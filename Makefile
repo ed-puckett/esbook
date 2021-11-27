@@ -32,8 +32,7 @@ $(BUILDDIR)/esbook.js: ./src/*
 .PHONY: build
 build: ./node_modules $(BUILDDIR)/esbook.js
 	@( \
-	    $(foreach d,$(wildcard ./lib/*),(   if [[ -d "$(d)" ]]; then echo 'Building lib $(d):';   cd "$(d)" && make; fi ) && ) \
-	    $(foreach d,$(wildcard ./facet/*),( if [[ -d "$(d)" ]]; then echo 'Building facet $(d):'; cd "$(d)" && make; fi ) && ) \
+	    $(foreach d,$(wildcard ./lib/*),( if [[ -d "$(d)" ]]; then echo 'Building lib $(d):'; cd "$(d)" && make; fi ) && ) \
 	    true \
 	)
 
