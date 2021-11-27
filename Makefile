@@ -1,5 +1,3 @@
-# Makefile for jsnb
-
 .PHONY: all
 all: start
 
@@ -28,11 +26,14 @@ full-clean: clean
 ./node_modules: ./package.json
 	npm install
 
+$(BUILDDIR)/esbook.js: ./src/*
+	@( cd ./src && make )
+
 .PHONY: build
-build:
+build: ./node_modules $(BUILDDIR)/esbook.js
 	@( \
-	    $(foreach d,$(wildcard ./lib/*),(   if [[ -d "$(d)" ]]; then echo 'Building lib $(d):';   cd "$(d)" && make build; fi ) && ) \
-	    $(foreach d,$(wildcard ./facet/*),( if [[ -d "$(d)" ]]; then echo 'Building facet $(d):'; cd "$(d)" && make build; fi ) && ) \
+	    $(foreach d,$(wildcard ./lib/*),(   if [[ -d "$(d)" ]]; then echo 'Building lib $(d):';   cd "$(d)" && make; fi ) && ) \
+	    $(foreach d,$(wildcard ./facet/*),( if [[ -d "$(d)" ]]; then echo 'Building facet $(d):'; cd "$(d)" && make; fi ) && ) \
 	    true \
 	)
 
@@ -42,4 +43,3 @@ lint: ./node_modules
 
 .PHONY: start
 start: build
-	npx electron ./src/main/main.js
