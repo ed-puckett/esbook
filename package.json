@@ -1,0 +1,14 @@
+{
+  "name": "esbook",
+  "version": "0.1.0",
+  "author": "Ed Puckett",
+  "description": "Interactive notebook based on JavaScript/EcmaScript",
+  "keywords": "JavaScript EcmaScript interactive notebook",
+  "license": "ISC (see LICENSE)",
+  "private": true,
+  "devDependencies": {
+    "eslint": "^7.30.0"
+  },
+  "dependencies": {
+  }
+}
