@@ -26,11 +26,11 @@ full-clean: clean
 ./node_modules: ./package.json
 	npm install
 
-$(BUILDDIR)/esbook.js: ./src/*
-	@( cd ./src && make )
+$(BUILDDIR)/package-bundle.js: ./src/package-bundle/*
+	@( cd ./src/package-bundle && make )
 
 .PHONY: build
-build: ./node_modules $(BUILDDIR)/esbook.js
+build: ./node_modules $(BUILDDIR)/package-bundle.js
 	@( \
 	    $(foreach d,$(wildcard ./lib/*),( if [[ -d "$(d)" ]]; then echo 'Building lib $(d):'; cd "$(d)" && make; fi ) && ) \
 	    true \
