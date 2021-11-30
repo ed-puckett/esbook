@@ -165,12 +165,19 @@
         // === LOAD OTHER FACETS ===
 
         Promise.all([
-            load_facet('facet/message-controller/message-controller.js'),
+            'facet/message-controller/message-controller.js',
+            'facet/settings/settings.js',
             //...
-        ]).then(() => {
-            _resolve_esbook_ready();
-            _resolve_esbook_ready = undefined;
-            _reject_esbook_ready  = undefined;
-        });
+        ].map(p => load_facet(p))).then(
+            () => {
+                _resolve_esbook_ready();
+                _resolve_esbook_ready = undefined;
+                _reject_esbook_ready  = undefined;
+            },
+            err => {
+                _reject_esbook_ready(err);
+                _resolve_esbook_ready = undefined;
+                _reject_esbook_ready  = undefined;
+            });
     }
 })();
