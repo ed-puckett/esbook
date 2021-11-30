@@ -166,7 +166,8 @@
 
         Promise.all([
             'facet/message-controller/message-controller.js',
-            'facet/settings/settings.js',
+            'facet/settings.js',
+            'facet/theme-settings.js',
             //...
         ].map(p => load_facet(p))).then(
             () => {

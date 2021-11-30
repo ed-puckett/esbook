@@ -101,8 +101,6 @@
             update_settings,
             subscribe_settings_update,
             unsubscribe_settings_update,
-            settings_changed_event_target,
-            settings_changed_event_type,
         });
 
     } catch (err) {
