@@ -4,7 +4,7 @@
 
 try {
 
-    const MESSAGE_CONTROL_ID = 'message';
+    const MESSAGE_CONTROL_ID = `message-${uuidv4()}`;
 
     const CSS_CLASS_ACTIVE = 'active';
 
@@ -184,11 +184,58 @@ try {
         }
     }
 
+
     // === INITIALIZE DOCUMENT STATE ===
 
+
+    const stylesheet_text = `
+/* See ../theme-settings/theme-colors.css for the general colors that are set
+ * according to the prefers-color-scheme media query.
+ */
+
+#message {
+    display: none;
+    padding: 0.5rem 0 0.5rem 0.75rem;
+    border: 7px double darkorange;
+    background-color: cornsilk;
+}
+
+#message.active {
+    display: block;
+}
+
+#message button {
+    margin: 0.5rem 0.5rem 0.5rem 0;
+}
+
+#message_text {
+    margin: 0.5rem 0.5rem 0.5rem 0;
+}
+
+#message_cancel {
+    display: none;
+}
+#message.confirm #message_cancel {
+    display: inline;
+}
+
+#message_ok {
+}
+
+#message_event_blocker {
+    display: none;
+    position: absolute;
+    background-color: #80808080;
+}
+#message_event_blocker.active {
+    display: block;
+}
+`;
     // add style sheet
-    const stylesheet_url = new URL('message-controller/message-controller.css', document.currentScript.src);
-    create_child_element(document.head, 'link', 'rel', "stylesheet", 'href', stylesheet_url);
+    create_inline_stylesheet(stylesheet_text.replaceAll('#message', `#${MESSAGE_CONTROL_ID}`));
+
+
+    // === EXPORT ===
 
     // export message controller instance
     facet_export(new MessageController());

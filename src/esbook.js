@@ -52,6 +52,17 @@
         return el;
     };
 
+    /** create_inline_stylesheet(stylesheet_text)
+     *  @param stylesheet_text: string
+     *  @returns the new <style> element
+     */
+    globalThis.create_inline_stylesheet = function create_inline_stylesheet(stylesheet_text) {
+        const style_el = create_element('style');
+        style_el.appendChild(document.createTextNode(stylesheet_text));
+        document.head.appendChild(style_el);
+        return style_el;
+    }
+
 
     // === FACETS ===
 
@@ -175,9 +186,9 @@
         // === LOAD OTHER FACETS ===
 
         Promise.all([
-            'facet/message-controller.js',
             'facet/settings.js',
             'facet/theme-settings.js',
+            'facet/message-controller.js',
             //...
         ].map(p => facet(p))).then(
             () => {
