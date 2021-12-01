@@ -187,7 +187,7 @@ try {
     // === INITIALIZE DOCUMENT STATE ===
 
     // add style sheet
-    const stylesheet_url = new URL('message-controller.css', document.currentScript.src);
+    const stylesheet_url = new URL('message-controller/message-controller.css', document.currentScript.src);
     create_child_element(document.head, 'link', 'rel', "stylesheet", 'href', stylesheet_url);
 
     // export message controller instance

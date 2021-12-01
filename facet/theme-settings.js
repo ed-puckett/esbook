@@ -5,6 +5,8 @@
 (() => {
     try {
 
+        // === THEME SETTINGS INTERFACE ===
+
         function copy_theme_settings(theme_settings) {
             return JSON.parse(JSON.stringify(theme_settings));
         }
@@ -59,10 +61,33 @@
             theme_settings_changed_event_target.removeEventListener(theme_settings_changed_event_type, handler_function);
         }
 
+
+        // === DOCUMENT DARK THEME SETTING ===
+
+        // add theme-settings/theme-colors.css stylesheet
+        const theme_colors_stylesheel_url = new URL('theme-settings/theme-colors.css', document.currentScript.src);
+        create_child_element(document.head, 'link', 'rel', "stylesheet", 'href', theme_colors_stylesheel_url);
+
+        const dark_mode_class = 'dark';
+
+        const root_element = document.getElementsByTagName('html')[0];
+
+        function update_document_dark_state(dark_state) {
+            if (dark_state) {
+                root_element.classList.add(dark_mode_class);
+            } else {
+                root_element.classList.remove(dark_mode_class);
+            }
+        }
+
+
+        // === EXPORT ===
+
         facet_export({
             get_theme_settings,
             subscribe_theme_settings_update,
             unsubscribe_theme_settings_update,
+            update_document_dark_state,
         });
 
     } catch (err) {

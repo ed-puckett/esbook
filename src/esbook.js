@@ -175,7 +175,7 @@
         // === LOAD OTHER FACETS ===
 
         Promise.all([
-            'facet/message-controller/message-controller.js',
+            'facet/message-controller.js',
             'facet/settings.js',
             'facet/theme-settings.js',
             //...

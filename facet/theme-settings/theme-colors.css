@@ -1,0 +1,86 @@
+/* === NAMING LEGEND ===
+ *
+ * bg: background
+ * c0: foreground level 0 (normal)
+ * c1: foreground level 1 (highlight)
+ *
+ * page: page region
+ * major: major page region
+ * minor: minor page region
+ * alert1: alert/warning
+ * alert2: error/important
+ *
+ * tool: toolbar/tab region
+ * active0: inactive
+ * active1: active
+ * awake0: sleeping/unfocused
+ * awake1: focused
+ */
+
+html {
+    --color-bg-page-major:          hsl(  0deg,   0%, 100%);
+    --color-c0-page-major:          hsl(  0deg,   0%,   0%);
+    --color-c1-page-major:          hsl(240deg,  60%,  50%);
+
+    --color-bg-page-minor:          hsl(  0deg,   0%,  95%);
+    --color-c0-page-minor:          hsl(  0deg,   0%,   0%);
+    --color-c1-page-minor:          hsl(240deg,  60%,  50%);
+
+    --color-bg-page-alert1:         hsl( 60deg,  80%,  50%);
+    --color-c0-page-alert1:         hsl(  0deg,   0%,   0%);
+    --color-c1-page-alert1:         hsl(240deg,  60%,  50%);
+
+    --color-bg-page-alert2:         hsl(  0deg,  60%,  50%);
+    --color-c0-page-alert2:         hsl(  0deg,   0%,   0%);
+    --color-c1-page-alert2:         hsl(  0deg,   0%, 100%);
+
+    --color-bg-tool-active0-awake0: hsl(  0deg,   0%,  20%);
+    --color-c0-tool-active0-awake0: hsl(  0deg,   0%, 100%);
+    --color-c1-tool-active0-awake0: hsl(240deg, 100%,  90%);
+
+    --color-bg-tool-active0-awake1: hsl(  0deg,   0%,  35%);
+    --color-c0-tool-active0-awake1: hsl(  0deg,   0%, 100%);
+    --color-c1-tool-active0-awake1: hsl(240deg, 100%,  90%);
+
+    --color-bg-tool-active1-awake0: hsl(  0deg,   0%,  96%);
+    --color-c0-tool-active1-awake0: hsl(  0deg,   0%,   0%);
+    --color-c1-tool-active1-awake0: hsl(  0deg,   0%,  30%);
+
+    --color-bg-tool-active1-awake1: hsl(  0deg,   0%, 100%);
+    --color-c0-tool-active1-awake1: hsl(  0deg,   0%,   0%);
+    --color-c1-tool-active1-awake1: hsl(  0deg,   0%,  30%);
+}
+
+html.dark {
+    --color-bg-page-major:          hsl(  0deg,   0%,  25%);
+    --color-c0-page-major:          hsl(  0deg,   0%, 100%);
+    --color-c1-page-major:          hsl(180deg, 100%,  90%);
+
+    --color-bg-page-minor:          hsl(  0deg,   0%,  15%);
+    --color-c0-page-minor:          hsl(  0deg,   0%, 100%);
+    --color-c1-page-minor:          hsl(180deg, 100%,  90%);
+
+    --color-bg-page-alert1:         hsl( 60deg,  80%,  20%);
+    --color-c0-page-alert1:         hsl(  0deg,   0%, 100%);
+    --color-c1-page-alert1:         hsl(180deg, 100%,  90%);
+
+    --color-bg-page-alert2:         hsl(  0deg,  60%,  30%);
+    --color-c0-page-alert2:         hsl(  0deg,   0%, 100%);
+    --color-c1-page-alert2:         hsl(180deg, 100%,  90%);
+
+    --color-bg-tool-active0-awake0: hsl(  0deg,   0%,  20%);
+    --color-c0-tool-active0-awake0: hsl(  0deg,   0%, 100%);
+    --color-c1-tool-active0-awake0: hsl(180deg, 100%,  90%);
+
+    --color-bg-tool-active0-awake1: hsl(  0deg,   0%,  30%);
+    --color-c0-tool-active0-awake1: hsl(  0deg,   0%, 100%);
+    --color-c1-tool-active0-awake1: hsl(180deg, 100%,  90%);
+
+    --color-bg-tool-active1-awake0: hsl(  0deg,   0%,  60%);
+    --color-c0-tool-active1-awake0: hsl(  0deg,   0%,   0%);
+    --color-c1-tool-active1-awake0: hsl(240deg, 100%,  30%);
+
+    --color-bg-tool-active1-awake1: hsl(  0deg,   0%,  70%);
+    --color-c0-tool-active1-awake1: hsl(  0deg,   0%,   0%);
+    --color-c1-tool-active1-awake1: hsl(240deg, 100%,  30%);
+}
