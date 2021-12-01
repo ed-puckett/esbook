@@ -76,13 +76,13 @@
 
     const facet_promise_data = {};  // map: url -> { promise?: Promise, resolve?: any=>void }
 
-    /** load_facet(facet_path)
+    /** facet(facet_path)
      *  @param facet_path: string  // path or url to code for facet
      *  @returns Promise
      *  The returned promise will resolve asynchronously to the data passed
      *  to facet_export() called within the facet code.
      */
-    globalThis.load_facet = async function load_facet(facet_path, base_url=location) {
+    globalThis.facet = async function facet(facet_path, base_url=location) {
         const facet_url = new URL(facet_path, base_url);
         if (!facet_promise_data[facet_url]) {
             const promise_data = {};
@@ -92,7 +92,7 @@
             });
             facet_promise_data[facet_url] = promise_data;
             const script_el = create_child_element(document.head, 'script', 'src', facet_url);
-            script_el.addEventListener(FacetExportEvent.event_name, function (event) {
+            function handle_facet_export_event(event) {
                 if (!facet_promise_data[facet_url]) {
                     // avoid subsequent events if an error was signalled
                     return;
@@ -111,9 +111,19 @@
                 // avoid further resolve/reject of promise
                 promise_data.resolve = undefined;
                 promise_data.reject  = undefined;
-            }, {
-                once: true,
-            });
+                // remove other listener
+                script_el.removeEventListener('error', handle_facet_script_error);
+            }
+            function handle_facet_script_error(event) {
+                promise_data.reject(new Error(`failed to load facet script: ${facet_url}`));
+                // avoid further resolve/reject of promise
+                promise_data.resolve = undefined;
+                promise_data.reject  = undefined;
+                // remove other listener
+                script_el.removeEventListener(FacetExportEvent.event_name, handle_facet_export_event);
+            }
+            script_el.addEventListener(FacetExportEvent.event_name, handle_facet_export_event, { once: true });
+            script_el.addEventListener('error', handle_facet_script_error, { once: true });
         }
         return facet_promise_data[facet_url].promise;
     }
@@ -123,7 +133,7 @@
      *  Exports data from a facet.
      *  To be called from a facet.
      *  To be called at most once.
-     *  The promise returned from load_facet() will resolve to export_data.
+     *  The promise returned from facet() will resolve to export_data.
      */
     globalThis.facet_export = function facet_export(export_data) {
         const event = new FacetExportEvent(null, export_data);
@@ -135,8 +145,8 @@
      *  To be called from a facet.
      *  To be called at most once.
      *  Reverts the modifications to the current document that were
-     *  directly caused by load_facet() to be undone and causes
-     *  the promise that was returned from load_facet() to reject.
+     *  directly caused by facet() to be undone and causes
+     *  the promise that was returned from facet() to reject.
      */
     globalThis.facet_load_error = function facet_load_error(err) {
         const event = new FacetExportEvent(err);
@@ -169,7 +179,7 @@
             'facet/settings.js',
             'facet/theme-settings.js',
             //...
-        ].map(p => load_facet(p))).then(
+        ].map(p => facet(p))).then(
             () => {
                 _resolve_esbook_ready();
                 _resolve_esbook_ready = undefined;
