@@ -31,14 +31,10 @@ $(BUILDDIR)/package-bundle.js: ./src/package-bundle/*
 
 .PHONY: build
 build: ./node_modules $(BUILDDIR)/package-bundle.js
-	@( \
-	    $(foreach d,$(wildcard ./lib/*),( if [[ -d "$(d)" ]]; then echo 'Building lib $(d):'; cd "$(d)" && make; fi ) && ) \
-	    true \
-	)
 
 .PHONY: lint
 lint: ./node_modules
-	./node_modules/.bin/eslint src lib facet
+	./node_modules/.bin/eslint src
 
 .PHONY: start
 start: build

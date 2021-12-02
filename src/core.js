@@ -19,7 +19,7 @@
     /** create_element(tag_name, ...attribute_pairs)
      *  @param tag_name: string
      *  @param attribute_pairs: string[]  // pairs of strings: attribute_name, value
-     *  @returns the new element
+     *  @return the new element
      */
     globalThis.create_element = function create_element(tag_name, ...attribute_pairs) {
         if (typeof tag_name !== 'string' || tag_name.length <= 0) {
@@ -41,7 +41,7 @@
      *  @param parent: Element
      *  @param tag_name: string
      *  @param attribute_pairs: string[]  // pairs of strings: attribute_name, value
-     *  @returns the new element
+     *  @return the new element
      */
     globalThis.create_child_element = function create_child_element(parent, tag_name, ...attribute_pairs) {
         if (typeof parent !== 'object' || !(parent instanceof Element)) {
@@ -54,7 +54,7 @@
 
     /** create_inline_stylesheet(stylesheet_text)
      *  @param stylesheet_text: string
-     *  @returns the new <style> element
+     *  @return the new <style> element
      */
     globalThis.create_inline_stylesheet = function create_inline_stylesheet(stylesheet_text) {
         const style_el = create_element('style');
@@ -89,7 +89,7 @@
 
     /** facet(facet_path)
      *  @param facet_path: string  // path or url to code for facet
-     *  @returns Promise
+     *  @return Promise
      *  The returned promise will resolve asynchronously to the data passed
      *  to facet_export() called within the facet code.
      */
