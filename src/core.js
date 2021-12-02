@@ -189,6 +189,7 @@
             'facet/settings.js',
             'facet/theme-settings.js',
             'facet/message-controller.js',
+            'facet/fs-interface.js',
             //...
         ].map(p => facet(p))).then(
             () => {

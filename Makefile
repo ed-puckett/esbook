@@ -38,3 +38,4 @@ lint: ./node_modules
 
 .PHONY: start
 start: build
+	chromium ./src/index.html

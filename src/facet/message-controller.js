@@ -2,7 +2,7 @@
 
 // This is a facet
 
-try {
+(() => { try {
 
     const MESSAGE_CONTROL_ID = `message-${uuidv4()}`;
 
@@ -240,6 +240,4 @@ try {
     // export message controller instance
     facet_export(new MessageController());
 
-} catch (err) {
-    facet_load_error(err);
-}
+} catch (err) { facet_load_error(err); }})();
