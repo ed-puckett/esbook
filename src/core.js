@@ -95,41 +95,51 @@
      */
     globalThis.facet = async function facet(facet_path, base_url=location) {
         const facet_url = new URL(facet_path, base_url);
-        if (!facet_promise_data[facet_url]) {
-            const promise_data = {};
-            promise_data.promise = new Promise((resolve, reject) => {
-                promise_data.resolve = resolve;
-                promise_data.reject  = reject;
-            });
-            facet_promise_data[facet_url] = promise_data;
+        // establish_promise() returns true iff the promise was not already created
+        function establish_promise() {
+            if (facet_promise_data[facet_url]) {
+                return false;
+            } else {
+                const promise_data = {};
+                promise_data.promise = new Promise((resolve, reject) => {
+                    promise_data.resolve = resolve;
+                    promise_data.reject  = reject;
+                });
+                facet_promise_data[facet_url] = promise_data;
+                return true;
+            }
+        }
+        if (establish_promise()) {
             const script_el = create_child_element(document.head, 'script', 'src', facet_url);
             function handle_facet_export_event(event) {
-                if (!facet_promise_data[facet_url]) {
-                    // avoid subsequent events if an error was signalled
-                    return;
+                const promise_data = facet_promise_data[facet_url];
+                if (promise_data) {
+                    const err = event.facet_export_error;
+                    if (err) {
+                        promise_data.reject?.(err);
+                        // undo state so it is possible to try again
+                        facet_promise_data[facet_url] = undefined;
+                        document.head.removeChild(script_el);
+                    } else {
+                        // non-error data export
+                        promise_data.resolve?.(event.facet_export_data);
+                        // script_el and facet_promise_data[facet_url] remain
+                    }
+                    // avoid further resolve/reject of promise
+                    promise_data.resolve = undefined;
+                    promise_data.reject  = undefined;
                 }
-                const err = event.facet_export_error;
-                if (err) {
-                    promise_data.reject?.(err);
-                    // undo state so it is possible to try again
-                    facet_promise_data[facet_url] = undefined;
-                    document.head.removeChild(script_el);
-                } else {
-                    // non-error data export
-                    promise_data.resolve?.(event.facet_export_data);
-                    // script_el and facet_promise_data[facet_url] remain
-                }
-                // avoid further resolve/reject of promise
-                promise_data.resolve = undefined;
-                promise_data.reject  = undefined;
                 // remove other listener
                 script_el.removeEventListener('error', handle_facet_script_error);
             }
             function handle_facet_script_error(event) {
-                promise_data.reject(new Error(`failed to load facet script: ${facet_url}`));
-                // avoid further resolve/reject of promise
-                promise_data.resolve = undefined;
-                promise_data.reject  = undefined;
+                const promise_data = facet_promise_data[facet_url];
+                if (promise_data) {
+                    promise_data.reject(new Error(`failed to load facet script: ${facet_url}`));
+                    // avoid further resolve/reject of promise
+                    promise_data.resolve = undefined;
+                    promise_data.reject  = undefined;
+                }
                 // remove other listener
                 script_el.removeEventListener(FacetExportEvent.event_name, handle_facet_export_event);
             }
