@@ -92,6 +92,8 @@
      *  @return Promise
      *  The returned promise will resolve asynchronously to the data passed
      *  to facet_export() called within the facet code.
+     *  The facet will be loaded via a script tag,
+     *  and that script tag will have the defer attribute set.
      */
     globalThis.facet = async function facet(facet_path, base_url=location) {
         const facet_url = new URL(facet_path, base_url);
@@ -110,7 +112,11 @@
             }
         }
         if (establish_promise()) {
-            const script_el = create_child_element(document.head, 'script', 'src', facet_url);
+            const script_el = create_child_element(
+                document.head, 'script',
+                'src', facet_url,
+                'defer', undefined,
+            );
             function handle_facet_export_event(event) {
                 const promise_data = facet_promise_data[facet_url];
                 if (promise_data) {
@@ -176,7 +182,7 @@
 
     /** async function load_and_wait_for_script(parent, script_url, poll_fn)
      *  #param parent: Node            // parent element for script
-     *  @param script_url: string      // url of script to load
+     *  @param script_url: string      // url of script to load (the script tag will be created without defer or async attributes)
      *  @param poll_fn: () => boolean  // function that will return true when script has loaded
      */
     globalThis.load_and_wait_for_script = async function load_and_wait_for_script(parent, script_url, poll_fn) {
