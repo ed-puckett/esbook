@@ -1,6 +1,6 @@
 'use strict';
 
-// This code is not a facet.  It bootstraps use of facets.
+// This code is not a facet.  It is part of the facet bootstrap process.
 
 (() => {
 
@@ -174,43 +174,73 @@
         document.currentScript.dispatchEvent(event);
     };
 
-
-    // === LOAD PACKAGE BUNDLE ===
-
-    const package_bundle_url = new URL('../build/package-bundle.js', document.currentScript.src)
-    create_child_element(document.head, 'script', 'src', package_bundle_url);
-
-    // package bundle is not a facet, so wait for it by polling
-    function wait_for_package_bundle() {
-        // package bundle sets globalThis.uuidv4, amongst other things
-        if (!globalThis.uuidv4) {
-            setTimeout(wait_for_package_bundle);
-        } else {
-            load_other_facets();
-        }
+    /** async function load_and_wait_for_script(parent, script_url, poll_fn)
+     *  #param parent: Node            // parent element for script
+     *  @param script_url: string      // url of script to load
+     *  @param poll_fn: () => boolean  // function that will return true when script has loaded
+     */
+    globalThis.load_and_wait_for_script = async function load_and_wait_for_script(parent, script_url, poll_fn) {
+        return new Promise((resolve, reject) => {
+            let script_el;
+            let wait_timer_id;
+            function script_load_error_handler(event) {
+                if (reject) {
+                    reject(new Error(`error loading script ${script_url}`));
+                }
+                reset();
+            }
+            function wait() {
+                if (poll_fn()) {
+                    resolve?.();
+                    reset();
+                } else {
+                    wait_timer_id = setTimeout(wait);  // check again on next tick
+                }
+            }
+            function reset() {
+                if (typeof wait_timer_id !== 'undefined') {
+                    clearTimeout(wait_timer_id);
+                    wait_timer_id = undefined;
+                }
+                if (script_el) {
+                    script_el.removeEventListener('error', script_load_error_handler);
+                }
+                resolve = undefined;
+                reject  = undefined;
+            }
+            try {
+                script_el = create_child_element(parent, 'script', 'src', script_url);
+                script_el.addEventListener('error', script_load_error_handler, { once: true });
+                wait();
+            } catch (err) {
+                reject?.(err);
+                reset();
+            }
+        });
     }
-    wait_for_package_bundle();
 
-    function load_other_facets() {
 
-        // === LOAD OTHER FACETS ===
+    // === LOAD CORE PACKAGE BUNDLE AND CORE FACETS ===
 
-        Promise.all([
-            'facet/settings.js',
-            'facet/theme-settings.js',
-            'facet/message-controller.js',
-            'facet/fs-interface.js',
-            //...
-        ].map(p => facet(p))).then(
-            () => {
+    const cpb_url = new URL('../build/core-package-bundle.js', document.currentScript.src);
+    const cpb_loaded = () => globalThis.uuidv4;  // core-package-bundle.js sets globalThis.uuidv4, amongst other things
+
+    const lcf_url = new URL('./load-core-facets.js', document.currentScript.src);
+    const lcf_loaded = () => globalThis.load_core_facets_result;  // load-core-facets.js sets globalThis.load_core_facets_result
+
+    load_and_wait_for_script(document.head, cpb_url, cpb_loaded)
+        .then(() => load_and_wait_for_script(document.head, lcf_url, lcf_loaded))
+        .then(() => {
+            if (globalThis.load_core_facets_result instanceof Error) {
+                _reject_esbook_ready(globalThis.load_core_facets_result);
+            } else {
                 _resolve_esbook_ready();
+            }
+        })
+        .catch(err => _reject_esbook_ready(err))
+        .then(
+            () => {
                 _resolve_esbook_ready = undefined;
                 _reject_esbook_ready  = undefined;
-            },
-            err => {
-                _reject_esbook_ready(err);
-                _resolve_esbook_ready = undefined;
-                _reject_esbook_ready  = undefined;
-            });
-    }
+            } );
 })();

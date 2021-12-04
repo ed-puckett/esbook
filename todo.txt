@@ -1,0 +1,1 @@
+make facet scripts inline-able without having been loaded via facet() [need to have one single export handler that listens for any facet export or error event]

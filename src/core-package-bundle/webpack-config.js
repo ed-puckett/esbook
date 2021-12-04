@@ -7,12 +7,12 @@ const TerserPlugin = require("terser-webpack-plugin");
 module.exports = {
     entry: {
         main: [
-            app_path('.', 'package-bundle.js'),
+            app_path('.', 'core-package-bundle.js'),
         ],
     },
     output: {
         path: app_path('..', '..', 'build'),
-        filename: 'package-bundle.js',
+        filename: 'core-package-bundle.js',
         publicPath: '/',
         chunkLoading: false,
         wasmLoading: false,

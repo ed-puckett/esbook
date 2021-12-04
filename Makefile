@@ -26,11 +26,11 @@ full-clean: clean
 ./node_modules: ./package.json
 	npm install
 
-$(BUILDDIR)/package-bundle.js: ./src/package-bundle/*
-	@( cd ./src/package-bundle && make )
+$(BUILDDIR)/core-package-bundle.js: ./src/core-package-bundle/*
+	@( cd ./src/core-package-bundle && make )
 
 .PHONY: build
-build: ./node_modules $(BUILDDIR)/package-bundle.js
+build: ./node_modules $(BUILDDIR)/core-package-bundle.js
 
 .PHONY: lint
 lint: ./node_modules
