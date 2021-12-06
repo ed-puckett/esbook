@@ -7,10 +7,11 @@ const facet_paths = [
     'facet/theme-settings.js',
     'facet/message-controller.js',
     'facet/fs-interface.js',
+    'facet/md+mj.js',
     //...
 ];
 
-Promise.all(facet_paths.map(p => facet(p)))
+Promise.all(facet_paths.map(p => facet(new URL(p, document.currentScript.src))))
     .then(results => Object.fromEntries(results.map((r, i) => [facet_paths[i], r])))
     .then(result_mappings => {
         globalThis.load_core_facets_result = result_mappings;

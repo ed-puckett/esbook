@@ -232,7 +232,7 @@
 }
 `;
     // add style sheet
-    create_inline_stylesheet(stylesheet_text.replaceAll('#message', `#${MESSAGE_CONTROL_ID}`));
+    create_inline_stylesheet(document.head, stylesheet_text.replaceAll('#message', `#${MESSAGE_CONTROL_ID}`));
 
 
     // === EXPORT ===
