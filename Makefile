@@ -26,11 +26,12 @@ full-clean: clean
 ./node_modules: ./package.json
 	npm install
 
-$(BUILDDIR)/core-package-bundle.js: ./src/core-package-bundle/*
-	@( cd ./src/core-package-bundle && make )
-
 .PHONY: build
-build: ./node_modules $(BUILDDIR)/core-package-bundle.js
+build: ./node_modules
+	@( \
+	    $(foreach d,$(wildcard ./src/*/Makefile ./src/facet/*/Makefile),( echo make $(dir $d) && cd "$(dir $d)" && make ) && ) \
+	    true \
+	)
 
 .PHONY: lint
 lint: ./node_modules
