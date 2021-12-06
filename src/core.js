@@ -17,9 +17,9 @@
     // === ELEMENT CREATION ===
 
     /** create_element(tag_name, ...attribute_pairs)
-     *  @param tag_name: string
-     *  @param attribute_pairs: string[]  // pairs of strings: attribute_name, value
-     *  @return the new element
+     *  @param {string} tag_name
+     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @return {Element} the new element
      */
     globalThis.create_element = function create_element(tag_name, ...attribute_pairs) {
         if (typeof tag_name !== 'string' || tag_name.length <= 0) {
@@ -38,10 +38,10 @@
     };
 
     /** create_child_element(parent, tag_name, ...attribute_pairs)
-     *  @param parent: Element
-     *  @param tag_name: string
-     *  @param attribute_pairs: string[]  // pairs of strings: attribute_name, value
-     *  @return the new element
+     *  @param {Element} parent
+     *  @param {string} tag_name
+     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @return {Element} the new element
      */
     globalThis.create_child_element = function create_child_element(parent, tag_name, ...attribute_pairs) {
         if (typeof parent !== 'object' || !(parent instanceof Element)) {
@@ -53,8 +53,8 @@
     };
 
     /** create_inline_stylesheet(stylesheet_text)
-     *  @param stylesheet_text: string
-     *  @return the new <style> element
+     *  @param {string} stylesheet_text
+     *  @return {HTMLStyleElement} the new <style> element
      */
     globalThis.create_inline_stylesheet = function create_inline_stylesheet(stylesheet_text) {
         const style_el = create_element('style');
@@ -88,8 +88,8 @@
     const facet_promise_data = {};  // map: url -> { promise?: Promise, resolve?: any=>void }
 
     /** facet(facet_path)
-     *  @param facet_path: string  // path or url to code for facet
-     *  @return Promise
+     *  @param {string} facet_path path or url to code for facet
+     *  @return {Promise}
      *  The returned promise will resolve asynchronously to the data passed
      *  to facet_export() called within the facet code.
      *  The facet will be loaded via a script tag,
@@ -156,7 +156,7 @@
     }
 
     /** facet_export(export_data)
-     *  @param export_data: any
+     *  @param {any} export_data
      *  Exports data from a facet.
      *  To be called from a facet.
      *  To be called at most once.
@@ -168,7 +168,7 @@
     };
 
     /** facet_load_error(err)
-     *  @param err: Error
+     *  @param {Error} err
      *  To be called from a facet.
      *  To be called at most once.
      *  Reverts the modifications to the current document that were
@@ -181,9 +181,10 @@
     };
 
     /** async function load_and_wait_for_script(parent, script_url, poll_fn)
-     *  #param parent: Node            // parent element for script
-     *  @param script_url: string      // url of script to load (the script tag will be created without defer or async attributes)
-     *  @param poll_fn: () => boolean  // function that will return true when script has loaded
+     *  @param {Node} parent the parent element for script
+     *  @param {string} script_url url of script to load (the script tag will be created without defer or async attributes)
+     *  @param {() => boolean} poll_fn function that will return true when script has loaded
+     *  @return {Promise}
      */
     globalThis.load_and_wait_for_script = async function load_and_wait_for_script(parent, script_url, poll_fn) {
         return new Promise((resolve, reject) => {
