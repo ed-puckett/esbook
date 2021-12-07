@@ -9,6 +9,7 @@ const facet_paths = [
     'facet/fs-interface.js',
     'facet/md+mj.js',
     'facet/output-handlers.js',
+    'facet/change.js',
     //...
 ];
 
