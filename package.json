@@ -13,10 +13,15 @@
     "webpack-cli": "^4.4.0"
   },
   "dependencies": {
+    "chart.js": "^3.6.2",
+    "d3": "^7.2.0",
+    "dagre-d3": "^0.6.4",
+    "dompurify": "^2.3.4",
     "js-sha256": "^0.9.0",
     "marked": "^2.0.1",
     "mathjax": "^2.7.7",
     "nerdamer": "^1.1.6",
+    "plotly.js-dist": "^2.7.0",
     "sprintf-js": "^1.1.2",
     "uuid": "^8.3.2"
   }

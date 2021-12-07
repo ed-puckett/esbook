@@ -8,6 +8,7 @@ const facet_paths = [
     'facet/message-controller.js',
     'facet/fs-interface.js',
     'facet/md+mj.js',
+    'facet/output-handlers.js',
     //...
 ];
 

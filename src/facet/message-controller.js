@@ -1,8 +1,6 @@
 'use strict';
 
-// This is a facet
-
-(() => { try {
+(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
     const MESSAGE_CONTROL_ID = `message-${uuidv4()}`;
 
@@ -240,4 +238,4 @@
     // export message controller instance
     facet_export(new MessageController());
 
-} catch (err) { facet_load_error(err); }})();
+} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end

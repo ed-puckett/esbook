@@ -198,6 +198,24 @@
         target_script.dispatchEvent(event);
     };
 
+    /** facet_init()
+     *  @return {{ current_script, facet_export, facet_load_error }}
+     *  Returns the current value of document.currentScript (current_script)
+     *  and versions of the facet_export() and facet_load_error() functions
+     *  with their target_script arguments defaulting to current_script.
+     *  This is useful for facet implementations that will ultimately use
+     *  the facet_export() and facet_load_error() functions in a context
+     *  where document.currentScript is no longer valid.
+     */
+    globalThis.facet_init = function facet_init() {
+        const current_script = document.currentScript;
+        return {
+            current_script,
+            facet_export:     (export_data, target_script=current_script) => facet_export(export_data, target_script),
+            facet_load_error: (err, target_script=current_script) => facet_load_error(err, target_script),
+        };
+    };
+
     /** async function load_script(parent, script_url)
      *  @param {Node} parent the parent element for script
      *  @param {string} script_url url of script to load (the script tag will be created without defer or async attributes)

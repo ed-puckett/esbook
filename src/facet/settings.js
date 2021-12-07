@@ -1,8 +1,6 @@
 'use strict';
 
-// This is a facet
-
-(() => { try {
+(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
     const settings_storage_key = 'settings-87a4c2ee-a607-45f9-b648-935ecfc0c059';
 
@@ -105,4 +103,4 @@
         unsubscribe_settings_update,
     });
 
-} catch (err) { facet_load_error(err); }})();
+} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end

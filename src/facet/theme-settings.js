@@ -1,8 +1,6 @@
 'use strict';
 
-// This is a facet
-
-(() => { try {
+(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
     // === THEME SETTINGS INTERFACE ===
 
@@ -10,7 +8,7 @@
         return JSON.parse(JSON.stringify(theme_settings));
     }
 
-    const dark_mode_media_query_list = window.matchMedia("(prefers-color-scheme: dark)");
+    const dark_mode_media_query_list = globalThis.matchMedia("(prefers-color-scheme: dark)");
 
     function get_theme_settings() {
         // return a new copy to insulate receivers from each others' modifications
@@ -64,7 +62,7 @@
     // === DOCUMENT DARK THEME SETTING ===
 
     // add theme-settings/theme-colors.css stylesheet
-    const theme_colors_stylesheel_url = new URL('theme-settings/theme-colors.css', document.currentScript.src);
+    const theme_colors_stylesheel_url = new URL('theme-settings/theme-colors.css', current_script.src);
     create_child_element(document.head, 'link', 'rel', "stylesheet", 'href', theme_colors_stylesheel_url);
 
     const dark_mode_class = 'dark';
@@ -89,4 +87,4 @@
         update_document_dark_state,
     });
 
-} catch (err) { facet_load_error(err); }})();
+} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end

@@ -1,0 +1,18 @@
+/* dagre-d3.css */
+
+svg.dagre {
+    font: 300 14px 'Helvetica Neue', Helvetica;
+    width: 100%;
+    height: 100%;
+}
+
+svg.dagre .node :is(rect, circle, ellipse, polygon) {
+    stroke: #333;
+    fill: #fff;
+}
+
+svg.dagre .edgePath path {
+    stroke: #333;
+    fill: #333;
+    stroke-width: 1.5px;
+}

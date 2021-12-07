@@ -1,8 +1,6 @@
 'use strict';
 
-// This is a facet
-
-(() => { try {
+(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
     class FsInterface {
         /** Verify permission to access the given FileSystemHandle, prompting the user if necessary
@@ -78,14 +76,14 @@
          *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle, fs_timestamp: number }
          */
         async prompt_for_save() {
-            return _prompt(window.showSaveFilePicker);
+            return _prompt(globalThis.showSaveFilePicker);
         }
 
         /** Show a file picker for the user to select a file for loading
          *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle, fs_timestamp: number }
          */
         async prompt_for_load() {
-            return _prompt(window.showOpenFilePicker);
+            return _prompt(globalThis.showOpenFilePicker);
         }
 
         async _prompt(picker) {
@@ -113,4 +111,4 @@
 
     facet_export(new FsInterface());
 
-} catch (err) { facet_load_error(err); }})();
+} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
