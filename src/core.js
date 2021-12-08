@@ -79,6 +79,127 @@
     }
 
 
+    // === SCRIPTS ===
+
+    const script_promise_data = {};  // map: url -> { promise?: Promise, resolve?: any=>void, reject?: any=>void }
+
+    // establish_script_promise_data(script_url) returns
+    // { promise_data, initial } where promise_data is
+    // script_promise_data[script_url] and initial is true
+    // iff the promise was newly created.
+    function establish_script_promise_data(script_url) {
+        let promise_data = script_promise_data[script_url];
+        let initial;
+        if (promise_data) {
+            initial = false;
+        } else {
+            promise_data = {};
+            promise_data.promise = new Promise((resolve, reject) => {
+                promise_data.resolve = resolve;
+                promise_data.reject  = reject;
+            });
+            script_promise_data[script_url] = promise_data;
+            initial = true;
+        }
+        return { initial, promise_data };
+    }
+
+    /** async function load_script(parent, script_url)
+     *  @param {Node} parent the parent element for script
+     *  @param {string} script_url url of script to load (the script tag will be created without defer or async attributes)
+     *  @return {Promise}
+     *  Use this to load a script and wait for its 'load' event.
+     *  Only the first invokation for a particular script_url will create
+     *  the script element.  Others will simply wait for the script to load
+     *  or for error.
+     */
+    globalThis.load_script = async function load_script(parent, script_url) {
+        const { promise_data, initial } = establish_script_promise_data(script_url);
+        if (initial) {
+            let script_el;
+            function script_load_handler(event) {
+                promise_data.resolve?.();
+                reset();
+            }
+            function script_load_error_handler(event) {
+                promise_data.reject?.(new Error(`error loading script ${script_url}`));
+                reset();
+            }
+            function reset() {
+                if (script_el) {
+                    script_el.removeEventListener('load',  script_load_handler);
+                    script_el.removeEventListener('error', script_load_error_handler);
+                }
+                promise_data.resolve = undefined;
+                promise_data.reject  = undefined;
+            }
+            try {
+                script_el = create_child_element(parent, 'script', 'src', script_url);
+                script_el.addEventListener('load',  script_load_handler,       { once: true });
+                script_el.addEventListener('error', script_load_error_handler, { once: true });
+            } catch (err) {
+                promise_data.reject?.(err);
+                reset();
+            }
+        }
+        return promise_data.promise;
+    }
+
+    /** async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn)
+     *  @param {Node} parent the parent element for script
+     *  @param {string} script_url url of script to load (the script tag will be created without defer or async attributes)
+     *  @param {() => boolean} condition_poll_fn function that will return true when script has loaded
+     *  @return {Promise}
+     *  Use this to load a script where you want to poll for condition
+     *  that will be triggered asynchronously by the script, in which
+     *  case waiting for the load event will not work because it fires
+     *  when script execution completes but not when some later condition
+     *  is triggered asynchronously by the script.
+     *  Only the first invokation for a particular script_url will create
+     *  the script element.  Others will simply wait for the script to load
+     *  or for error.
+     */
+    globalThis.load_script_and_wait_for_condition = async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn) {
+        const { promise_data, initial } = establish_script_promise_data(script_url);
+        if (initial) {
+            let script_el;
+            let wait_timer_id;
+            function script_load_error_handler(event) {
+                promise_data.reject?.(new Error(`error loading script ${script_url}`));
+                reset();
+            }
+            function wait() {
+                if (condition_poll_fn()) {
+                    promise_data.resolve?.();
+                    reset();
+                } else {
+                    wait_timer_id = setTimeout(wait);  // check again on next tick
+                }
+            }
+            function reset() {
+                if (typeof wait_timer_id !== 'undefined') {
+                    clearTimeout(wait_timer_id);
+                    wait_timer_id = undefined;
+                }
+                if (script_el) {
+                    script_el.removeEventListener('error', script_load_error_handler);
+                }
+                promise_data.resolve = undefined;
+                promise_data.reject  = undefined;
+            }
+            try {
+                script_el = create_child_element(parent, 'script', 'src', script_url);
+                script_el.addEventListener('error', script_load_error_handler, { once: true });
+                wait();
+            } catch (err) {
+                promise_data.reject?.(err);
+                reset();
+            }
+        }
+        return promise_data.promise;
+    }
+
+
     // === FACETS ===
 
     class FacetExportEvent extends Event {
@@ -94,7 +215,28 @@
         get facet_export_data  (){ return this._facet_export_data; }
     };
 
-    const facet_promise_data = {};  // map: url -> { promise?: Promise, resolve?: any=>void }
+    const facet_promise_data = {};  // map: url -> { promise?: Promise, resolve?: any=>void, reject?: any=>void }
+
+    // establish_facet_promise_data(facet_url) returns
+    // { promise_data, initial } where promise_data is
+    // facet_promise_data[facet_url] and initial is true
+    // iff the promise was newly created.
+    function establish_facet_promise_data(facet_url) {
+        let promise_data = facet_promise_data[facet_url];
+        let initial;
+        if (promise_data) {
+            initial = false;
+        } else {
+            promise_data = {};
+            promise_data.promise = new Promise((resolve, reject) => {
+                promise_data.resolve = resolve;
+                promise_data.reject  = reject;
+            });
+            facet_promise_data[facet_url] = promise_data;
+            initial = true;
+        }
+        return { initial, promise_data };
+    }
 
     /** facet(facet_url)
      *  @param {string} url to code for facet
@@ -103,64 +245,44 @@
      *  to facet_export() called within the facet code.
      *  The facet will be loaded via a script tag,
      *  and that script tag will have the defer attribute set.
+     *  Only the first invokation for a particular facet_url will create
+     *  the facet element.  Others will simply wait for the facet to load
+     *  or for error.
      */
     globalThis.facet = async function facet(facet_url) {
-        // establish_promise() returns true iff the promise was not already created
-        function establish_promise() {
-            if (facet_promise_data[facet_url]) {
-                return false;
-            } else {
-                const promise_data = {};
-                promise_data.promise = new Promise((resolve, reject) => {
-                    promise_data.resolve = resolve;
-                    promise_data.reject  = reject;
-                });
-                facet_promise_data[facet_url] = promise_data;
-                return true;
-            }
-        }
-        if (establish_promise()) {
+        const { promise_data, initial } = establish_facet_promise_data(facet_url);
+        if (initial) {
             const script_el = create_child_element(
                 document.head, 'script',
-                'src', facet_url,
+                'src',   facet_url,
                 'defer', undefined,
             );
             function handle_facet_export_event(event) {
-                const promise_data = facet_promise_data[facet_url];
-                if (promise_data) {
-                    const err = event.facet_export_error;
-                    if (err) {
-                        promise_data.reject?.(err);
-                        // undo state so it is possible to try again
-                        facet_promise_data[facet_url] = undefined;
-                        document.head.removeChild(script_el);
-                    } else {
-                        // non-error data export
-                        promise_data.resolve?.(event.facet_export_data);
-                        // script_el and facet_promise_data[facet_url] remain
-                    }
-                    // avoid further resolve/reject of promise
-                    promise_data.resolve = undefined;
-                    promise_data.reject  = undefined;
+                const err = event.facet_export_error;
+                if (err) {
+                    promise_data.reject?.(err);
+                } else {
+                    // non-error data export
+                    promise_data.resolve?.(event.facet_export_data);
                 }
+                // avoid further resolve/reject of promise
+                promise_data.resolve = undefined;
+                promise_data.reject  = undefined;
                 // remove other listener
                 script_el.removeEventListener('error', handle_facet_script_error);
             }
             function handle_facet_script_error(event) {
-                const promise_data = facet_promise_data[facet_url];
-                if (promise_data) {
-                    promise_data.reject(new Error(`failed to load facet script: ${facet_url}`));
-                    // avoid further resolve/reject of promise
-                    promise_data.resolve = undefined;
-                    promise_data.reject  = undefined;
-                }
+                promise_data.reject(new Error(`failed to load facet script: ${facet_url}`));
+                // avoid further resolve/reject of promise
+                promise_data.resolve = undefined;
+                promise_data.reject  = undefined;
                 // remove other listener
                 script_el.removeEventListener(FacetExportEvent.event_name, handle_facet_export_event);
             }
             script_el.addEventListener(FacetExportEvent.event_name, handle_facet_export_event, { once: true });
             script_el.addEventListener('error', handle_facet_script_error, { once: true });
         }
-        return facet_promise_data[facet_url].promise;
+        return promise_data.promise;
     }
 
     /** facet_export(export_data, target_script=document.currentScript)
@@ -211,99 +333,7 @@
     };
 
 
-    // === DYNAMIC SCRIPTS ===
-
-    /** async function load_script(parent, script_url)
-     *  @param {Node} parent the parent element for script
-     *  @param {string} script_url url of script to load (the script tag will be created without defer or async attributes)
-     *  @return {Promise}
-     *  Use this to load a script and wait for its 'load' event.
-     */
-    globalThis.load_script = async function load_script(parent, script_url) {
-        return new Promise((resolve, reject) => {
-            let script_el;
-            function script_load_handler(event) {
-                resolve?.();
-                reset();
-            }
-            function script_load_error_handler(event) {
-                if (reject) {
-                    reject(new Error(`error loading script ${script_url}`));
-                }
-                reset();
-            }
-            function reset() {
-                if (script_el) {
-                    script_el.removeEventListener('load',  script_load_handler);
-                    script_el.removeEventListener('error', script_load_error_handler);
-                }
-                resolve = undefined;
-                reject  = undefined;
-            }
-            try {
-                script_el = create_child_element(parent, 'script', 'src', script_url);
-                script_el.addEventListener('load',  script_load_handler,       { once: true });
-                script_el.addEventListener('error', script_load_error_handler, { once: true });
-            } catch (err) {
-                reject?.(err);
-                reset();
-            }
-        });
-    }
-
-    /** async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn)
-     *  @param {Node} parent the parent element for script
-     *  @param {string} script_url url of script to load (the script tag will be created without defer or async attributes)
-     *  @param {() => boolean} condition_poll_fn function that will return true when script has loaded
-     *  @return {Promise}
-     *  Use this to load a script where you want to poll for condition
-     *  that will be triggered asynchronously by the script, in which
-     *  case waiting for the load event will not work because it fires
-     *  when script execution completes but not when some later condition
-     *  is triggered asynchronously by the script.
-     */
-    globalThis.load_script_and_wait_for_condition = async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn) {
-        return new Promise((resolve, reject) => {
-            let script_el;
-            let wait_timer_id;
-            function script_load_error_handler(event) {
-                if (reject) {
-                    reject(new Error(`error loading script ${script_url}`));
-                }
-                reset();
-            }
-            function wait() {
-                if (condition_poll_fn()) {
-                    resolve?.();
-                    reset();
-                } else {
-                    wait_timer_id = setTimeout(wait);  // check again on next tick
-                }
-            }
-            function reset() {
-                if (typeof wait_timer_id !== 'undefined') {
-                    clearTimeout(wait_timer_id);
-                    wait_timer_id = undefined;
-                }
-                if (script_el) {
-                    script_el.removeEventListener('error', script_load_error_handler);
-                }
-                resolve = undefined;
-                reject  = undefined;
-            }
-            try {
-                script_el = create_child_element(parent, 'script', 'src', script_url);
-                script_el.addEventListener('error', script_load_error_handler, { once: true });
-                wait();
-            } catch (err) {
-                reject?.(err);
-                reset();
-            }
-        });
-    }
-
-
-    // === LOAD CORE PACKAGE BUNDLE AND CORE FACETS ===
+    // === LOAD CSP, CORE PACKAGE BUNDLE AND CORE FACETS ===
 
     const csp_url = new URL('./content-security-policy.js', document.currentScript.src);
 
