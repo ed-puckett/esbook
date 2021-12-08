@@ -81,12 +81,6 @@
 
     // === FACETS ===
 
-    // Set Content Security Policy to allow what we need
-    create_child_element(document.head, 'meta',
-        'http-equiv', "Content-Security-Policy",
-        'content',    "default-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' *; img-src 'self' data: blob: *",
-    );
-
     class FacetExportEvent extends Event {
         static event_name = 'facet_export';
 
@@ -216,6 +210,9 @@
         };
     };
 
+
+    // === DYNAMIC SCRIPTS ===
+
     /** async function load_script(parent, script_url)
      *  @param {Node} parent the parent element for script
      *  @param {string} script_url url of script to load (the script tag will be created without defer or async attributes)
@@ -308,12 +305,15 @@
 
     // === LOAD CORE PACKAGE BUNDLE AND CORE FACETS ===
 
+    const csp_url = new URL('./content-security-policy.js', document.currentScript.src);
+
     const cpb_url = new URL('../build/core-package-bundle.js', document.currentScript.src);
 
     const lcf_url = new URL('./load-core-facets.js', document.currentScript.src);
     const lcf_loaded = () => globalThis.load_core_facets_result;  // load-core-facets.js sets globalThis.load_core_facets_result
 
-    load_script(document.head, cpb_url)
+    load_script(document.head, csp_url)
+        .then(() => load_script(document.head, cpb_url))
         .then(() => load_script_and_wait_for_condition(document.head, lcf_url, lcf_loaded))
         .then(() => {
             if (globalThis.load_core_facets_result instanceof Error) {
