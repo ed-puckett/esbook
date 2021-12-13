@@ -10,7 +10,7 @@
     const define_subscribable = await facet('facet/subscribable.js');
 
 
-    // === COMMANDS AND KEY BINDINGS ===
+    // === COMMAND SPECS ===
 
     const initial_command_specs = {  // command_string->key_specs_array
         'undo':                 [ 'CmdOrCtrl+Z' ],
@@ -34,32 +34,83 @@
         'delete_element':       [ 'CmdOrCtrl+Alt+Backspace' ],
     };
 
-    let command_specs = JSON.parse(JSON.stringify(initial_command_specs));  // command_string->key_specs_array
-
-    function _freeze_command_specs(ksfc) {
-        Object.freeze(ksfc);
-        for (const command in ksfc) {
-            Object.freeze(ksfc[command]);
+    function _freeze_command_specs(cs) {
+        for (const command in cs) {
+            Object.freeze(cs[command]);
         }
-        return ksfc;
+        Object.freeze(cs);
+        return cs;
     }
+    function _copy_command_specs(cs) {
+        const ccs = JSON.parse(JSON.stringify(cs));
+        return _freeze_command_specs(ccs);
+    }
+    function _command_spec_structure_valid(cs) {
+        return ( typeof cs === 'object' &&
+                 Object.keys(cs).every(k => {
+                     return ( typeof k === 'string' &&
+                              Array.isArray(cs[k]) &&
+                              cs[k].every(ks => (typeof ks === 'string')) );
+                }) );
+    }
+
     _freeze_command_specs(initial_command_specs);
-    _freeze_command_specs(command_specs);
+
+
+    // === KEY BINDINGS ===
+
+    function _freeze_key_bindings(kb) {
+        for (const kbe of kb) {
+            Object.freeze(kbe);
+        }
+        Object.freeze(kb);
+        return kb;
+    }
+
+
+    // === DERIVATION OF KEY BINDINGS FROM COMMAND SPECS ===
+
+    let command_specs = _copy_command_specs(initial_command_specs);  // command_string->key_specs_array
 
     function get_command_specs() {
-        return _freeze_command_specs(command_specs);
+        return command_specs;
     }
 
-    const key_bindings =  // array of [ canonical_key_spec, command ] elements
-          Object.freeze(
-              Object.entries(command_specs)
-                  .map(([ command, key_specs ]) => {
-                      const canonical_key_specs = key_specs.map(parse_key_spec);
-                      const distinct_canonical_key_specs = [ ...new Set(canonical_key_specs).values() ];
-                      return distinct_canonical_key_specs.map(canonical_key_spec => [ canonical_key_spec, command ])
-                  })
-                  .reduce((acc, a) => [ ...acc, ...a ])
-          );
+    let key_bindings;  // (initialized below) array of [ canonical_key_spec, command ] elements
+
+    function get_key_bindings() {
+        return key_bindings;
+    }
+
+    function set_command_specs(cs) {
+        // validate structure of cs
+        if (!_command_spec_structure_valid(cs)) {
+            throw new Error('invalid command_spec structure');
+        }
+
+        // copy and freeze new command_specs structure
+        cs = _copy_command_specs(cs);
+
+        const kb = Object.entries(cs)
+              .map(([ command, key_specs ]) => {
+                  const canonical_key_specs = key_specs.map(parse_key_spec);
+                  const distinct_canonical_key_specs = [ ...new Set(canonical_key_specs).values() ];
+                  return distinct_canonical_key_specs.map(canonical_key_spec => [ canonical_key_spec, command ])
+              })
+              .reduce((acc, a) => [ ...acc, ...a ])
+
+        // freeze new key_bindings
+        _freeze_key_bindings(kb);
+
+        // after success, set the variables
+        command_specs = cs;
+        key_bindings  = kb;
+    }
+
+    set_command_specs(initial_command_specs);
+
+
+    // === KEYBOARD EVENT TO COMMAND INTERFACE ===
 
     function keyboard_event_to_command(keyboard_event) {
         const event_canonical_key_spec = parse_keyboard_event(keyboard_event);
@@ -86,7 +137,8 @@
     facet_export({
         initial_command_specs,
         get_command_specs,
-        key_bindings,
+        set_command_specs,
+        get_key_bindings,
         keyboard_event_to_command,
         KeyBindingEvent,
     });
