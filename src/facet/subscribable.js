@@ -5,7 +5,7 @@
     function define_subscribable(base_name) {
         const _name_prefix = base_name ? `${base_name}-` : '';
 
-        const _event_target = document;
+        const _event_target = globalThis;
         const _event_type   = `${_name_prefix}${uuidv4()}`;
 
         const _event_handler_functions = {};
