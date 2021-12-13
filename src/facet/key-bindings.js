@@ -7,49 +7,43 @@
 
     // === COMMANDS AND KEY BINDINGS ===
 
-    const commands = [
-        'undo',
-        'redo',
-        'clear_notebook',
-        'open_notebook',
-        'import_notebook',
-        'reopen_notebook',
-        'save_notebook',
-        'save_as_notebook',
-        'eval_element',
-        'eval_stay_element',
-        'eval_notebook',
-        'eval_notebook_before',
-        'focus_up_element',
-        'focus_down_element',
-        'move_up_element',
-        'move_down_element',
-        'add_before_element',
-        'add_after_element',
-        'delete_element',
-    ];
-
-    const key_bindings_specs = {
-        'CmdOrCtrl+Z':              'undo',
-        'CmdOrCtrl+Shift+Z':        'redo',
-        'CmdOrCtrl+Shift+C':        'clear_notebook',
-        'CmdOrCtrl+O':              'open_notebook',
-        'CmdOrCtrl+Shift+O':        'import_notebook',
-        'CmdOrCtrl+R':              'reopen_notebook',
-        'CmdOrCtrl+S':              'save_notebook',
-        'CmdOrCtrl+Shift+S':        'save_as_notebook',
-        'CmdOrCtrl+Enter':          'eval_element',
-        'CmdOrCtrl+Shift+Enter':    'eval_stay_element',
-        'CmdOrCtrl+Shift+!':        'eval_notebook',
-        'CmdOrCtrl+Shift+Alt+!':    'eval_notebook_before',
-        'Alt+Up':                   'focus_up_element',
-        'Alt+Down':                 'focus_down_element',
-        'CmdOrCtrl+Alt+Shift+Up':   'move_up_element',
-        'CmdOrCtrl+Alt+Shift+Down': 'move_down_element',
-        'CmdOrCtrl+Alt+Up':         'add_before_element',
-        'CmdOrCtrl+Alt+Down':       'add_after_element',
-        'CmdOrCtrl+Alt+Backspace':  'delete_element',
+    const initial_key_specs_for_command = {  // command_string->key_specs_array
+        'undo':                 [ 'CmdOrCtrl+Z' ],
+        'redo':                 [ 'CmdOrCtrl+Shift+Z' ],
+        'clear_notebook':       [ 'CmdOrCtrl+Shift+C' ],
+        'open_notebook':        [ 'CmdOrCtrl+O' ],
+        'import_notebook':      [ 'CmdOrCtrl+Shift+O' ],
+        'reopen_notebook':      [ 'CmdOrCtrl+R' ],
+        'save_notebook':        [ 'CmdOrCtrl+S' ],
+        'save_as_notebook':     [ 'CmdOrCtrl+Shift+S' ],
+        'eval_element':         [ 'CmdOrCtrl+Enter' ],
+        'eval_stay_element':    [ 'CmdOrCtrl+Shift+Enter' ],
+        'eval_notebook':        [ 'CmdOrCtrl+Shift+!' ],
+        'eval_notebook_before': [ 'CmdOrCtrl+Shift+Alt+!' ],
+        'focus_up_element':     [ 'Alt+Up' ],
+        'focus_down_element':   [ 'Alt+Down' ],
+        'move_up_element':      [ 'CmdOrCtrl+Alt+Shift+Up' ],
+        'move_down_element':    [ 'CmdOrCtrl+Alt+Shift+Down' ],
+        'add_before_element':   [ 'CmdOrCtrl+Alt+Up' ],
+        'add_after_element':    [ 'CmdOrCtrl+Alt+Down' ],
+        'delete_element':       [ 'CmdOrCtrl+Alt+Backspace' ],
     };
+
+    let key_specs_for_command = JSON.parse(JSON.stringify(initial_key_specs_for_command));  // command_string->key_specs_array
+
+    function _freeze_key_specs_for_command(ksfc) {
+        Object.freeze(ksfc);
+        for (const command in ksfc) {
+            Object.freeze(ksfc[command]);
+        }
+        return ksfc;
+    }
+    _freeze_key_specs_for_command(initial_key_specs_for_command);
+    _freeze_key_specs_for_command(key_specs_for_command);
+
+    function get_key_specs_for_command() {
+        return _freeze_key_specs_for_command(key_specs_for_command);
+    }
 
 
     // === KEY BINDING PARSING ===
@@ -73,7 +67,7 @@
             if (keys.some(k => k !== k.toLowerCase())) {
                 throw new Error('basic_modifier_desc_map keys must be lowercase');
             }
-            const all_alternates = keys.map(k => basic_modifier_desc_map[k].alternates).reduce((acc, a) => [...acc, ...a], []);
+            const all_alternates = keys.map(k => basic_modifier_desc_map[k].alternates).reduce((acc, a) => [...acc, ...a]);
             if (all_alternates.some(k => k !== k.toLowerCase())) {
                 throw new Error('basic_modifier_desc_map alternates must be lowercase');
             }
@@ -181,12 +175,6 @@
         return _modifier_descs_and_key_to_canoncial_key_spec(modifier_descs, key);
     }
 
-    const key_bindings =  // array of [ canonical_key_spec, command ] elements
-          Object.freeze(
-              Object.entries(key_bindings_specs)
-                  .map(([ key_spec, command ]) => [ parse_key_spec(key_spec), command ])
-          );
-
     // parse_event() returns a canonical key spec (which is a string)
     function parse_keyboard_event(keyboard_event) {
         const modifier_descs = [];
@@ -198,7 +186,18 @@
         }
         return _modifier_descs_and_key_to_canoncial_key_spec(modifier_descs, event.key.toLowerCase());
     }
-//!!! need to compare key case-insensitive if modifiers exist, otherwise case-sensitive
+//!!! need to compare key case-insensitive if modifiers exist, otherwise case-sensitive (?)
+
+    const key_bindings =  // array of [ canonical_key_spec, command ] elements
+          Object.freeze(
+              Object.entries(key_specs_for_command)
+                  .map(([ command, key_specs ]) => {
+                      const canonical_key_specs = key_specs.map(parse_key_spec);
+                      const distinct_canonical_key_specs = [ ...new Set(canonical_key_specs).values() ];
+                      return distinct_canonical_key_specs.map(canonical_key_spec => [ canonical_key_spec, command ])
+                  })
+                  .reduce((acc, a) => [ ...acc, ...a ])
+          );
 
     function keyboard_event_to_command(keyboard_event) {
         const event_canonical_key_spec = parse_keyboard_event(keyboard_event);
@@ -211,13 +210,18 @@
     }
 
     facet_export({
-        commands,
-        key_bindings_specs,
-        is_on_macos,
-        CmdOrCtrl,
-        key_bindings,
+        initial_key_specs_for_command,
+        get_key_specs_for_command,
+        canonical_key_spec_separator,
+        disallowed_modifier_codes,
         modifier_desc_map,
         modifier_code_desc_map,
+        is_on_macos,
+        CmdOrCtrl,
+        key_spec_modifier_to_desc,
+        parse_key_spec,
+        parse_keyboard_event,
+        key_bindings,
         keyboard_event_to_command,
     });
 
