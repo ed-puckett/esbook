@@ -11,7 +11,9 @@ const facet_paths = [
     'facet/md+mj.js',
     'facet/output-handlers.js',
     'facet/change.js',
+    'facet/key-spec.js',
     'facet/key-bindings.js',
+    'facet/notebook.js',
     //...
 ];
 

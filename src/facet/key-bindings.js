@@ -2,12 +2,12 @@
 
 (async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
+    const define_subscribable = await facet('facet/subscribable.js');
+
     const {
         parse_key_spec,
         parse_keyboard_event,
     } = await facet('facet/key-spec.js');
-
-    const define_subscribable = await facet('facet/subscribable.js');
 
 
     // === COMMAND SPECS ===
@@ -125,7 +125,6 @@
     class KeyBindingEvent extends define_subscribable('key-binding') {
         get command (){ return this.data; }
     }
-
     window.addEventListener('keydown', (event) => {
         const command = keyboard_event_to_command(event);
         if (command) {
@@ -133,6 +132,9 @@
             KeyBindingEvent.dispatch_event(command);
         }
     });
+
+
+    // === EXPORT ===
 
     facet_export({
         initial_command_specs,
