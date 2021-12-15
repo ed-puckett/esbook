@@ -19,6 +19,8 @@
     const message_controller = await facet('facet/message-controller.js')
     const fs_interface       = await facet('facet/fs-interface.js');
 
+    const { beep } = await facet('facet/beep.js');
+
     const {
         marked,
         is_MathJax_v2,
@@ -68,13 +70,10 @@ facet_export(); return;//!!!
     } = require('./eval-worker-interface.js');
 
     const {
-        token_switch_context,
         parse_input_text,
-        input_text_has_code,
     } = require('./parse-input-text.js');
 
-    const { ipcRenderer, shell } = require('electron');
-
+//!!!    const { ipcRenderer } = require('electron');
 //!!!    const file_selector      = require('./file-selector.js');
 //!!!    const fs_path = require('path');
 
@@ -449,7 +448,7 @@ facet_export(); return;//!!!
             if (this.get_input_text_for_ie(ie).trim()) {  // if there is anything to evaluate...
                 const eval_ticket = establish_eval_worker();
                 if (!eval_ticket) {
-                    shell.beep();
+                    beep();
                 } else {
                     try {
                         await this.evaluate_ie(eval_ticket, ie, stay);
@@ -464,11 +463,11 @@ facet_export(); return;//!!!
         async ie_ops_eval_notebook(ie, only_before_current_element=false) {
             // start a new eval worker to reset the environment
             if (eval_worker_eval_ticket_allocated()) {
-                shell.beep();
+                beep();
             } else {
                 const eval_ticket = establish_eval_worker(true);
                 if (!eval_ticket) {
-                    shell.beep();
+                    beep();
                 } else {
                     try {
                         for (const ie_id of this.nb_state.order) {
