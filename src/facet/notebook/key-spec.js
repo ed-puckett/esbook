@@ -13,8 +13,9 @@
         alt:   { code: 'a', event_prop: 'altKey',   alternates: [] },
     };
 
-    const canonical_key_spec_separator = '+';  // separator between modifier codes and key in a canonical key spec
-    const disallowed_modifier_codes = '+-' + canonical_key_spec_separator;
+    const canonical_key_modifier_separator = '+';  // separator between modifier codes and key in a canonical key spec
+    const canonical_key_spec_separator     = ' ';  // separator between key_specs in a canonical key binding
+    const disallowed_modifier_codes = '+-' + canonical_key_modifier_separator + canonical_key_spec_separator;
 
     function build_modifier_desc_map() {
         // validate basic_modifier_desc_map:
@@ -99,7 +100,7 @@
 
     function _modifier_descs_and_key_to_canoncial_key_spec(modifier_descs, key) {
         const canonical_modifiers = modifier_descs.map(desc => desc.code).sort().join('');
-        const canonical_key_spec = `${canonical_modifiers}${canonical_key_spec_separator}${key}`;
+        const canonical_key_spec = `${canonical_modifiers}${canonical_key_modifier_separator}${key}`;
         return canonical_key_spec;
     }
 
@@ -144,6 +145,7 @@
     }
 
     facet_export({
+        canonical_key_modifier_separator,
         canonical_key_spec_separator,
         disallowed_modifier_codes,
         modifier_desc_map,

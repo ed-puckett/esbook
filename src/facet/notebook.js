@@ -53,11 +53,6 @@
     } = await facet('facet/notebook/key-bindings.js');
 
     const {
-        remove_current_key_handler,
-        bind_key_handler,
-    } = await facet('facet/notebook/key-handler.js');  //!!! integrate into key-bindings.js
-
-    const {
         establish_eval_worker,
         eval_worker_eval_ticket_allocated,
         eval_worker_deallocate_eval_ticket,
