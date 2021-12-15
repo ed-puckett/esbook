@@ -57,8 +57,6 @@
         bind_key_handler,
     } = await facet('facet/notebook/key-handler.js');  //!!! integrate into key-bindings.js
 
-facet_export(); return;//!!!
-
     const {
         establish_eval_worker,
         eval_worker_eval_ticket_allocated,
@@ -67,8 +65,9 @@ facet_export(); return;//!!!
         eval_worker_is_running,
         eval_worker_alert_if_running,
         eval_worker_eval_expression,
-    } = require('./eval-worker-interface.js');
+    } = await facet('facet/notebook/eval-worker-interface.js');
 
+facet_export(); return;//!!!
 //!!!    const { ipcRenderer } = require('electron');
 //!!!    const file_selector      = require('./file-selector.js');
 

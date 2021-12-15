@@ -2,7 +2,7 @@
 
 (async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
-    const { shell } = { shell: { beep() {} } };//!!!require('electron');
+    const { beep } = await facet('facet/beep.js');
 
     const current_event_listeners = new WeakMap();
 
@@ -20,13 +20,13 @@
     // key_bindings: { key_spec: (() => any), ... }
     // options: {
     //     operation_args?: any[],               // default: []
-    //     beep?:           (() => any),         // default: shell.beep
+    //     beep?:           (() => any),         // default: beep (imported above)
     //     skip_key_event?: (event) => boolean,  // default: always return false
     // }
     function bind_key_handler(element, key_bindings, options) {
         options = options ?? {};
         const operation_args = options.operation_args ?? [];
-        const beep           = options.beep           ?? shell.beep;
+        const beep_impl      = options.beep           ?? beep;
         const skip_key_event = options.skip_key_event ?? ((event) => false);
 
         const initial_state = build_operation_trie(key_bindings);
@@ -71,9 +71,7 @@
                 if (!next) {
                     if (state !== initial_state) {
                         // Beep only if at least one keypress has already been accepted.
-                        // Otherwise, beeps will occur even when using a keypress defined
-                        // by an accelerator.
-                        beep();
+                        beep_impl();
                     }
                     reset();
                 } else {
@@ -111,7 +109,7 @@
         for (const key_sequence in key_bindings) {
             const operation = key_bindings[key_sequence];
             let state = trie;
-            for (const key_spec of key_sequence.trim().split(/[ \t]+/)) {
+            for (const key_spec of key_sequence.trim().split(/\s+/)) {
                 const canonical = canonical_key_spec(key_spec);
                 let next = state[canonical];
                 if (!next) {
