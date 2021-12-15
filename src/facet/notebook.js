@@ -16,45 +16,43 @@
 
     // === EXTERNAL MODULES ===
 
-facet_export(); return;//!!!
-    const fs_path = require('path');
-
-    const { ipcRenderer, shell } = require('electron');
-
-    const marked = require('marked');
-
-    const { sha256 } = require('js-sha256');
-    const object_hasher = (obj) => sha256(JSON.stringify(obj));
-
     const {
-        generate_object_id,
-    } = require('./object-id.js');
-
-    const {
-        token_switch_context,
-        parse_input_text,
-        input_text_has_code,
-    } = require('./parse-input-text.js');
+        marked,
+        is_MathJax_v2,
+        MathJax,
+    } = await facet('facet/md+mj.js');
 
     const {
         TEXT_ELEMENT_CLASS,
         clean_for_html,
         output_handlers,
-    } = require('./output-handlers.js');
+    } = await facet('facet/output-handlers.js');
+
+    const {
+        Change,
+        add_edit_change,
+        perform_move_up_ie_change,
+        perform_move_down_ie_change,
+        perform_add_new_before_ie_change,
+        perform_add_new_after_ie_change,
+        perform_delete_ie_change,
+        perform_state_change,
+        add_ie_output_change,
+    } = await facet('facet/change.js');
+
+    const {
+        KeyBindingEvent,
+    } = await facet('facet/notebook/key-bindings.js');
 
     const {
         remove_current_key_handler,
         bind_key_handler,
-    } = require('../window/key-handler.js');
+    } = await facet('facet/notebook/key-handler.js');  //!!! integrate into key-bindings.js
 
-    const {
-        add_contextmenu_event_handler,
-    } = require('../main/contextmenu.js');
+    const message_controller = await facet('facet/message-controller.js')
+    const fs_interface       = await facet('facet/fs-interface.js');
 
-    const {
-        TextuallyLocatedError,
-        ParseError,
-    } = require('./error-types.js');
+facet_export(); return;//!!!
 
     const {
         establish_eval_worker,
@@ -67,20 +65,32 @@ facet_export(); return;//!!!
     } = require('./eval-worker-interface.js');
 
     const {
-        Change,
-        add_edit_change,
-        perform_move_up_ie_change,
-        perform_move_down_ie_change,
-        perform_add_new_before_ie_change,
-        perform_add_new_after_ie_change,
-        perform_delete_ie_change,
-        perform_state_change,
-        add_ie_output_change,
-    } = require('./change.js');
+        token_switch_context,
+        parse_input_text,
+        input_text_has_code,
+    } = require('./parse-input-text.js');
 
-    const message_controller = require('./message-controller.js')
-    const fs_interface       = require('./fs-interface.js');
-    const file_selector      = require('./file-selector.js');
+    const { ipcRenderer, shell } = require('electron');
+
+//!!!    const file_selector      = require('./file-selector.js');
+//!!!    const fs_path = require('path');
+
+
+    // === OBJECT HASHER ===
+
+    const object_hasher = (obj) => sha256(JSON.stringify(obj));
+
+
+    // === ERROR TYPES ===
+
+    class TextuallyLocatedError extends Error {
+        constructor(message, line_col) {
+            super(message);
+            this.line_col = line_col;
+        }
+    }
+
+    class ParseError extends TextuallyLocatedError {}
 
 
     // === NOTEBOOK INSTANCE ===
@@ -119,7 +129,6 @@ facet_export(); return;//!!!
     // We are using MathJax v2.7.x instead of v3.x.x because Plotly
     // (used in ./output-handlers.js) still requires the older version.
     // We want to upgrade when Plotly supports it.
-    const is_MathJax_v2 = !MathJax.startup;  // Mathjax.startup is not defined before version 3
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', document_ready, { once: true });
@@ -218,8 +227,6 @@ facet_export(); return;//!!!
 
         // called exactly once (by constructor)
         init_event_handlers() {
-            add_contextmenu_event_handler();
-
             ipcRenderer.on('menu_command', (event, command, ...args) => {
                 switch (command) {
                 case 'undo': {
@@ -895,12 +902,14 @@ facet_export(); return;//!!!
                 for (const option in settings.editor_options) {
                     const value = (settings.editor_options ?? {})[option];
                     if (typeof value !== 'undefined') {
-                        cm.setOption(option, settings.editor_options[option]);
+                        cm.setOption(option, value);
                     }
                 }
                 if (settings.editor_options.keyMap === 'emacs') {
                     // Guess what? CodeMirror.normalizeKeyMap modifies the given keymap!!  So send a copy....
-                    cm.setOption('extraKeys', CodeMirror.normalizeKeyMap({ ...this.constructor.emacs_special_key_bindings }));
+                    const key_bindings_copy = { ...this.constructor.emacs_special_key_bindings };
+                    const normalized_keymap = CodeMirror.normalizeKeyMap(key_bindings_copy);
+                    cm.setOption('extraKeys', normalized_keymap);
 
                     bind_key_handler(ie, this.constructor.emacs_special_key_bindings, {
                         skip_key_event: (event) => {

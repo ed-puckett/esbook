@@ -7,7 +7,7 @@
     const {
         parse_key_spec,
         parse_keyboard_event,
-    } = await facet('facet/key-spec.js');
+    } = await facet('facet/notebook/key-spec.js');
 
 
     // === COMMAND SPECS ===
