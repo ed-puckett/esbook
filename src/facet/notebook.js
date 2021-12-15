@@ -69,13 +69,8 @@ facet_export(); return;//!!!
         eval_worker_eval_expression,
     } = require('./eval-worker-interface.js');
 
-    const {
-        parse_input_text,
-    } = require('./parse-input-text.js');
-
 //!!!    const { ipcRenderer } = require('electron');
 //!!!    const file_selector      = require('./file-selector.js');
-//!!!    const fs_path = require('path');
 
 
     // === OBJECT HASHER ===
@@ -91,8 +86,6 @@ facet_export(); return;//!!!
             this.line_col = line_col;
         }
     }
-
-    class ParseError extends TextuallyLocatedError {}
 
 
     // === NOTEBOOK INSTANCE ===
@@ -118,6 +111,11 @@ facet_export(); return;//!!!
             notebook.update_from_settings();
         }
     });
+
+
+    // === INPUT TEXT TYPE HEADER ===
+
+    const input_text_type_header_re = /^%.*$/m;  // if present, then the input following is markdown+MathJax
 
 
     // === MAJOR UI ELEMENTS ===
@@ -165,9 +163,6 @@ facet_export(); return;//!!!
             'Ctrl-X Ctrl-F': () => notebook.open_notebook(),
             'Ctrl-X Ctrl-S': () => notebook.save_notebook(false),
             'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
-            'Ctrl-X Ctrl-C': () => ipcRenderer.sendToHost('edit_command', 'quit'),
-            'Ctrl-X B':      () => ipcRenderer.sendToHost('edit_command', 'create_tab'),
-            'Ctrl-X K':      () => ipcRenderer.sendToHost('edit_command', 'close_tab'),
         };
 
         constructor() {
@@ -374,7 +369,15 @@ facet_export(); return;//!!!
         set_notebook_path(path, fs_timestamp=undefined) {
             this.notebook_path = path;
             this.notebook_fs_timestamp = fs_timestamp;
-            const title = this.notebook_path ? fs_path.parse(this.notebook_path).base : 'Untitled';
+
+            let title = 'Untitled';
+            if (this.notebook_path) {
+                const notebook_path_components = new URL(this.notebook_path).pathname.split('/');
+                const basename = notebook_path_components[notebook_path_components.length-1];
+                if (basename) {
+                    title = basename;
+                }
+            }
             document.title = title;
         }
 
@@ -817,9 +820,6 @@ facet_export(); return;//!!!
         // may throw an error
         async import_nb_state(contents) {
             this.clear_notebook(true);
-            // assuming that contents does not contain the
-            // mode switch token at the beginngin of a line....
-            // (see parse-input-text.js)
             this.set_input_text_for_ie(this.current_ie, contents);
             this.update_nb_state(this.current_ie);  // make sure contents is present in this.nb_state
         }
@@ -1017,8 +1017,7 @@ facet_export(); return;//!!!
             try {
 
                 const input_text = this.get_input_text_for_ie(ie);
-                const input_text_segments = parse_input_text(input_text);
-                await this.evaluate_input_text_segments(eval_ticket, ie, output_data_collection, input_text_segments);
+                await this.evaluate_input_text(eval_ticket, ie, output_data_collection, input_text);
 
             } catch (err) {
 
@@ -1049,23 +1048,29 @@ facet_export(); return;//!!!
         }
 
         // may throw an error
-        // input_text_segments: { is_expression, text, start, end, separator, separator_end }[]
-        async evaluate_input_text_segments(eval_ticket, ie, output_data_collection, input_text_segments) {
-            for (const { is_expression, text, start, end, separator, separator_end } of input_text_segments) {
-                if (text.length > 0) {
-                    if (is_expression) {
-                        if (text.trim().length > 0) {
-                            for await (const value of eval_worker_eval_expression(eval_ticket, text, start)) {
-                                const handler = output_handlers[value.type];
-                                if (!handler) {
-                                    throw new TextuallyLocatedError(`unknown output type: ${value.type}`, end);
-                                }
-                                await handler.update_notebook(ie, output_data_collection, value);
+        async evaluate_input_text(eval_ticket, ie, output_data_collection, input_text) {
+            let is_expression, text;
+            const mdmj_header_match = input_text.match(input_text_type_header_re);
+            if (mdmj_header_match) {
+                is_expression = false;
+                text = input_text.substring(mdmj_header_match[0].length + 1);
+            } else {
+                is_expression = true;
+                text = input_text;
+            }
+            if (text.length > 0) {
+                if (is_expression) {
+                    if (text.trim().length > 0) {
+                        for await (const value of eval_worker_eval_expression(eval_ticket, text, start)) {
+                            const handler = output_handlers[value.type];
+                            if (!handler) {
+                                throw new TextuallyLocatedError(`unknown output type: ${value.type}`, end);
                             }
+                            await handler.update_notebook(ie, output_data_collection, value);
                         }
-                    } else {  // markdown
-                        await output_handlers.text.update_notebook(ie, output_data_collection, text);
                     }
+                } else {  // markdown
+                    await output_handlers.text.update_notebook(ie, output_data_collection, text);
                 }
             }
         }
