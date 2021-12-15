@@ -3,14 +3,6 @@
 // This code is not a facet.  It is part of the facet bootstrap process.
 
 const facet_paths = [
-    'facet/subscribable.js',
-    'facet/settings.js',
-    'facet/theme-settings.js',
-    'facet/message-controller.js',
-    'facet/fs-interface.js',
-    'facet/md+mj.js',
-    'facet/output-handlers.js',
-    'facet/change.js',
     'facet/notebook.js',
     //...
 ];

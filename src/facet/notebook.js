@@ -16,17 +16,23 @@
 
     // === EXTERNAL MODULES ===
 
+    const message_controller = await facet('facet/message-controller.js')
+    const fs_interface       = await facet('facet/fs-interface.js');
+
     const {
         marked,
         is_MathJax_v2,
         MathJax,
     } = await facet('facet/md+mj.js');
 
+    const { SettingsUpdatedEvent      } = await facet('facet/notebook/settings.js')
+    const { ThemeSettingsUpdatedEvent } = await facet('facet/notebook/theme-settings.js')
+
     const {
         TEXT_ELEMENT_CLASS,
         clean_for_html,
         output_handlers,
-    } = await facet('facet/output-handlers.js');
+    } = await facet('facet/notebook/output-handlers.js');
 
     const {
         Change,
@@ -38,7 +44,7 @@
         perform_delete_ie_change,
         perform_state_change,
         add_ie_output_change,
-    } = await facet('facet/change.js');
+    } = await facet('facet/notebook/change.js');
 
     const {
         KeyBindingEvent,
@@ -48,9 +54,6 @@
         remove_current_key_handler,
         bind_key_handler,
     } = await facet('facet/notebook/key-handler.js');  //!!! integrate into key-bindings.js
-
-    const message_controller = await facet('facet/message-controller.js')
-    const fs_interface       = await facet('facet/fs-interface.js');
 
 facet_export(); return;//!!!
 
