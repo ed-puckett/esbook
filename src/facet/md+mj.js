@@ -33,7 +33,7 @@ globalThis.MathJax = {
               // We are currently using MathJax v2.7.x instead of v3.x.x because
               // Plotly (used as an output handler) still requires the older version.
               // We want to upgrade to MathJax 3.x when Plotly supports it.
-              const is_MathJax_v2 = !MathJax.startup;  // Mathjax.startup is not defined before version 3
+              const is_MathJax_v2 = !MathJax.startup;  // MathJax.startup is not defined before version 3
               const export_data = {
                   marked,
                   is_MathJax_v2,

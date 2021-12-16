@@ -31,6 +31,10 @@
     const { ThemeSettingsUpdatedEvent } = await facet('facet/notebook/theme-settings.js')
 
     const {
+        KeyBindingEvent,
+    } = await facet('facet/notebook/key-bindings.js');
+
+    const {
         TEXT_ELEMENT_CLASS,
         clean_for_html,
         output_handlers,
@@ -49,10 +53,6 @@
     } = await facet('facet/notebook/change.js');
 
     const {
-        KeyBindingEvent,
-    } = await facet('facet/notebook/key-bindings.js');
-
-    const {
         establish_eval_worker,
         eval_worker_eval_ticket_allocated,
         eval_worker_deallocate_eval_ticket,
@@ -62,7 +62,6 @@
         eval_worker_eval_expression,
     } = await facet('facet/notebook/eval-worker-interface.js');
 
-facet_export(); return;//!!!
 //!!!    const { ipcRenderer } = require('electron');
 //!!!    const file_selector      = require('./file-selector.js');
 
@@ -91,31 +90,21 @@ facet_export(); return;//!!!
 
     let settings;        // initialized and updated by settings_state event
     let theme_settings;  // initialized and updated by settings_state event
-    let app_version;     // initialized and updated by settings_state event
 
-    ipcRenderer.on('settings_state', (event, new_settings, new_theme_settings, new_app_version) => {
-        // update the global variables
-        settings       = new_settings;
-        theme_settings = new_theme_settings;
-        app_version    = new_app_version;
-        if (notebook) {
-            // normally, notebook will be set, but just in case
-            // this gets fired before document_ready() is called....
-            // Note: document_ready() calls notebook.update_from_settings()
-            notebook.update_from_settings();
-        }
+    SettingsUpdatedEvent.subscribe((event) => {
+        settings = event.get_settings();
+        notebook?.update_from_settings();
+    });
+
+    ThemeSettingsUpdatedEvent.subscribe((event) => {
+        theme_settings = event.get_theme_settings();
+        notebook?.update_from_settings();
     });
 
 
     // === INPUT TEXT TYPE HEADER ===
 
     const input_text_type_header_re = /^%.*$/m;  // if present, then the input following is markdown+MathJax
-
-
-    // === MAJOR UI ELEMENTS ===
-
-    const interaction_header = document.getElementById('interaction_header');
-    const interaction_area   = document.getElementById('interaction_area');
 
 
     // === NOTEBOOK LOAD BOOTSTRAP ===
@@ -137,6 +126,7 @@ facet_export(); return;//!!!
             await MathJax.startup.promise;
         }
         notebook = new Notebook();
+        await notebook.setup();
         notebook.update_from_settings();  // in case setting update already received
     }
 
@@ -159,7 +149,7 @@ facet_export(); return;//!!!
             'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
         };
 
-        constructor() {
+        async setup() {
             // notebook focus
             this.current_ie = undefined;  // initialized below
 
@@ -171,11 +161,11 @@ facet_export(); return;//!!!
 
             this._loaded_notebook_hash = undefined;  // used by this.set_notebook_unmodified() and this.notebook_modified()
 
+            this.interaction_area      = undefined;  // will be set in this._setup_document()
+
             try {
 
-                if (interaction_area.querySelectorAll('.interaction_element').length > 0) {
-                    throw new Error('initial static document must not contain interaction elements');
-                }
+                await this._initialize_document();
 
                 // replace CodeMirror undo/redo with our implementation
                 CodeMirror.commands.undo = (cm) => Change.perform_undo(this);
@@ -185,10 +175,6 @@ facet_export(); return;//!!!
 
                 // initialize empty notebook
                 this.clear_notebook(true);
-
-                // finally, send 'notebook_init_complete' to let our containing
-                // window know that we are ready to accept events.
-                ipcRenderer.sendToHost('notebook_init_complete');
 
             } catch (err) {
 
@@ -205,6 +191,56 @@ facet_export(); return;//!!!
             }
         }
 
+        async _initialize_document() {
+            if (document.getElementById('content')) {
+                throw new Error('initial document must not contain an element with id "content"');
+            }
+
+            // add initial notebook structure to document body:
+            //
+            //     <div id="content">
+            //         <div id="interaction_area">
+            //             ....
+            //         </div>
+            //     </div>
+
+            const content_el = create_child_element(document.body, 'div', 'id', 'content');
+            this.interaction_area = create_child_element(content_el, 'div', 'id', 'interaction_area');
+
+            // add notebook stylesheet:
+            const stylesheet_url = new URL('notebook/notebook.css', current_script.src);
+            create_stylesheet(document.head, stylesheet_url);
+
+            // load CodeMirror scripts:
+            for (const script_path of [
+                '../../node_modules/codemirror/lib/codemirror.js',
+                '../../node_modules/codemirror/mode/markdown/markdown.js',
+                '../../node_modules/codemirror/mode/stex/stex.js',
+                '../../node_modules/codemirror/mode/javascript/javascript.js',
+                '../../node_modules/codemirror/keymap/sublime.js',
+                '../../node_modules/codemirror/keymap/vim.js',
+                '../../node_modules/codemirror/addon/dialog/dialog.js',
+                '../../node_modules/codemirror/addon/search/search.js',
+                '../../node_modules/codemirror/addon/search/searchcursor.js',
+                '../../node_modules/codemirror/addon/search/jump-to-line.js',
+                '../../node_modules/codemirror/addon/edit/matchbrackets.js',
+                'notebook/codemirror-jsnb-mode.js',
+            ]) {
+                const script_url = new URL(script_path, current_script.src);
+                await load_script(document.head, script_url);
+            }
+
+            // load CodeMirror stylesheets:
+            for (const stylesheet_path of [
+                '../../node_modules/codemirror/lib/codemirror.css',
+                '../../node_modules/codemirror/theme/blackboard.css',
+                '../../node_modules/codemirror/addon/dialog/dialog.css',
+            ]) {
+                const stylesheet_url = new URL(stylesheet_path, current_script.src);
+                create_stylesheet(document.head, stylesheet_url);
+            }
+        }
+
         update_from_settings() {
             for (const ie_id of this.nb_state.order) {
                 const ie = document.getElementById(ie_id);
@@ -218,6 +254,7 @@ facet_export(); return;//!!!
 
         // called exactly once (by constructor)
         init_event_handlers() {
+return;//!!!
             ipcRenderer.on('menu_command', (event, command, ...args) => {
                 switch (command) {
                 case 'undo': {
@@ -248,11 +285,6 @@ facet_export(); return;//!!!
                 case 'save_notebook': {
                     const [ interactive ] = args;
                     this.save_notebook(interactive);
-                    break;
-                }
-                case 'auto_hide_inputs': {
-                    const [ state ] = args;
-                    perform_state_change(this, { auto_hide_inputs: this.nb_state.auto_hide_inputs }, { auto_hide_inputs: state });
                     break;
                 }
                 case 'eval_element': {
@@ -301,49 +333,6 @@ facet_export(); return;//!!!
                 }
                 }
             });
-
-            ipcRenderer.on('open_notebook', (event, new_notebook_path, do_import) => {
-                this.open_notebook_from_path(new_notebook_path, do_import, true);
-            });
-
-            ipcRenderer.on('get_tab_state', (event) => {
-                // This event is sent from the main process to the window,
-                // and then is forwarded here (to the tab).
-                // This tab then replies directly to the main process.
-                this.send_tab_state_to_parent_processes();
-            });
-
-            ipcRenderer.on('get_tab_restart_info', (event, pos) => {
-                event.sender.sendTo(event.senderId, 'get_tab_restart_info', pos, {
-                    pos,
-                    notebook_path: this.notebook_path,
-                });
-            });
-
-            ipcRenderer.on('tab_confirm_close', (event) => {
-                function reply(confirmed) {
-                    event.sender.sendTo(event.senderId, 'tab_confirm_close', confirmed);
-                }
-                if (!this.notebook_modified()) {
-                    reply(true);
-                } else {
-                    event.sender.sendTo(event.senderId, 'show_me');
-                    reply(message_controller.confirm_sync(`Warning: changes not saved, close anyway?`));
-                }
-            });
-
-            if (stop_eval_button) {
-                stop_eval_button.onclick = function (event) {
-                    if (eval_worker_is_running()) {
-                        message_controller.confirm('Warning: stopping current evaluation will reset notebook state')
-                            .then(ok => {
-                                if (ok) {
-                                    stop_eval_worker();
-                                }
-                            });
-                    }
-                };
-            }
         }
 
         init_ie_event_handlers(ie) {
@@ -380,7 +369,6 @@ facet_export(); return;//!!!
             this.nb_state = {
                 nb_type:    this.constructor.nb_type,
                 nb_version: this.constructor.nb_version,
-                auto_hide_inputs: false,
                 order:    [],  // interaction_element ids, in order of appearance in notebook
                 elements: {},  // the actual interaction_element data, indexed by interaction_element id
             };
@@ -523,24 +511,11 @@ facet_export(); return;//!!!
         }
 
         update_global_view_properties() {
-            if (this.nb_state.auto_hide_inputs) {
-                interaction_area.classList.remove('show_all_inputs');
-            } else {
-                interaction_area.classList.add('show_all_inputs');
-            }
+            // currently nothing...
         }
 
         send_tab_state_to_parent_processes() {
-            const tab_state = {
-                auto_hide_inputs: this.nb_state.auto_hide_inputs,
-                modified:         this.notebook_modified(),  // expensive, may cost 10ms...
-                undo_neutral:     Change.in_neutral_state(),
-                can_perform_undo: Change.can_perform_undo(),
-                can_perform_redo: Change.can_perform_redo(),
-            };
-            ipcRenderer.sendToHost('tab_state', tab_state);  // win
-            ipcRenderer.send('tab_state', tab_state);  // main process
-
+            //!!! nothing...
         }
 
         set_notebook_unmodified() {
@@ -554,7 +529,7 @@ facet_export(); return;//!!!
         _current_notebook_hash() {
             const items = [
                 this.nb_state,
-                [...document.querySelectorAll('#interaction_area .interaction_element')]
+                [ ...this.interaction_area.querySelectorAll('.interaction_element') ]
                     .map(ie => this.get_input_text_for_ie(ie)),
             ];
             return object_hasher(items);
@@ -569,8 +544,8 @@ facet_export(); return;//!!!
             }
 
             // remove all current interaction_element elements
-            for (const ie of interaction_area.querySelectorAll('.interaction_element')) {
-                interaction_area.removeChild(ie);
+            for (const ie of this.interaction_area.querySelectorAll('.interaction_element')) {
+                this.interaction_area.removeChild(ie);
             }
 
             // reset state
@@ -755,16 +730,15 @@ facet_export(); return;//!!!
             const prior_state = { current_ie: this.current_ie, nb_state: this.nb_state };  // save in order to restore if there is an error
             this.current_ie = undefined;
             this.set_new_notebook_state();
-            this.nb_state.nb_type          = new_nb_state.nb_type;
-            this.nb_state.nb_version       = new_nb_state.nb_version;
-            this.nb_state.auto_hide_inputs = new_nb_state.auto_hide_inputs;
+            this.nb_state.nb_type    = new_nb_state.nb_type;
+            this.nb_state.nb_version = new_nb_state.nb_version;
 
             // load the new state
             try {
 
                 // remove current interaction_element elements
-                for (const ie of interaction_area.querySelectorAll('.interaction_element')) {
-                    interaction_area.removeChild(ie);
+                for (const ie of this.interaction_area.querySelectorAll('.interaction_element')) {
+                    this.interaction_area.removeChild(ie);
                 }
 
                 this.update_global_view_properties();
@@ -785,7 +759,7 @@ facet_export(); return;//!!!
                         output_element_collection.appendChild(static_output_element);
                     }
                 }
-                this.set_current_ie(document.querySelector('#interaction_area .interaction_element'));
+                this.set_current_ie(this.interaction_area.querySelector('.interaction_element'));
                 // make sure "selected" cursor is correct
                 this.set_selection_state_for_ie(this.current_ie, true);
                 // typeset
@@ -866,7 +840,7 @@ facet_export(); return;//!!!
             // (this must be done before setting up the CodeMirror editor)
             const successor = append_to_end ? null : reference_ie;
             // if successor is null, the new ie will be appended to the end
-            interaction_area.insertBefore(ie, successor);
+            this.interaction_area.insertBefore(ie, successor);
             this.update_nb_state_order();
 
             // set up CodeMirror editor
@@ -991,7 +965,7 @@ facet_export(); return;//!!!
         }
 
         update_nb_state_order() {
-            this.nb_state.order = [...interaction_area.querySelectorAll('.interaction_element')].map(e => e.id);
+            this.nb_state.order = [ ...this.interaction_area.querySelectorAll('.interaction_element') ].map(e => e.id);
         }
 
 
@@ -1111,5 +1085,10 @@ facet_export(); return;//!!!
             }
         }
     }
+
+    facet_export({
+        Notebook,
+    });
+
 
 } catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end

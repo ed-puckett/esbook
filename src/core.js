@@ -52,6 +52,21 @@
         return el;
     };
 
+    /** create_stylesheet(parent, stylesheet_url, ...attribute_pairs)
+     *  @param {Element} parent
+     *  @param {string} stylesheet_url
+     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @return {HTMLStyleElement} the new <style> element
+     */
+    globalThis.create_stylesheet = function create_stylesheet(parent, stylesheet_url, ...attribute_pairs) {
+        return create_child_element(
+            parent,
+            'link',
+            'rel', "stylesheet",
+            'href', stylesheet_url,
+            ...attribute_pairs );
+    }
+
     /** create_inline_stylesheet(parent, stylesheet_text, ...attribute_pairs)
      *  @param {Element} parent
      *  @param {string} stylesheet_text
@@ -63,6 +78,20 @@
         style_el.appendChild(document.createTextNode(stylesheet_text));
         parent.appendChild(style_el);
         return style_el;
+    }
+
+    /** create_script(parent, script_url, ...attribute_pairs)
+     *  @param {Element} parent
+     *  @param {string} script_url
+     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @return {HTMLStyleElement} the new <style> element
+     */
+    globalThis.create_script = function create_script(parent, script_url, ...attribute_pairs) {
+        return create_child_element(
+            parent,
+            'script',
+            'src', script_url,
+            ...attribute_pairs );
     }
 
     /** create_inline_script(parent, script_text, ...attribute_pairs)
@@ -134,7 +163,7 @@
                 promise_data.reject  = undefined;
             }
             try {
-                script_el = create_child_element(parent, 'script', 'src', script_url);
+                script_el = create_script(parent, script_url);
                 script_el.addEventListener('load',  script_load_handler,       { once: true });
                 script_el.addEventListener('error', script_load_error_handler, { once: true });
             } catch (err) {
@@ -188,7 +217,7 @@
                 promise_data.reject  = undefined;
             }
             try {
-                script_el = create_child_element(parent, 'script', 'src', script_url);
+                script_el = create_script(parent, script_url);
                 script_el.addEventListener('error', script_load_error_handler, { once: true });
                 wait();
             } catch (err) {
@@ -252,9 +281,7 @@
     globalThis.facet = async function facet(facet_url) {
         const { promise_data, initial } = establish_facet_promise_data(facet_url);
         if (initial) {
-            const script_el = create_child_element(
-                document.head, 'script',
-                'src',   facet_url,
+            const script_el = create_script(document.head, facet_url,
                 'defer', undefined,
             );
             function handle_facet_export_event(event) {

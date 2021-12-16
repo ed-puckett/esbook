@@ -14,8 +14,8 @@
         ].map(p => load_script(document.head, new URL(p, current_script.src)))
     );
 
-    const dagreD3_stylesheel_url = new URL('output-handlers/dagre-d3.css', current_script.src);
-    create_child_element(document.head, 'link', 'rel', "stylesheet", 'href', dagreD3_stylesheel_url);
+    const dagreD3_stylesheet_url = new URL('output-handlers/dagre-d3.css', current_script.src);
+    create_stylesheet(document.head, dagreD3_stylesheet_url);
 
 
     // === CONSTANTS ===

@@ -1,0 +1,229 @@
+/* See theme-colors.css for the general colors that are set according
+ * to the prefers-color-scheme media query.
+ */
+
+body {
+    --color-border:                    black;
+
+    --color-bg-body:                   var(--color-bg-page-major);
+    --color-fg-body:                   var(--color-c0-page-major);
+
+    --color-bg-stop-eval:              var(--color-bg-page-alert1);
+    --color-fg-stop-eval:              var(--color-c0-page-alert1);
+
+    --color-ie-selected-indicator:     var(--color-border);
+
+    --color-ie-input-outline-selected: var(--color-bg-page-alert2);
+
+    --color-bg-ie-input:               var(--color-bg-page-minor);
+
+    --color-bg-ie-output:              var(--color-bg-page-major);
+    --color-fg-ie-output:              var(--color-c0-page-major);
+
+    --color-ie-output-td:              var(--color-c0-page-major);
+
+    --color-bg-ie-error:               var(--color-bg-page-alert2);
+    --color-fg-ie-error:               var(--color-c0-page-alert2);
+}
+
+html {
+    height: 100%;
+    margin: 0;
+}
+
+body.hidden {
+    display: none;
+}
+
+body {
+    margin: 0;
+    height: 100%;
+    /* set in @media not print: overflow: hidden; */
+    color: var(--color-fg-body);
+    background: var(--color-bg-body);
+}
+
+#content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    /* set in @media not print: overflow: hidden; */
+}
+
+#interaction_header {
+    display: none;
+    padding: 0.75rem;
+    border-bottom-style: solid;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--color-border);
+    /* set in @media not print: overflow: hidden; */
+}
+
+#interaction_header.active {
+    display: block;
+}
+
+#interaction_controls {
+    display: block;
+}
+#interaction_controls>div>span {
+    white-space: nowrap;
+}
+#interaction_controls>div>span>input,
+#interaction_controls>div>span>label {
+    vertical-align: middle;
+}
+
+#interaction_area {
+    margin-left: 2px;
+    /* set in @media not print: overflow: auto; */
+    flex: 1;
+}
+
+/* display id of each interaction_element */
+/* DISABLED
+.interaction_element::before {
+    content: attr(id);
+    padding: 0 1rem;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    color: red;
+    font-style: italic;
+}
+*/
+
+.interaction_element {
+    display: grid;
+    grid-template-columns: 0.25rem auto;
+    grid-template-rows: auto;
+    grid-template-areas:
+        "selected_indicator input"
+        "selected_indicator output"
+        "selected_indicator graphics";
+}
+
+.selected_indicator {
+    margin: 2px 0 2px 0;
+    grid-column: 1;
+    grid-row: 1 / 5;
+    border-radius: 0.125rem;
+    background: var(--color-ie-selected-indicator);
+}
+
+.interaction_element.selected .selected_indicator {
+    background: var(--color-ie-input-outline-selected);
+}
+
+.CodeMirror {
+    height: auto !important;  /* this, plus configuring CodeMirror with "viewportMargin: Infinity" enables auto-resize */
+}
+
+.input {
+    display: none;
+    width: calc(100% - 2em);
+    padding: 0.5em;
+    margin: 0.5em 0.5em 0 0.5em;
+    border: 1px solid var(--color-border);
+    background: var(--color-border);
+}
+
+.interaction_element.selected .input {
+    outline: 1px solid var(--color-ie-input-outline-selected);
+}
+
+#interaction_area.show_all_inputs .input,
+.interaction_element.selected .input {
+    display: block;
+}
+
+.output {
+    margin: 0.5em;
+    padding: 0.25em;
+    color: var(--color-fg-ie-output);
+    background: var(--color-bg-ie-output);
+}
+.output:empty {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.output > .text-content {
+    white-space: pre-wrap;
+    font-family: monospace;
+    display: inline;
+}
+.output > .text-content > p {
+    margin-block-start: 0;
+    margin-block-end: 0;
+    display: inline;
+}
+.output > .text-content > pre {
+    margin: 0 0;
+}
+
+.output table {
+    border-collapse: collapse;
+}
+
+.output td {
+    border: 1px solid var(--color-ie-output-td);
+    padding: 0.5em;
+}
+
+.graphics {
+}
+
+.error {
+    color: var(--color-fg-ie-error);
+    background: var(--color-bg-ie-error);
+    padding: 0.5em;
+}
+
+#stop_eval_button {
+    display: none;
+    color: var(--color-fg-stop-eval);
+    background: var(--color-bg-stop-eval);
+}
+
+#stop_eval_button.active {
+    display: inline;
+}
+
+
+/* === print media queries === */
+
+@media print {
+    #interaction_header {
+        display: none;
+    }
+
+    #interaction_area:not(.show_all_inputs) .input {
+        display: none;
+    }
+
+    #interaction_area .input {
+        border: 1px solid black;
+    }
+}
+
+@media not print {
+    /* these overflow styles cause only a single page to be printed */
+
+    body {
+        overflow: hidden;
+    }
+
+    #content {
+        overflow: hidden;
+    }
+
+    #interaction_header {
+        overflow: hidden;
+    }
+
+    #interaction_area {
+        overflow: auto;
+    }
+}
