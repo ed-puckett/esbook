@@ -5,7 +5,6 @@
         // dependencies:
         '../../node_modules/codemirror/mode/markdown/markdown.js',
         '../../node_modules/codemirror/mode/stex/stex.js',
-        '../../node_modules/codemirror/mode/javascript/javascript.js',
     ];
     if (typeof exports === 'object' && typeof module === 'object') {  // CommonJS
         mod(...require_paths.map(path => require(path)));
@@ -17,19 +16,13 @@
 })(function (CodeMirror) {
     'use strict';
 
-    const token_switch_context = '%%%';//!!!
-
-    const JAVASCRIPT = 'javascript';
-    const MARKDOWN   = 'markdown';
-    const STEX       = 'stex';
+    const MARKDOWN = 'markdown';
+    const STEX     = 'stex';
 
     const mode_change_token_style = 'bracket';
 
-    CodeMirror.defineMode('jsnb', function (config, parser_config) {
+    CodeMirror.defineMode('md+mj', function (config, parser_config) {
         const modes = {
-            [JAVASCRIPT]: CodeMirror.getMode(config, {
-                name: 'javascript',
-            }),
             [MARKDOWN]: CodeMirror.getMode(config, {
                 name: 'markdown',
             }),
@@ -38,27 +31,15 @@
             }),
         };
 
-        // This is the implementation of the token() function for the jsnb
+        // This is the implementation of the token() function for the md+mj
         // mode, and also performs state transitions between the inner modes
         // of that mode.
         function token(stream, state) {
             // detect mode change token
             switch (state.current) {
-            case JAVASCRIPT: {
-                if (stream.sol() && stream.match(token_switch_context)) {
-                    state.current = MARKDOWN;
-                    return mode_change_token_style;
-                }
-                // un-consume and fall through to current mode delegation
-                stream.backUp(stream.current().length);
-                break;
-            }
             case MARKDOWN: {
                 stream.eatSpace();
-                if (stream.sol() && stream.match(token_switch_context)) {
-                    state.current = JAVASCRIPT;
-                    return mode_change_token_style;
-                } else if (stream.match(/^[^\\][$]{2}/)) {
+                if (stream.match(/^[^\\][$]{2}/)) {
                     state.current = STEX;
                     state.stex_inline = false;
                     return mode_change_token_style;
@@ -93,13 +74,12 @@
 
             startState: function () {
                 return {
-                    current: JAVASCRIPT,  // start in MARKDOWN
+                    current: MARKDOWN,  // start in MARKDOWN
                     mode_switch: false,  // true when mode just switched
                     stex_inline: undefined,  // relevant when in STEX; false: $$...$$, true: $...$
                     inner: {
-                        [JAVASCRIPT]: CodeMirror.startState(modes[JAVASCRIPT]),
-                        [MARKDOWN]:   CodeMirror.startState(modes[MARKDOWN]),
-                        [STEX]:       CodeMirror.startState(modes[STEX]),
+                        [MARKDOWN]: CodeMirror.startState(modes[MARKDOWN]),
+                        [STEX]:     CodeMirror.startState(modes[STEX]),
                     },
                 };
             },
@@ -131,5 +111,5 @@
         };
     });
 
-    CodeMirror.defineMIME('application/x-jsnb', 'jsnb');
+    CodeMirror.defineMIME('application/x-md+mj', 'md+mj');
 });

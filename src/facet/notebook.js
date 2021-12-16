@@ -4,10 +4,10 @@
 
     // === CONSTANTS ===
 
-    const NB_TYPE    = 'jsnb';
+    const NB_TYPE    = 'esbook';
     const NB_VERSION = '1.0.0';
 
-    const DEFAULT_SAVE_PATH = 'new-notebook.jsnb';
+    const DEFAULT_SAVE_PATH = 'new-notebook.esbook';
     const DEFAULT_LOAD_PATH = '';
 
     const CM_DARK_MODE_THEME  = 'blackboard';
@@ -224,7 +224,7 @@
                 '../../node_modules/codemirror/addon/search/searchcursor.js',
                 '../../node_modules/codemirror/addon/search/jump-to-line.js',
                 '../../node_modules/codemirror/addon/edit/matchbrackets.js',
-                'notebook/codemirror-jsnb-mode.js',
+                'notebook/codemirror-md+mj-mode.js',
             ]) {
                 const script_url = new URL(script_path, current_script.src);
                 await load_script(document.head, script_url);
@@ -857,7 +857,7 @@ return;//!!!
             const cm = CodeMirror.fromTextArea(input_textarea, {
                 viewportMargin: Infinity,  // this plus setting height style to "auto" makes the editor auto-resize
                 matchBrackets: true,
-                mode: 'jsnb',  // defined in codemirror-jsnb-mode.js
+                mode: 'javascript',  //!!! switch based on buffer format  // defined in codemirror-md+mj-mode.js
             });
             this.update_cm_from_settings(cm, ie);
             ie.querySelector('.CodeMirror').classList.add('input');
