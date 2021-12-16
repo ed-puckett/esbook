@@ -31,7 +31,7 @@
     const { ThemeSettingsUpdatedEvent } = await facet('facet/notebook/theme-settings.js')
 
     const {
-        KeyBindingEvent,
+        KeyBindingCommandEvent,
     } = await facet('facet/notebook/key-bindings.js');
 
     const {
@@ -62,13 +62,7 @@
         eval_worker_eval_expression,
     } = await facet('facet/notebook/eval-worker-interface.js');
 
-//!!!    const { ipcRenderer } = require('electron');
-//!!!    const file_selector      = require('./file-selector.js');
-
-
-    // === OBJECT HASHER ===
-
-    const object_hasher = (obj) => sha256(JSON.stringify(obj));
+//!!!    const file_selector = require('./file-selector.js');
 
 
     // === ERROR TYPES ===
@@ -100,11 +94,6 @@
         theme_settings = event.get_theme_settings();
         notebook?.update_from_settings();
     });
-
-
-    // === INPUT TEXT TYPE HEADER ===
-
-    const input_text_type_header_re = /^%.*$/m;  // if present, then the input following is markdown+MathJax
 
 
     // === NOTEBOOK LOAD BOOTSTRAP ===
@@ -149,6 +138,9 @@
             'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
         };
 
+        static _input_text_type_header_re = /^%.*$/m;  // if present, then the input following is markdown+MathJax
+
+        // async setup/initialization (to be called immediately after construction)
         async setup() {
             // notebook focus
             this.current_ie = undefined;  // initialized below
@@ -241,6 +233,10 @@
             }
         }
 
+        _object_hasher(obj) {
+            return sha256(JSON.stringify(obj));
+        }
+
         update_from_settings() {
             for (const ie_id of this.nb_state.order) {
                 const ie = document.getElementById(ie_id);
@@ -254,9 +250,8 @@
 
         // called exactly once (by constructor)
         init_event_handlers() {
-return;//!!!
-            ipcRenderer.on('menu_command', (event, command, ...args) => {
-                switch (command) {
+            KeyBindingCommandEvent.subscribe((event) => {
+                switch (event.command) {
                 case 'undo': {
                     Change.perform_undo(this);
                     break;
@@ -270,7 +265,12 @@ return;//!!!
                     break;
                 }
                 case 'open_notebook': {
-                    const [ do_import ] = args;
+                    const do_import = false;
+                    this.open_notebook(do_import);
+                    break;
+                }
+                case 'import_notebook': {
+                    const do_import = true;
                     this.open_notebook(do_import);
                     break;
                 }
@@ -283,7 +283,12 @@ return;//!!!
                     break;
                 }
                 case 'save_notebook': {
-                    const [ interactive ] = args;
+                    const interactive = false;
+                    this.save_notebook(interactive);
+                    break;
+                }
+                case 'save_as_notebook': {
+                    const interactive = true;
                     this.save_notebook(interactive);
                     break;
                 }
@@ -532,7 +537,7 @@ return;//!!!
                 [ ...this.interaction_area.querySelectorAll('.interaction_element') ]
                     .map(ie => this.get_input_text_for_ie(ie)),
             ];
-            return object_hasher(items);
+            return this._object_hasher(items);
         }
 
         // create a new empty notebook with a single interaction_element element
@@ -1018,7 +1023,7 @@ return;//!!!
         // may throw an error
         async evaluate_input_text(eval_ticket, ie, output_data_collection, input_text) {
             let is_expression, text;
-            const mdmj_header_match = input_text.match(input_text_type_header_re);
+            const mdmj_header_match = input_text.match(this.constructor._input_text_type_header_re);
             if (mdmj_header_match) {
                 is_expression = false;
                 text = input_text.substring(mdmj_header_match[0].length + 1);
