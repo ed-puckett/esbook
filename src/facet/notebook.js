@@ -1034,7 +1034,7 @@
             if (text.length > 0) {
                 if (is_expression) {
                     if (text.trim().length > 0) {
-                        for await (const value of eval_worker_eval_expression(eval_ticket, text, start)) {
+                        for await (const value of eval_worker_eval_expression(eval_ticket, text)) {
                             const handler = output_handlers[value.type];
                             if (!handler) {
                                 throw new TextuallyLocatedError(`unknown output type: ${value.type}`, end);
