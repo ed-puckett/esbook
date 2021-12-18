@@ -311,8 +311,8 @@
                 }
                 this.notebook.nb_state.order.splice(order_index, 1);
                 delete this.notebook.nb_state.elements[id];
-                this.notebook.remove_internal_state_for_ie(this.ie.id);
-                this.notebook.get_internal_state_for_ie(this.ie).cm.toTextArea();  // remove editor from textarea
+                this.notebook.get_internal_state_for_ie_id(this.ie.id).cm.toTextArea();  // remove editor from textarea
+                this.notebook.remove_internal_state_for_ie_id(this.ie.id);
                 interaction_area.removeChild(this.ie);
                 if (this.ie === this.notebook.current_ie) {
                     this.notebook.current_ie = undefined;  // prevent attempted access
