@@ -4,6 +4,34 @@
 
 (() => {
 
+    /** a Promise-like object with its resolve and reject methods exposed externally
+     */
+    class OpenPromise {
+        constructor() {
+            let resolve, reject;
+            const promise = new Promise((o, x) => { resolve = o; reject = x; });
+            Object.defineProperties(this, {
+                promise: {
+                    value: promise,
+                },
+                resolve: {
+                    value: resolve,
+                },
+                reject: {
+                    value: reject,
+                },
+                then: {
+                    value: promise.then.bind(promise),
+                },
+                catch: {
+                    value: promise.catch.bind(promise),
+                },
+            });
+        }
+
+        async await() { return await this.promise; }
+    }
+
     /** esbook_ready
      *  A promise that will resolve when initial facets have been loaded
      */

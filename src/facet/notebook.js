@@ -53,26 +53,11 @@
     } = await facet('facet/notebook/change.js');
 
     const {
-        establish_eval_worker,
-        eval_worker_eval_ticket_allocated,
-        eval_worker_deallocate_eval_ticket,
-        stop_eval_worker,
-        eval_worker_is_running,
-        eval_worker_alert_if_running,
-        eval_worker_eval_expression,
+        TextuallyLocatedError,
+        EvalWorker,
     } = await facet('facet/notebook/eval-worker-interface.js');
 
 //!!!    const file_selector = require('./file-selector.js');
-
-
-    // === ERROR TYPES ===
-
-    class TextuallyLocatedError extends Error {
-        constructor(message, line_col) {
-            super(message);
-            this.line_col = line_col;
-        }
-    }
 
 
     // === NOTEBOOK INSTANCE ===
@@ -387,7 +372,31 @@
 
         // Remove the internal state object for ie.
         remove_internal_state_for_ie(ie) {
+            stop_eval_worker_for_ie(ie);
+            const internal_state = this.internal_nb_state[ie.id];
+            if (internal_state) {
+                const { eval_worker } = internal_state;
+                eval_worker?.stop();
+            }
             delete this.internal_nb_state[ie.id];
+        }
+
+        stop_eval_worker_for_ie(ie) {
+            const internal_state = get_internal_state_for_ie(ie);
+            if (internal_state) {
+                internal_state.eval_worker?.stop();
+                internal_state.eval_worker = undefined;
+            }
+        }
+
+        // Remove ie from this.nb_state and this.internal_nb_state
+        remove_state_for_ie(ie) {
+            const order_index = this.nb_state.order.indexOf(ie.id);
+            if (order_index !== -1) {
+                this.nb_state.order.splice(order_index, 1);
+            }
+            delete this.nb_state.elements[ie.id];
+            remove_internal_state_for_ie(ie);
         }
 
         // Given an ie, return the internal state object associated with it.
@@ -908,6 +917,11 @@
             }
         }
 
+        remove_ie(ie) {
+            this.remove_state_for_ie(ie);
+            this.interaction_area.removeChild(ie);
+        }
+
         set_current_ie(ie, leave_focus_alone=false) {
             if (ie !== this.current_ie) {
                 if (this.current_ie) {
@@ -1037,7 +1051,7 @@
                         for await (const value of eval_worker_eval_expression(eval_ticket, text)) {
                             const handler = output_handlers[value.type];
                             if (!handler) {
-                                throw new TextuallyLocatedError(`unknown output type: ${value.type}`, end);
+                                throw new TextuallyLocatedError(`unknown output type: ${value.type}`, [1, 0]);
                             }
                             await handler.update_notebook(ie, output_data_collection, value);
                         }

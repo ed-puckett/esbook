@@ -1,3 +1,4 @@
 make facet scripts inline-able without having been loaded via facet() [need to have one single export handler that listens for any facet export or error event]
+call cleanup on change objects that are deleted
 
 * don't load scripts more that once: load_script(), load_script_and_wait_for_condition()
