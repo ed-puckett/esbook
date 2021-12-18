@@ -55,7 +55,7 @@
     const {
         TextuallyLocatedError,
         EvalWorker,
-    } = await facet('facet/notebook/eval-worker-interface.js');
+    } = await facet('facet/notebook/eval-worker.js');
 
 //!!!    const file_selector = require('./file-selector.js');
 
@@ -224,9 +224,9 @@
 
         update_from_settings() {
             for (const ie_id of this.nb_state.order) {
-                const ie = document.getElementById(ie_id);
-                const cm = this.get_internal_state_for_ie(ie).cm;
+                const cm = this.get_internal_state_for_ie_id(ie_id)?.cm;
                 if (cm) {
+                    const ie = document.getElementById(ie_id);
                     this.update_cm_from_settings(cm, ie);
                 }
             }
@@ -365,56 +365,57 @@
             this.internal_nb_state = {};  // indexed by ie.id
         }
 
-        // Create a new empty internal state object for ie.
-        init_internal_state_for_ie(ie) {
-            return (this.internal_nb_state[ie.id] = {});
-        }
-
-        // Remove the internal state object for ie.
-        remove_internal_state_for_ie(ie) {
-            stop_eval_worker_for_ie(ie);
-            const internal_state = this.internal_nb_state[ie.id];
-            if (internal_state) {
-                const { eval_worker } = internal_state;
-                eval_worker?.stop();
+        // Create a new empty internal state object for ie with id ie_id
+        // or return the current internal state object if it already exists.
+        establish_internal_state_for_ie_id(ie_id) {
+            const current_state = this.internal_nb_state[ie_id];
+            if (current_state) {
+                return current_state;
+            } else {
+                return (this.internal_nb_state[ie_id] = {});
             }
-            delete this.internal_nb_state[ie.id];
         }
 
-        stop_eval_worker_for_ie(ie) {
-            const internal_state = get_internal_state_for_ie(ie);
+        // Remove the internal state object for ie with id ie_id.
+        remove_internal_state_for_ie_id(ie_id) {
+            this.remove_eval_worker_for_ie_id(ie_id);
+            delete this.internal_nb_state[ie_id];
+        }
+
+        remove_eval_worker_for_ie_id(ie_id) {
+            const internal_state = this.get_internal_state_for_ie_id(ie_id);
             if (internal_state) {
-                internal_state.eval_worker?.stop();
+                internal_state.eval_worker?.stop();  // stop old eval_worker, if any
                 internal_state.eval_worker = undefined;
             }
         }
+        set_eval_worker_for_ie_id(ie_id, eval_worker) {
+            this.remove_eval_worker_for_ie_id(ie_id);
+            const internal_state = this.establish_internal_state_for_ie_id(ie_id);
+            internal_state.eval_worker = eval_worker;
+        }
 
-        // Remove ie from this.nb_state and this.internal_nb_state
-        remove_state_for_ie(ie) {
-            const order_index = this.nb_state.order.indexOf(ie.id);
+        // Remove ie with id ie_id from this.nb_state and this.internal_nb_state
+        remove_state_for_ie_id(ie_id) {
+            const order_index = this.nb_state.order.indexOf(ie_id);
             if (order_index !== -1) {
                 this.nb_state.order.splice(order_index, 1);
             }
-            delete this.nb_state.elements[ie.id];
-            remove_internal_state_for_ie(ie);
+            delete this.nb_state.elements[ie_id];
+            this.remove_internal_state_for_ie_id(ie_id);
         }
 
-        // Given an ie, return the internal state object associated with it.
-        get_internal_state_for_ie(ie) {
-            return this.internal_nb_state[ie.id];
-        }
-
-        // Given an ie id, return the internal state object associated with the ie.
+        // Return the internal state object associated with the ie with id ie_id.
         get_internal_state_for_ie_id(ie_id) {
             return this.internal_nb_state[ie_id];
         }
 
-        get_input_text_for_ie(ie) {
-            return this.get_internal_state_for_ie(ie).cm.getValue();
+        get_input_text_for_ie_id(ie_id) {
+            return this.get_internal_state_for_ie_id(ie_id).cm.getValue();
         }
 
-        set_input_text_for_ie(ie, text) {
-            const cm = this.get_internal_state_for_ie(ie).cm;
+        set_input_text_for_ie_id(ie_id, text) {
+            const cm = this.get_internal_state_for_ie_id(ie_id).cm;
             cm.setValue(text);
             cm.setCursor(0, 0);
         }
@@ -422,14 +423,14 @@
         // *_pos may be either line or [ line, col ]
         // line is 1-based, col is 0-based.
         // If end_pos is not specified, use end_pos=start_pos
-        set_input_selection_for_ie(ie, start_pos, end_pos) {
+        set_input_selection_for_ie_id(ie_id, start_pos, end_pos) {
             if (typeof start_pos === 'number') {
                 start_pos = [ start_pos, 0 ];
             }
             if (typeof end_pos === 'number') {
                 end_pos = [ end_pos, 0 ];
             }
-            const cm = this.get_internal_state_for_ie(ie).cm;
+            const cm = this.get_internal_state_for_ie_id(ie_id).cm;
             // CodeMirror line numbers are 0-based
             if (end_pos) {
                 cm.setSelection( { line: start_pos[0]-1, ch: start_pos[1] },
@@ -439,55 +440,32 @@
             }
         }
 
-        set_input_focus_for_ie(ie) {
-            this.get_internal_state_for_ie(ie).cm.focus();
+        set_input_focus_for_ie_id(ie_id) {
+            this.get_internal_state_for_ie_id(ie_id).cm.focus();
         }
 
         async ie_ops_eval_element(ie, stay=false) {
-            if (this.get_input_text_for_ie(ie).trim()) {  // if there is anything to evaluate...
-                const eval_ticket = establish_eval_worker();
-                if (!eval_ticket) {
-                    beep();
-                } else {
-                    try {
-                        await this.evaluate_ie(eval_ticket, ie, stay);
-                    } finally {
-                        eval_worker_deallocate_eval_ticket(eval_ticket);
-                    }
-                    this.send_tab_state_to_parent_processes();
-                }
+            if (this.get_input_text_for_ie_id(ie.id).trim()) {  // if there is anything to evaluate...
+                await this.evaluate_ie(ie, stay);
+                this.send_tab_state_to_parent_processes();
             }
         }
 
         async ie_ops_eval_notebook(ie, only_before_current_element=false) {
-            // start a new eval worker to reset the environment
-            if (eval_worker_eval_ticket_allocated()) {
-                beep();
-            } else {
-                const eval_ticket = establish_eval_worker(true);
-                if (!eval_ticket) {
-                    beep();
-                } else {
-                    try {
-                        for (const ie_id of this.nb_state.order) {
-                            if (only_before_current_element && ie_id === ie.id) {
-                                this.set_current_ie(ie);
-                                break;
-                            }
-                            const ie_to_eval = document.getElementById(ie_id);
-                            this.set_current_ie(ie_to_eval);
-                            if (this.get_input_text_for_ie(ie_to_eval).trim()) {  // if there is anything to evaluate...
-                                if (! await this.evaluate_ie(eval_ticket, ie_to_eval, true)) {
-                                    break;
-                                }
-                            }
-                        }
-                    } finally {
-                        eval_worker_deallocate_eval_ticket(eval_ticket);
+            for (const ie_id of this.nb_state.order) {
+                if (only_before_current_element && ie_id === ie.id) {
+                    this.set_current_ie(ie);
+                    break;
+                }
+                const ie_to_eval = document.getElementById(ie_id);
+                this.set_current_ie(ie_to_eval);
+                if (this.get_input_text_for_ie_id(ie_to_eval.id).trim()) {  // if there is anything to evaluate...
+                    if (! await this.evaluate_ie(ie_to_eval, true)) {
+                        break;
                     }
-                    this.send_tab_state_to_parent_processes();
                 }
             }
+            this.send_tab_state_to_parent_processes();
         }
 
         ie_ops_focus_up_element(ie) {
@@ -517,10 +495,6 @@
         }
 
         ie_ops_delete_element(ie) {
-            if (eval_worker_is_running()) {
-                message_controller.alert('Cannot delete running interaction element');
-                return;
-            }
             perform_delete_ie_change(this, ie);
         }
 
@@ -544,7 +518,7 @@
             const items = [
                 this.nb_state,
                 [ ...this.interaction_area.querySelectorAll('.interaction_element') ]
-                    .map(ie => this.get_input_text_for_ie(ie)),
+                    .map(ie => this.get_input_text_for_ie_id(ie.id)),
             ];
             return this._object_hasher(items);
         }
@@ -572,9 +546,6 @@
             this.focus_to_current_ie();
             Change.update_for_clear(this);
             this.set_notebook_unmodified();
-
-            // remove old EvalWorker (and its old state)
-            stop_eval_worker();
 
             // inform main process of new state
             this.send_tab_state_to_parent_processes();
@@ -761,9 +732,9 @@
                     const ie = this.add_new_ie(undefined, true, id);
                     this.set_current_ie(ie, true);
                     const new_nb_data = new_nb_state.elements[id];
-                    const nb_data = this.init_nb_state_for_ie(ie);
+                    const nb_data = this.init_nb_state_for_ie_id(ie.id);
                     const output_element_collection = ie.querySelector('.output');
-                    this.set_input_text_for_ie(ie, new_nb_data.input);
+                    this.set_input_text_for_ie_id(ie.id, new_nb_data.input);
                     nb_data.input = new_nb_data.input;
                     // load output elements
                     for (const output_data of new_nb_data.output) {
@@ -775,11 +746,9 @@
                 }
                 this.set_current_ie(this.interaction_area.querySelector('.interaction_element'));
                 // make sure "selected" cursor is correct
-                this.set_selection_state_for_ie(this.current_ie, true);
+                this.set_ie_selection_state(this.current_ie, true);
                 // typeset
                 await this.typeset_notebook();
-                // remove old EvalWorker (and its old state)
-                stop_eval_worker();
                 // set focus
                 this.focus_to_current_ie();
 
@@ -802,12 +771,12 @@
         // may throw an error
         async import_nb_state(contents) {
             this.clear_notebook(true);
-            this.set_input_text_for_ie(this.current_ie, contents);
+            this.set_input_text_for_ie_id(this.current_ie.id, contents);
             this.update_nb_state(this.current_ie);  // make sure contents is present in this.nb_state
         }
 
         focus_to_current_ie() {
-            this.set_input_focus_for_ie(this.current_ie);
+            this.set_input_focus_for_ie_id(this.current_ie.id);
         }
 
         // if !append_to_end, the new interaction_element is inserted before reference_ie.
@@ -846,8 +815,8 @@
             }
 
             // reset the state of the new ie and initialize
-            this.init_nb_state_for_ie(ie);
-            this.init_internal_state_for_ie(ie);
+            this.init_nb_state_for_ie_id(ie.id);
+            this.establish_internal_state_for_ie_id(ie.id);
             this.init_ie_event_handlers(ie);
 
             // add new ie to the interaction_area
@@ -859,14 +828,14 @@
 
             // set up CodeMirror editor
             // (this needs to be done after the new ie is part of the DOM)
-            this.init_cm_for_ie(ie);
+            this.init_ie_codemirror(ie);
 
             return ie;
         }
 
         // Convert the textarea in a new ie to a CodeMirror object (cm)
         // and store the new cm in the internal state for ie.
-        init_cm_for_ie(ie) {
+        init_ie_codemirror(ie) {
             const input_textarea = ie.querySelector('.input');
             const cm = CodeMirror.fromTextArea(input_textarea, {
                 viewportMargin: Infinity,  // this plus setting height style to "auto" makes the editor auto-resize
@@ -875,7 +844,7 @@
             });
             this.update_cm_from_settings(cm, ie);
             ie.querySelector('.CodeMirror').classList.add('input');
-            this.get_internal_state_for_ie(ie).cm = cm;
+            this.get_internal_state_for_ie_id(ie.id).cm = cm;
             cm.on('changes', (instance_cm, changes) => {
                 add_edit_change(this, ie.id, changes);
             });
@@ -918,7 +887,7 @@
         }
 
         remove_ie(ie) {
-            this.remove_state_for_ie(ie);
+            this.remove_state_for_ie_id(ie.id);
             this.interaction_area.removeChild(ie);
         }
 
@@ -926,18 +895,18 @@
             if (ie !== this.current_ie) {
                 if (this.current_ie) {
                     this.update_nb_state(this.current_ie);
-                    this.set_selection_state_for_ie(this.current_ie, false);
+                    this.set_ie_selection_state(this.current_ie, false);
                 }
                 this.current_ie = ie;
                 this.update_nb_state(this.current_ie);
-                this.set_selection_state_for_ie(this.current_ie, true);
+                this.set_ie_selection_state(this.current_ie, true);
             }
             if (!leave_focus_alone) {
                 this.focus_to_current_ie();
             }
         }
 
-        set_selection_state_for_ie(ie, selected) {
+        set_ie_selection_state(ie, selected) {
             const cl = ie.classList;
             if (selected) {
                 cl.add('selected');
@@ -949,13 +918,13 @@
         // Called for newly created (or newly loaded from page HTML) interaction_element
         // elements.  The interaction_element ie must already have an id.
         // Returns this.nb_state.elements[ie.id];
-        init_nb_state_for_ie(ie) {
-            this.nb_state.elements[ie.id] = {
-                id: ie.id,
+        init_nb_state_for_ie_id(ie_id) {
+            this.nb_state.elements[ie_id] = {
+                id: ie_id,
                 input: '',
                 output: [],
             };
-            return this.nb_state.elements[ie.id];
+            return this.nb_state.elements[ie_id];
         }
 
         // Resets output ui elements and this.nb_state output for ie.
@@ -980,7 +949,7 @@
             // assume that every interaction element has a (uuid) id, and that it has
             // a corresponding entry in this.nb_state.
             const ie_data = this.nb_state.elements[ie.id];
-            ie_data.input = this.get_input_text_for_ie(ie);
+            ie_data.input = this.get_input_text_for_ie_id(ie.id);
         }
 
         update_nb_state_order() {
@@ -991,26 +960,20 @@
         // === EVALUATION ===
 
         // Returns true iff no errors.
-        // Assumes that an eval worker exists and that eval_ticket is the
-        // currently-allocated eval ticket for that worker.
-        async evaluate_ie(eval_ticket, ie, stay=false) {
-            if (eval_worker_alert_if_running()) {
-                return false;
-            }
-
+        async evaluate_ie(ie, stay=false) {
             this.update_nb_state(ie);
 
             const output_data_collection = this.reset_output(ie);
             try {
 
-                const input_text = this.get_input_text_for_ie(ie);
-                await this.evaluate_input_text(eval_ticket, ie, output_data_collection, input_text);
+                const input_text = this.get_input_text_for_ie_id(ie.id);
+                await this.evaluate_input_text(ie, output_data_collection, input_text);
 
             } catch (err) {
 
                 await output_handlers.error.update_notebook(ie, output_data_collection, err);
                 if (err instanceof TextuallyLocatedError) {
-                    this.set_input_selection_for_ie(ie, err.line_col);
+                    this.set_input_selection_for_ie_id(ie.id, err.line_col);
                 }
                 const output_element_collection = ie.querySelector('.output');
                 output_element_collection.scrollIntoView(false);  // show error
@@ -1035,7 +998,7 @@
         }
 
         // may throw an error
-        async evaluate_input_text(eval_ticket, ie, output_data_collection, input_text) {
+        async evaluate_input_text(ie, output_data_collection, input_text) {
             let is_expression, text;
             const mdmj_header_match = input_text.match(this.constructor._input_text_type_header_re);
             if (mdmj_header_match) {
@@ -1047,15 +1010,8 @@
             }
             if (text.length > 0) {
                 if (is_expression) {
-                    if (text.trim().length > 0) {
-                        for await (const value of eval_worker_eval_expression(eval_ticket, text)) {
-                            const handler = output_handlers[value.type];
-                            if (!handler) {
-                                throw new TextuallyLocatedError(`unknown output type: ${value.type}`, [1, 0]);
-                            }
-                            await handler.update_notebook(ie, output_data_collection, value);
-                        }
-                    }
+                    const eval_worker = new EvalWorker(ie, output_data_collection, text);
+                    this.set_eval_worker_for_ie_id(ie.id, eval_worker);
                 } else {  // markdown
                     await output_handlers.text.update_notebook(ie, output_data_collection, text);
                 }

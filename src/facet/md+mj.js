@@ -2,6 +2,8 @@
 
 (async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
+    const mathjax_static_config_identifying_property = 'this_is_initial_static_data';
+
     const mathjax_static_config_js = `
 'use strict';
 
@@ -21,13 +23,16 @@ globalThis.MathJax = {
     displayAlign: 'left',
     displayIndent: '0',
     skipStartupTypeset: true,  // typeset must be performed explicitly
+    ${mathjax_static_config_identifying_property}: true,  // used to detect when MathJax has replaced this initialization object with itself
 };
 `;
     create_inline_script(document.head, mathjax_static_config_js);
 
     const export_data = await Promise.all([
         load_script(document.head, new URL('../../node_modules/marked/marked.min.js', current_script.src)),
-        load_script(document.head, new URL('../../node_modules/mathjax/latest.js',    current_script.src)),
+        load_script_and_wait_for_condition(document.head, new URL('../../node_modules/mathjax/latest.js', current_script.src), () => {
+            return !globalThis.MathJax[mathjax_static_config_identifying_property];
+        }),
     ])
           .then(() => {
               // We are currently using MathJax v2.7.x instead of v3.x.x because

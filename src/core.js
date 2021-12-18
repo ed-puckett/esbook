@@ -6,7 +6,7 @@
 
     /** a Promise-like object with its resolve and reject methods exposed externally
      */
-    class OpenPromise {
+    globalThis.OpenPromise = class OpenPromise {
         constructor() {
             let resolve, reject;
             const promise = new Promise((o, x) => { resolve = o; reject = x; });
