@@ -26,6 +26,9 @@
                 catch: {
                     value: promise.catch.bind(promise),
                 },
+                finally: {
+                    value: promise.finally.bind(promise),
+                },
             });
         }
 
