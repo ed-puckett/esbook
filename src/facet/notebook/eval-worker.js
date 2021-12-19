@@ -1,4 +1,4 @@
-// 'use strict';// not strict mode because we use a "with" statement
+'use strict';
 
 (async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
 
@@ -6,75 +6,8 @@
         output_handlers,
     } = await facet('facet/notebook/output-handlers.js');
 
-    function expression_evaluator(expression, post_value) {
-        const eval_context = {};
-
-        eval_context.pp = (thing, indent=4) => {
-            let rest_args = [];
-            if (indent !== null && typeof indent !== 'undefined') {
-                if (!Number.isInteger(indent)) {
-                    throw new Error('indent must be an integer');
-                }
-                rest_args = [null, indent];
-            }
-            return JSON.stringify(thing, ...rest_args);
-        };
-        // provide a print() implementation
-        eval_context.print = (output) => {
-            output = (typeof output === 'undefined') ? '' : output;
-            post_value(transform_text_result(output));  // value: { type: 'text', text, is_tex, inline_tex }
-        };
-        eval_context.println = (output) => {
-            output = (typeof output === 'undefined') ? '' : output;
-            post_value(transform_text_result(output + '\n'));  // value: { type: 'text', text, is_tex, inline_tex }
-        }
-        eval_context.printf = (...args) => {
-            eval_context.print(sprintf(...args));
-        };
-        // provide a graphics implementation
-        eval_context.graphics = (type, args) => {
-            post_value({
-                type,
-                args,
-            });
-        };
-        // provide a chart() implementation
-        eval_context.chart = (...args) => {
-            eval_context.graphics('chart', args);
-        };
-        // provide a dagre() implementation
-        eval_context.dagre = (...args) => {
-            eval_context.graphics('dagre', args);
-        };
-        // provide an image_data() implementation
-        eval_context.image_data = (...args) => {
-            eval_context.graphics('image_data', args);
-        };
-        // provide a canvas2d() implementation
-        eval_context.create_canvas2d = (size_config) => {
-            return new Canvas2dContext(eval_context.graphics, size_config);
-        };
-        // provide a plotly() implementation
-        eval_context.plotly = (...args) => {
-            eval_context.graphics('plotly', args);
-        };
-
-        const result = eval(`with (eval_context) ${expression}`);  // may throw an error
-
-        Promise.resolve(result)  // takes care of waiting for result if result is a Promise
-            .then(result_value => {
-                // if expression does not end with ';', include the final result in outputs
-                if (!expression.trim().endsWith(';')) {
-                    post_value(transform_text_result(result_value));  // value: { type: 'text', text, is_tex, inline_tex }
-                }
-            });
-    }
-
     const nerdamer_script_url = new URL('../../../node_modules/nerdamer/all.min.js', current_script.src);
     await load_script(document.head, nerdamer_script_url);
-
-    var _ = nerdamer;
-    var { factor, simplify, expand } = nerdamer;
 
     class TextuallyLocatedError extends Error {
         constructor(message, line_col) {
@@ -105,15 +38,105 @@
         return { type: 'text', text, is_tex, inline_tex };
     }
 
-    // Make sure the given Error object is serializable across the Web Worker
-    // interface.  This works for the error objects manufactured for, e.g.,
-    // expression evaluation errors.
-    function clean_error(err) {
-        return {
-            ...err,
-            message: err.message,
-            stack:   err.stack,
-        };
+    function create_eval_context(post_value) {
+        function pp(thing, indent=4) {
+            let rest_args = [];
+            if (indent !== null && typeof indent !== 'undefined') {
+                if (!Number.isInteger(indent)) {
+                    throw new Error('indent must be an integer');
+                }
+                rest_args = [null, indent];
+            }
+            return JSON.stringify(thing, ...rest_args);
+        }
+
+        function println(output) {
+            output = (typeof output === 'undefined') ? '' : output;
+            post_value(transform_text_result(output + '\n'));  // value: { type: 'text', text, is_tex, inline_tex }
+        }
+
+        function printf(format, ...args) {
+            format = (typeof format === 'undefined') ? '' : format.toString();
+            post_value(transform_text_result(sprintf(format, ...args)));  // value: { type: 'text', text, is_tex, inline_tex }
+        }
+
+        function graphics(type, args) {
+            post_value({
+                type,
+                args,
+            });
+        }
+
+        function chart(...args) {
+            graphics('chart', args);
+        }
+
+        function dagre(...args) {
+            graphics('dagre', args);
+        }
+
+        function image_data(...args) {
+            graphics('image_data', args);
+        }
+
+        function create_canvas2d(size_config) {
+            return new Canvas2dContext(graphics, size_config);
+        }
+
+        function plotly(...args) {
+            graphics('plotly', args);
+        }
+
+        const eval_context = {
+            _:        nerdamer,
+            factor:   nerdamer.factor.bind(nerdamer),
+            simplify: nerdamer.simplify.bind(nerdamer),
+            expand:   nerdamer.expand.bind(nerdamer),
+            pp,
+            println,
+            printf,
+            graphics,
+            chart,
+            dagre,
+            image_data,
+            create_canvas2d,
+            plotly,
+         };
+
+        return eval_context;
+    }
+
+    function expression_evaluator(expression, post_value) {
+        const eval_context = create_eval_context(post_value);
+
+        // Create a "full expression" that is a block containing bindings for
+        // all the values in eval_context.  This allows us to evaluate
+        // expression in a context that contains these bindings but then
+        // remove all the temporary bindings from globalThis and while letting
+        // async code from expression still work after this function exits.
+
+        if (globalThis.hasOwnProperty('eval_context')) {
+            throw new Error('expression_evaluator: globalThis already has a property named "eval_context"');
+        }
+        globalThis.eval_context = eval_context;
+
+        var full_expression = `{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${expression}}`
+
+        let result;
+        try {
+            // evaluate the expression in the global context by using (0, eval) for the reference to eval
+            result = (0, eval)(full_expression);  // may throw an error
+        } finally {
+            delete globalThis.eval_context;
+        }
+
+        Promise.resolve(result)  // takes care of waiting for result if result is a Promise
+            .then(result_value => {
+                // if expression does not end with ';', include the final result in outputs
+                if (!expression.trim().endsWith(';')) {
+                    post_value(transform_text_result(result_value));  // value: { type: 'text', text, is_tex, inline_tex }
+                }
+            });
     }
 
     class EvalWorker {
@@ -126,10 +149,12 @@
                 ie: {
                     value: ie,
                     enumerable: true,
+writable: true,//!!!
                 },
                 output_data_collection : {
                     value: output_data_collection,
                     enumerable: true,
+writable: true,//!!!
                 },
                 expression: {
                     value: expression,
@@ -163,6 +188,8 @@
                     const w = waiting_for_value;
                     waiting_for_value = undefined;
                     w.reject(new Error('stopped'));
+self.ie = undefined;//!!!
+self.output_data_collection = undefined;//!!!
                 }
             }
             function consume_pending_values() {
