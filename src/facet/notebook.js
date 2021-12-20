@@ -706,7 +706,11 @@
                 if ( e.id !== id ||
                      typeof e.input !== 'string' ||
                      !Array.isArray(e.output) ||
-                     !e.output.every(output_data => (typeof output_data === 'object' && (output_data.type in output_handlers))) ) {
+                     !e.output.every(output_data => {
+                         return ( typeof output_data === 'object' &&
+                                  output_handlers[output_data?.type]?.validate_output_data(output_data) );
+                     })
+                   ) {
                     throw new Error('notebook state has bad data');
                 }
             }

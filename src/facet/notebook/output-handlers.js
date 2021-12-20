@@ -54,8 +54,10 @@
     // CREATING A NEW OUTPUT HANDLER
     // -----------------------------
     // !!! UPDATE ME !!!
-    // 1. Define a new output handler class which extends OutputHandler, creating
-    //    new update_notebook() and generate_static_element() methods.
+    // 1. Define a new output handler class which extends OutputHandler,
+    //    creating a new update_notebook() method, and if the new output
+    //    type is significantly different than its base class, new
+    //    validate_output_data() and generate_static_element() methods.
     // 2. Add the new class to the expression which creates the
     //    output_handler_id_to_handler mapping.
     // 3. (Optional) add a new function for the output handler in
@@ -83,6 +85,15 @@
         async update_notebook(ie, output_data_collection, value) {
             throw new Error('unimplemented');
         }
+
+        // Returns true iff the structure of the data is acceptable
+        // for generate_static_element().
+        validate_output_data(output_data) {
+            // This is the most basic test:
+            return ( typeof output_data === 'object' &&
+                     output_data?.type === this.type );
+        }
+
 
         // Returns a non-live node for the given output_data.
         async generate_static_element(output_data) {
@@ -172,12 +183,12 @@
         async _render_svg_image_data(svg) {
             // Save an image of the rendered canvas.  This will be used if this
             // notebook is saved and then loaded again later.
-            const css = svg_image_util.get_all_css_with_selector_prefix('svg.dagre');
+            const css = svg_image_util.get_all_css_with_selector_prefix('svg.dagre');//!!! 'svg.dagre' should not be hard-coded here
             const svg_string = svg_image_util.getSVGString(svg, css);
             const width  = svg.clientWidth;
             const height = svg.clientHeight;
             const image_format = 'image/svg+xml';
-            const image_uri = `data:${image_format};utf8,`+ encodeURIComponent(svg_string);
+            const image_uri = `data:${image_format};utf8,${encodeURIComponent(svg_string)}`;
             // The width and height are necessary because when we load this later (using the svg data uri)
             // the image width and height will not be set (as opposed to a png data uri which encodes
             // the width and height in its content).
@@ -284,6 +295,18 @@
     class _GraphicsOutputHandlerBase extends OutputHandler {
         constructor(type) { super(type); }
 
+        validate_output_data(output_data) {
+            if (!super.validate_output_data(output_data)) {
+                return false;
+            }
+            const { image_uri } = output_data;
+            if (typeof image_uri !== 'string') {
+                return false;
+            }
+            //!!! should also check the image_uri for correct mime-type and format...
+            return true;
+        }
+
         async generate_static_element(output_data) {
             if (output_data.type !== this.type) {
                 throw new Error(`output_data type does not match (${this.type})`);
@@ -305,6 +328,17 @@
             return img_element;
         }
     }
+
+    class CustomGraphicsOutputHandler extends _GraphicsOutputHandlerBase {
+        constructor() { super('custom'); }
+        // This class is for custom graphics-type output
+        // that is created programmatically by a notebook
+        // interaction element.  The only requirement is that
+        // output_data must have a "type" property equal to
+        // "custom" and that it pass the validate_output_data()
+        // method of this class.  Rendering of the "live" object
+        // is entirely up to the code in the interaction element.
+    };
 
     class ChartOutputHandler extends _GraphicsOutputHandlerBase {
         constructor() { super('chart'); }
@@ -575,6 +609,7 @@
               [
                   TextOutputHandler,
                   ErrorOutputHandler,
+                  CustomGraphicsOutputHandler,
                   ChartOutputHandler,
                   DagreOutputHandler,
                   ImageDataOutputHandler,

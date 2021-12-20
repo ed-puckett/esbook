@@ -120,7 +120,7 @@
         }
         globalThis.eval_context = eval_context;
 
-        var full_expression = `{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${expression}}`
+        var full_expression = `{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${expression}}`;
 
         let result;
         try {
