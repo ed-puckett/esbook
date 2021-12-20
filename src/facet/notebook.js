@@ -235,96 +235,7 @@
 
         // called exactly once (by constructor)
         init_event_handlers() {
-            KeyBindingCommandEvent.subscribe((event) => {
-                switch (event.command) {
-                case 'undo': {
-                    Change.perform_undo(this);
-                    break;
-                }
-                case 'redo': {
-                    Change.perform_redo(this);
-                    break;
-                }
-                case 'clear_notebook': {
-                    this.clear_notebook();
-                    break;
-                }
-                case 'open_notebook': {
-                    const do_import = false;
-                    this.open_notebook(do_import);
-                    break;
-                }
-                case 'import_notebook': {
-                    const do_import = true;
-                    this.open_notebook(do_import);
-                    break;
-                }
-                case 'reopen_notebook': {
-                    if (!this.notebook_path) {
-                        this.clear_notebook();
-                    } else {
-                        this.open_notebook_from_path(this.notebook_path);
-                    }
-                    break;
-                }
-                case 'save_notebook': {
-                    const interactive = false;
-                    this.save_notebook(interactive);
-                    break;
-                }
-                case 'save_as_notebook': {
-                    const interactive = true;
-                    this.save_notebook(interactive);
-                    break;
-                }
-                case 'eval_element': {
-                    this.ie_ops_eval_element(this.current_ie, false);
-                    break;
-                }
-                case 'eval_stay_element': {
-                    this.ie_ops_eval_element(this.current_ie, true);
-                    break;
-                }
-                case 'eval_notebook': {
-                    this.ie_ops_eval_notebook(this.current_ie, false);
-                    break;
-                }
-                case 'eval_notebook_before': {
-                    this.ie_ops_eval_notebook(this.current_ie, true);
-                    break;
-                }
-                case 'focus_up_element': {
-                    const ie_to_focus = this.current_ie.previousElementSibling || this.current_ie;
-                    this.set_current_ie(ie_to_focus);
-                    break;
-                }
-                case 'focus_down_element': {
-                    const ie_to_focus = this.current_ie.nextElementSibling || this.current_ie;
-                    this.set_current_ie(ie_to_focus);
-                    break;
-                }
-                case 'move_up_element': {
-                    perform_move_up_ie_change(this, this.current_ie.id);
-                    break;
-                }
-                case 'move_down_element': {
-                    perform_move_down_ie_change(this, this.current_ie.id);
-                    break;
-                }
-                case 'add_before_element': {
-                    perform_add_new_before_ie_change(this, this.current_ie.id);
-                    break;
-                }
-                case 'add_after_element': {
-                    perform_add_new_after_ie_change(this, this.current_ie.id);
-                    break;
-                }
-                case 'delete_element': {
-                    perform_delete_ie_change(this, this.current_ie);
-                    break;
-                }
-                }
-            });
+            KeyBindingCommandEvent.subscribe((event) => this.handle_ie_command(event.command));
         }
 
         init_ie_event_handlers(ie) {
@@ -444,6 +355,101 @@
 
         set_input_focus_for_ie_id(ie_id) {
             this.get_internal_state_for_ie_id(ie_id).cm.focus();
+        }
+
+        handle_ie_command(command) {
+            switch (command) {
+            case 'undo': {
+                Change.perform_undo(this);
+                break;
+            }
+            case 'redo': {
+                Change.perform_redo(this);
+                break;
+            }
+            case 'clear_notebook': {
+                this.clear_notebook();
+                break;
+            }
+            case 'open_notebook': {
+                const do_import = false;
+                this.open_notebook(do_import);
+                break;
+            }
+            case 'import_notebook': {
+                const do_import = true;
+                this.open_notebook(do_import);
+                break;
+            }
+            case 'reopen_notebook': {
+                if (!this.notebook_path) {
+                    this.clear_notebook();
+                } else {
+                    this.open_notebook_from_path(this.notebook_path);
+                }
+                break;
+            }
+            case 'save_notebook': {
+                const interactive = false;
+                this.save_notebook(interactive);
+                break;
+            }
+            case 'save_as_notebook': {
+                const interactive = true;
+                this.save_notebook(interactive);
+                break;
+            }
+            case 'eval_element': {
+                this.ie_ops_eval_element(this.current_ie, false);
+                break;
+            }
+            case 'eval_stay_element': {
+                this.ie_ops_eval_element(this.current_ie, true);
+                break;
+            }
+            case 'eval_notebook': {
+                this.ie_ops_eval_notebook(this.current_ie, false);
+                break;
+            }
+            case 'eval_notebook_before': {
+                this.ie_ops_eval_notebook(this.current_ie, true);
+                break;
+            }
+            case 'focus_up_element': {
+                const ie_to_focus = this.current_ie.previousElementSibling || this.current_ie;
+                this.set_current_ie(ie_to_focus);
+                break;
+            }
+            case 'focus_down_element': {
+                const ie_to_focus = this.current_ie.nextElementSibling || this.current_ie;
+                this.set_current_ie(ie_to_focus);
+                break;
+            }
+            case 'move_up_element': {
+                perform_move_up_ie_change(this, this.current_ie.id);
+                break;
+            }
+            case 'move_down_element': {
+                perform_move_down_ie_change(this, this.current_ie.id);
+                break;
+            }
+            case 'add_before_element': {
+                perform_add_new_before_ie_change(this, this.current_ie.id);
+                break;
+            }
+            case 'add_after_element': {
+                perform_add_new_after_ie_change(this, this.current_ie.id);
+                break;
+            }
+            case 'delete_element': {
+                perform_delete_ie_change(this, this.current_ie);
+                break;
+            }
+            default: {
+                console.warn('** command not handled:', command);
+                break;
+            }
+            }
         }
 
         async ie_ops_eval_element(ie, stay=false) {
