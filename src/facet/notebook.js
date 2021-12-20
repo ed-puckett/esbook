@@ -294,31 +294,33 @@
                     break;
                 }
                 case 'focus_up_element': {
-                    this.ie_ops_focus_up_element(this.current_ie);
+                    const ie_to_focus = this.current_ie.previousElementSibling || this.current_ie;
+                    this.set_current_ie(ie_to_focus);
                     break;
                 }
                 case 'focus_down_element': {
-                    this.ie_ops_focus_down_element(this.current_ie);
+                    const ie_to_focus = this.current_ie.nextElementSibling || this.current_ie;
+                    this.set_current_ie(ie_to_focus);
                     break;
                 }
                 case 'move_up_element': {
-                    this.ie_ops_move_up_element(this.current_ie);
+                    perform_move_up_ie_change(this, this.current_ie.id);
                     break;
                 }
                 case 'move_down_element': {
-                    this.ie_ops_move_down_element(this.current_ie);
+                    perform_move_down_ie_change(this, this.current_ie.id);
                     break;
                 }
                 case 'add_before_element': {
-                    this.ie_ops_add_before_element(this.current_ie);
+                    perform_add_new_before_ie_change(this, this.current_ie.id);
                     break;
                 }
                 case 'add_after_element': {
-                    this.ie_ops_add_after_element(this.current_ie);
+                    perform_add_new_after_ie_change(this, this.current_ie.id);
                     break;
                 }
                 case 'delete_element': {
-                    this.ie_ops_delete_element(this.current_ie);
+                    perform_delete_ie_change(this, this.current_ie);
                     break;
                 }
                 }
@@ -466,36 +468,6 @@
                 }
             }
             this.send_tab_state_to_parent_processes();
-        }
-
-        ie_ops_focus_up_element(ie) {
-            const ie_to_focus = ie.previousElementSibling || this.current_ie;
-            this.set_current_ie(ie_to_focus);
-        }
-
-        ie_ops_focus_down_element(ie) {
-            const ie_to_focus = ie.nextElementSibling || this.current_ie;
-            this.set_current_ie(ie_to_focus);
-        }
-
-        ie_ops_move_up_element(ie) {
-            perform_move_up_ie_change(this, ie.id);
-        }
-
-        ie_ops_move_down_element(ie) {
-            perform_move_down_ie_change(this, ie.id);
-        }
-
-        ie_ops_add_before_element(ie) {
-            perform_add_new_before_ie_change(this, ie.id);
-        }
-
-        ie_ops_add_after_element(ie) {
-            perform_add_new_after_ie_change(this, ie.id);
-        }
-
-        ie_ops_delete_element(ie) {
-            perform_delete_ie_change(this, ie);
         }
 
         update_global_view_properties() {
