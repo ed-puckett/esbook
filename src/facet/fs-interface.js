@@ -36,12 +36,11 @@
 
         /** Load text from the file associated with a FileSystemFileHandle
          *  @param {FileSystemFileHandle} file_handle
-         *  @param {boolean} verify_for_writing (Default false) If true, verify write permissions, too
          *  @return {Promise} resolves to { text: string, stats: object }
          *          where stats is as returned by get_fs_stats_for_file()
          */
-        async open_text(file_handle, verify_for_writing=false) {
-            await this.verify_permission(file_handle, verify_for_writing);
+        async open_text(file_handle) {
+            await this.verify_permission(file_handle, false);
             const file = await file_handle.getFile();
             const text = await file.text();
             const stats = this.get_fs_stats_for_file(file);
@@ -50,12 +49,11 @@
 
         /** Load an object that is encoded in JSON from the file associated with a FileSystemFileHandle
          *  @param {FileSystemFileHandle} file_handle
-         *  @param {boolean} verify_for_writing (Default false) If true, verify write permissions, too
          *  @return {Promise} resolves to { contents: object, stats: object }
          *          where stats is as returned by get_fs_stats_for_file()
          */
-        async open_json(file_handle, verify_for_writing=false) {
-            const { text, stats } = await this.open_text(file_handle, verify_for_writing);
+        async open_json(file_handle) {
+            const { text, stats } = await this.open_text(file_handle);
             const contents = JSON.parse(text);
             return { contents, stats };
         }

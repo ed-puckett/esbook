@@ -528,17 +528,16 @@
         async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
             try {
                 if (!force && this.notebook_modified()) {
-                    //!!! confirm_sync does not exist...
                     if (! message_controller.confirm_sync('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
                 if (do_import) {
-                    const { text, stats } = await fs_interface.open_text(file_handle, true);
+                    const { text, stats } = await fs_interface.open_text(file_handle);
                     await this.import_nb_state(text);
                     this.set_notebook_source(undefined);
                 } else {
-                    const { contents, stats } = await fs_interface.open_json(file_handle, true);
+                    const { contents, stats } = await fs_interface.open_json(file_handle);
                     const new_nb_state = this.contents_to_nb_state(contents);
                     await this.load_nb_state(new_nb_state);
                     this.set_notebook_source(file_handle, stats);
