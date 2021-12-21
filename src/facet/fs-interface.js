@@ -21,88 +21,116 @@
         /** Save object as JSON to the file asscociated with FileSystemFileHandle
          *  @param {FileSystemFileHandle} file_handle
          *  @param {Object} obj
-         *  @return {Promise}
+         *  @return {Promise} resolving to stats: object
+         *          where stats is as returned by get_fs_stats_for_file()
          */
         async save_json(file_handle, obj) {
             await this.verify_permission(file_handle, true);
-            const writable = await fileHandle.createWritable();
+            const writable = await file_handle.createWritable();
             const contents = JSON.stringify(obj, null, 4);
             await writable.write(contents);
             await writable.close();
+            const stats = await get_fs_stats_for_file_handle(file_handle);
+            return stats;
         }
 
-        /** Load JSON from the file associated with a FileSystemFileHandle
+        /** Load text from the file associated with a FileSystemFileHandle
          *  @param {FileSystemFileHandle} file_handle
          *  @param {boolean} verify_for_writing (Default false) If true, verify write permissions, too
-         *  @return {Promise} resolves to { text: string, fs_timestamp: number }
+         *  @return {Promise} resolves to { text: string, stats: object }
+         *          where stats is as returned by get_fs_stats_for_file()
          */
-        async load_raw(file_handle, verify_for_writing=false) {
+        async open_text(file_handle, verify_for_writing=false) {
             await this.verify_permission(file_handle, verify_for_writing);
             const file = await file_handle.getFile();
             const text = await file.text();
-            const fs_timestamp = file.lastModified;
-            return {
-                text,
-                fs_timestamp,
-            };
+            const stats = this.get_fs_stats_for_file(file);
+            return { text, stats };
         }
 
         /** Load an object that is encoded in JSON from the file associated with a FileSystemFileHandle
          *  @param {FileSystemFileHandle} file_handle
          *  @param {boolean} verify_for_writing (Default false) If true, verify write permissions, too
-         *  @return {Promise} resolves to { contents: object, fs_timestamp: number }
+         *  @return {Promise} resolves to { contents: object, stats: object }
+         *          where stats is as returned by get_fs_stats_for_file()
          */
-        async load_json(file_handle, verify_for_writing=false) {
-            const { text, fs_timestamp } = await this.load_raw(file_handle, verify_for_writing);
+        async open_json(file_handle, verify_for_writing=false) {
+            const { text, stats } = await this.open_text(file_handle, verify_for_writing);
             const contents = JSON.parse(text);
+            return { contents, stats };
+        }
+
+        /** Return stats for the file associated with a FileSystemFileHandle
+         *  @param {FileSystemFileHandle} file_handle
+         *  @return {Promise} resolves to stats as returned by get_fs_stats_for_file()
+         */
+        async get_fs_stats_for_file_handle(file_handle) {
+            await this.verify_permission(file_handle);
+            const file = await file_handle.getFile();
+            return get_fs_stats_for_file(file);
+        }
+
+        /** Return stats for the file
+         *  @param {File} file
+         *  @return {object} stats: {
+         *              last_modified: number,  // the "last modified" time of the file in milliseconds since the UNIX epoch (January 1, 1970 at Midnight UTC)
+         *              name:          string,  // name of file
+         *              size:          number,  // size of file in bytes
+         *              type:          string,  // MIME type of file contents
+         *          }
+         */
+        get_fs_stats_for_file(file) {
+            const {
+                lastModified,
+                lastModified: last_modified,
+                name,
+                size,
+                type,
+            } = file;
             return {
-                contents,
-                fs_timestamp,
+                lastModified,
+                last_modified,
+                name,
+                size,
+                type,
             };
         }
 
-        /** Return the "last modified" timestamp for the file associated with a FileSystemFileHandle
-         *  @param {FileSystemFileHandle} file_handle
-         *  @return {Promise} resolves to the "last modified" time of the file,
-         *                    in milliseconds since the UNIX epoch (January 1, 1970 at Midnight UTC)
-         */
-        async get_fs_timestamp(file_handle) {
-            await this.verify_permission(file_handle);
-            const file = await file_handle.getFile();
-            return file.lastModified;
-        }
-
         /** Show a file picker for the user to select a file for saving
-         *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle, fs_timestamp: number }
+         *  @param {object|undefined} options for showSaveFilePicker()
+         *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle }
          */
-        async prompt_for_save() {
-            return _prompt(globalThis.showSaveFilePicker);
+        async prompt_for_save(options) {
+            const result = await this._prompt(globalThis.showSaveFilePicker, options);
+            return result
+                ? { file_handle: result }
+                : { canceled: true };
         }
 
         /** Show a file picker for the user to select a file for loading
-         *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle, fs_timestamp: number }
+         *  @param {object|undefined} options for showOpenFilePicker()
+         *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle }
          */
-        async prompt_for_load() {
-            return _prompt(globalThis.showOpenFilePicker);
+        async prompt_for_open(options) {
+            options = options ?? {};
+            const result = await this._prompt(globalThis.showOpenFilePicker, { ...options, multiple: false });
+            return result
+                ? { file_handle: result[0] }
+                : { canceled: true };
         }
 
-        async _prompt(picker) {
-            const options = {};
-            let file_handle;
+        async _prompt(picker, options) {
+            options = options ?? {};
+            let result;
             try {
-                file_handle = await picker(options);
+                return await picker(options);
             } catch (err) {
                 if (err instanceof AbortError) {
-                    return { canceled: true };
+                    return undefined;  // indicate: canceled
                 } else {
                     throw err;
                 }
             }
-            const fs_timestamp = (await file_handle.getFile()).lastModified;
-            return {
-                file_handle,
-                fs_timestamp,
-            };
         }
     }
 

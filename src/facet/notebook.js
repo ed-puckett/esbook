@@ -8,7 +8,6 @@
     const NB_VERSION = '1.0.0';
 
     const DEFAULT_SAVE_PATH = 'new-notebook.esbook';
-    const DEFAULT_LOAD_PATH = '';
 
     const CM_DARK_MODE_THEME  = 'blackboard';
     const CM_LIGHT_MODE_THEME = 'default';
@@ -56,8 +55,6 @@
         TextuallyLocatedError,
         EvalWorker,
     } = await facet('facet/notebook/eval-worker.js');
-
-//!!!    const file_selector = require('./file-selector.js');
 
 
     // === NOTEBOOK INSTANCE ===
@@ -112,13 +109,12 @@
         static nb_version = NB_VERSION;
 
         static default_save_path = DEFAULT_SAVE_PATH;
-        static default_load_path = DEFAULT_LOAD_PATH;
 
         static cm_dark_mode_theme  = CM_DARK_MODE_THEME;
         static cm_light_mode_theme = CM_LIGHT_MODE_THEME;
 
         static emacs_special_key_bindings = {
-            'Ctrl-X Ctrl-F': () => notebook.open_notebook(),
+            'Ctrl-X Ctrl-F': () => notebook.open_notebook(false),
             'Ctrl-X Ctrl-S': () => notebook.save_notebook(false),
             'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
         };
@@ -127,18 +123,20 @@
 
         // async setup/initialization (to be called immediately after construction)
         async setup() {
-            // notebook focus
-            this.current_ie = undefined;  // initialized below
+            // notebook source information
+            this.notebook_file_handle  = undefined;
+            this.notebook_file_stats   = undefined;  // stats from when last loaded/saved, or undefined
 
             // notebook persistent state
-            this.notebook_path         = undefined;
-            this.notebook_fs_timestamp = undefined;  // timestamp from when last loaded/saved, or undefined
             this.nb_state              = undefined;  // persisted state; first initialized below when this.clear_notebook() is called
             this.internal_nb_state     = undefined;  // not persisted;   first initialized below when this.clear_notebook() is called
 
             this._loaded_notebook_hash = undefined;  // used by this.set_notebook_unmodified() and this.notebook_modified()
 
             this.interaction_area      = undefined;  // will be set in this._setup_document()
+
+            // notebook focus
+            this.current_ie = undefined;  // initialized below
 
             try {
 
@@ -251,18 +249,14 @@
             event.stopPropagation();
         }
 
-        // Set a new notebook_path and update things accordingly.
-        set_notebook_path(path, fs_timestamp=undefined) {
-            this.notebook_path = path;
-            this.notebook_fs_timestamp = fs_timestamp;
+        // Set a new notebook source information and update things accordingly.
+        set_notebook_source(file_handle, stats=undefined) {
+            this.notebook_file_handle = file_handle;
+            this.notebook_file_stats  = stats;
 
             let title = 'Untitled';
-            if (this.notebook_path) {
-                const notebook_path_components = new URL(this.notebook_path).pathname.split('/');
-                const basename = notebook_path_components[notebook_path_components.length-1];
-                if (basename) {
-                    title = basename;
-                }
+            if (stats) {
+                title = stats.name;
             }
             document.title = title;
         }
@@ -382,10 +376,12 @@
                 break;
             }
             case 'reopen_notebook': {
-                if (!this.notebook_path) {
+                if (!this.notebook_file_handle) {
                     this.clear_notebook();
                 } else {
-                    this.open_notebook_from_path(this.notebook_path);
+                    const do_import = false;
+                    const force     = false;
+                    this.open_notebook_from_file_handle(this.notebook_file_handle, do_import, force);
                 }
                 break;
             }
@@ -516,7 +512,7 @@
 
             // reset state
             this.set_new_notebook_state();
-            this.set_notebook_path(undefined);
+            this.set_notebook_source(undefined);
             this.update_global_view_properties();
             this.current_ie = undefined;
             const ie = this.add_new_ie();  // add a single new interaction_element
@@ -529,31 +525,34 @@
             this.send_tab_state_to_parent_processes();
         }
 
-        async open_notebook_from_path(path, do_import=false, force=false) {
+        async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
             try {
                 if (!force && this.notebook_modified()) {
+                    //!!! confirm_sync does not exist...
                     if (! message_controller.confirm_sync('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
-                const load_raw = do_import;
-                const { selected_path, contents, fs_timestamp } = await fs_interface.load_file(path, load_raw);
                 if (do_import) {
-                    await this.import_nb_state(contents);
+                    const { text, stats } = await fs_interface.open_text(file_handle, true);
+                    await this.import_nb_state(text);
+                    this.set_notebook_source(undefined);
                 } else {
+                    const { contents, stats } = await fs_interface.open_json(file_handle, true);
                     const new_nb_state = this.contents_to_nb_state(contents);
                     await this.load_nb_state(new_nb_state);
-                    this.set_notebook_path(selected_path, fs_timestamp);
+                    this.set_notebook_source(file_handle, stats);
                 }
                 Change.update_for_open(this, do_import);
                 if (!do_import) {
                     this.set_notebook_unmodified();
                 }
                 this.send_tab_state_to_parent_processes();
+
             } catch (err) {
-                console.error('load failed', err.stack);
-                this.set_notebook_path(undefined);  // reset potentially problematic path  //!!! better if we only do this when the path was definitely the problem
-                await message_controller.alert(`load failed: ${err.message}\n(initializing empty document)`);
+                console.error('open failed', err.stack);
+                this.set_notebook_source(undefined);  // reset potentially problematic source info
+                await message_controller.alert(`open failed: ${err.message}\n(initializing empty document)`);
                 this.clear_notebook(true);  // initialize empty notebook
             }
         }
@@ -565,30 +564,29 @@
                         return;
                     }
                 }
-                const path = do_import ? this.constructor.default_load_path : (this.notebook_path ?? this.constructor.default_load_path);
-                const load_raw = do_import;
-                const load_result = await file_selector.load(path, load_raw);  // may throw an error
-                if (!load_result) {
-                    // canceled
-                    return;
+                const open_dialog_options = do_import
+                      ? {
+                          description: 'JavaScript files',
+                          accept: {
+                              'text/javascript': ['.js'],
+                          },
+                      }
+                      : {
+                          description: 'esbook files',
+                          accept: {
+                              'application/x-esbook': ['.esbook', '.esb'],
+                          },
+                      };
+                const { canceled, file_handle } = await fs_interface.prompt_for_open(open_dialog_options)
+console.log('file_handle', file_handle);//!!!
+                if (!canceled) {
+                    this.open_notebook_from_file_handle(file_handle, do_import);
                 }
-                const { selected_path, contents, fs_timestamp } = load_result;
-                if (do_import) {
-                    await this.import_nb_state(contents);
-                } else {
-                    const new_nb_state = this.contents_to_nb_state(contents);
-                    await this.load_nb_state(new_nb_state);
-                    this.set_notebook_path(selected_path, fs_timestamp);
-                }
-                Change.update_for_open(this, do_import);
-                if (!do_import) {
-                    this.set_notebook_unmodified();
-                }
-                this.send_tab_state_to_parent_processes();
+
             } catch (err) {
-                console.error('load failed', err.stack);
-                this.set_notebook_path(undefined);  // reset potentially problematic path  //!!! better if we only do this when the path was definitely the problem
-                await message_controller.alert(`load failed: ${err.message}\n(initializing empty document)`);
+                console.error('open failed', err.stack);
+                this.set_notebook_source(undefined);  // reset potentially problematic source info
+                await message_controller.alert(`open failed: ${err.message}\n(initializing empty document)`);
                 this.clear_notebook(true);  // initialize empty notebook
             }
         }
@@ -596,11 +594,13 @@
         async save_notebook(interactive=false) {
             let timestamp_mismatch;
             try {
-                if (!this.notebook_path || typeof this.notebook_fs_timestamp !== 'number') {
+                const last_fs_timestamp = this.notebook_file_stats?.last_modified;
+                if (!this.notebook_file_handle || typeof last_fs_timestamp !== 'number') {
                     timestamp_mismatch = false;
                 } else {
-                    const current_fs_timestamp = await fs_interface.get_fs_timestamp(this.notebook_path);
-                    timestamp_mismatch = (current_fs_timestamp !== this.notebook_fs_timestamp);
+                    const stats = await fs_interface.get_fs_stats_for_file_handle(this.notebook_file_handle);//!!!
+                    const current_fs_timestamp = stats.last_modified;
+                    timestamp_mismatch = (current_fs_timestamp !== last_fs_timestamp);
                 }
             } catch (_) {
                 timestamp_mismatch = false;
@@ -613,26 +613,33 @@
                 }
                 this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
                 const contents = this.nb_state_to_contents(this.nb_state);
-                if (!interactive && this.notebook_path) {
-                    const { selected_path, fs_timestamp } = await fs_interface.save_json(this.notebook_path, contents);
-                    this.set_notebook_path(selected_path, fs_timestamp);
+                if (!interactive && this.notebook_file_handle) {
+                    const file_handle = this.notebook_file_handle;
+                    const stats = await fs_interface.save_json(file_handle, contents);
+                    this.set_notebook_source(file_handle, stats);
                 } else {
-                    const path = this.notebook_path ?? this.constructor.default_save_path;
-                    const save_result = await file_selector.save(path, contents);  // may throw an error
-                    if (!save_result) {
-                        // canceled
+                    const save_dialog_options = {
+                        description: 'esbook files',
+                        accept: {
+                            'application/x-esbook': ['.esbook', '.esb'],
+                        },
+                    };
+                    const { canceled, file_handle } = await fs_interface.prompt_for_save(save_dialog_options);
+                    if (canceled) {
+                        // return with nothing changed
                         return;
                     }
-                    const { selected_path, fs_timestamp } = save_result;
-                    this.set_notebook_path(selected_path, fs_timestamp);
+                    const stats = await fs_interface.save_json(file_handle, contents);  // may throw an error
+                    this.set_notebook_source(file_handle, stats);
                 }
                 this.focus_to_current_ie();
                 Change.update_for_save(this);
                 this.set_notebook_unmodified();
                 this.send_tab_state_to_parent_processes();
+
             } catch (err) {
                 console.error('save failed', err.stack);
-                this.set_notebook_path(undefined);  // reset potentially problematic path  //!!! better if we only do this when the path was definitely the problem
+                this.set_notebook_source(undefined);  // reset potentially problematic source info
                 await message_controller.alert(`save failed: ${err.message}`);
             }
         }
@@ -751,10 +758,10 @@
         }
 
         // may throw an error
-        async import_nb_state(contents) {
+        async import_nb_state(text) {
             this.clear_notebook(true);
-            this.set_input_text_for_ie_id(this.current_ie.id, contents);
-            this.update_nb_state(this.current_ie);  // make sure contents is present in this.nb_state
+            this.set_input_text_for_ie_id(this.current_ie.id, text);
+            this.update_nb_state(this.current_ie);  // make sure new text is present in this.nb_state
         }
 
         focus_to_current_ie() {
