@@ -83,14 +83,14 @@
                 lastModified: last_modified,
                 name,
                 size,
-                type,
+                kind,
             } = file;
             return {
                 lastModified,
                 last_modified,
                 name,
                 size,
-                type,
+                kind,
             };
         }
 

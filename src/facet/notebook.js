@@ -56,6 +56,12 @@
         EvalWorker,
     } = await facet('facet/notebook/eval-worker.js');
 
+    const {
+        get_recents,
+        add_to_recents,
+        clear_recents,
+    } = await facet('facet/notebook/recents.js');
+
 
     // === NOTEBOOK INSTANCE ===
 
@@ -114,6 +120,7 @@
         static cm_light_mode_theme = CM_LIGHT_MODE_THEME;
 
         static emacs_special_key_bindings = {
+            'Ctrl-X Ctrl-R': () => notebook.handle_command('open_last_recent'),//!!!
             'Ctrl-X Ctrl-F': () => notebook.open_notebook(false),
             'Ctrl-X Ctrl-S': () => notebook.save_notebook(false),
             'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
@@ -231,9 +238,9 @@
             //!!! other updates?
         }
 
-        // called exactly once (by constructor)
+        // called exactly once (by setup())
         init_event_handlers() {
-            KeyBindingCommandEvent.subscribe((event) => this.handle_ie_command(event.command));
+            KeyBindingCommandEvent.subscribe((event) => this.handle_command(event.command));
         }
 
         init_ie_event_handlers(ie) {
@@ -253,6 +260,10 @@
         set_notebook_source(file_handle, stats=undefined) {
             this.notebook_file_handle = file_handle;
             this.notebook_file_stats  = stats;
+
+            if (file_handle) {
+                add_to_recents(file_handle);  //!!! not waiting for this async function...
+            }
 
             let title = 'Untitled';
             if (stats) {
@@ -351,7 +362,7 @@
             this.get_internal_state_for_ie_id(ie_id).cm.focus();
         }
 
-        handle_ie_command(command) {
+        handle_command(command) {
             switch (command) {
             case 'undo': {
                 Change.perform_undo(this);
@@ -440,6 +451,15 @@
             case 'delete_element': {
                 perform_delete_ie_change(this, this.current_ie);
                 break;
+            }
+            case 'open_last_recent': {//!!!
+                get_recents().then(recents => {
+                    if (recents.length > 0) {
+                        this.open_notebook_from_file_handle(recents[0]);
+                    } else {
+                        beep();
+                    }
+                });
             }
             default: {
                 console.warn('** command not handled:', command);
