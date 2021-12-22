@@ -126,7 +126,12 @@
             'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
         };
 
-        static _input_text_type_header_re = /^%.*$/m;  // if present, then the input following is markdown+MathJax
+        // if present, then the input following is markdown+MathJax
+        static _input_text_type_header_sequence = '%';  // if this sequence occurs on first line after optional whitespace, then md+mj mode
+        static _input_text_type_header_re = new RegExp(`^\\s*${this._input_text_type_header_sequence}.*\$`, 'm');
+
+        // CSS class for ie when in md+mj mode
+        static _ie_mdmj_mode_css_class = 'mdmj';
 
         // async setup/initialization (to be called immediately after construction)
         async setup() {
@@ -861,9 +866,25 @@ console.log('file_handle', file_handle);//!!!
             });
             this.update_cm_from_settings(cm, ie);
             ie.querySelector('.CodeMirror').classList.add('input');
-            this.get_internal_state_for_ie_id(ie.id).cm = cm;
+            const internal_state = this.get_internal_state_for_ie_id(ie.id);
+            internal_state.cm = cm;
             cm.on('changes', (instance_cm, changes) => {
                 add_edit_change(this, ie.id, changes);
+                // check for mode update:
+                if (changes.some(c => (c.from.line === 0 || c.to.line === 0))) {
+                    // change affected first line; check if mode changed
+                    const mdmj_mode = cm.getLine(0).trim().startsWith(this.constructor._input_text_type_header_sequence);
+                    if (!!internal_state.mdmj_mode != !!mdmj_mode) {
+                        internal_state.mdmj_mode = mdmj_mode;
+                        if (mdmj_mode) {
+                            ie.classList.add(this.constructor._ie_mdmj_mode_css_class);
+                            cm.setOption('mode', 'md+mj');
+                        } else {
+                            ie.classList.remove(this.constructor._ie_mdmj_mode_css_class);
+                            cm.setOption('mode', 'javascript');
+                        }
+                    }
+                }
             });
             return cm;
         }
