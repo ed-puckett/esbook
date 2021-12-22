@@ -127,8 +127,8 @@
         };
 
         // if present, then the input following is markdown+MathJax
-        static _input_text_type_header_sequence = '%';  // if this sequence occurs on first line after optional whitespace, then md+mj mode
-        static _input_text_type_header_re = new RegExp(`^\\s*${this._input_text_type_header_sequence}.*\$`, 'm');
+        static _input_mdmj_header_sequence = '%';  // if this sequence occurs on first line after optional whitespace, then md+mj mode
+        static _input_mdmj_header_re = new RegExp(`^\\s*${this._input_mdmj_header_sequence}.*\$`, 'm');
 
         // CSS class for ie when in md+mj mode
         static _ie_mdmj_mode_css_class = 'mdmj';
@@ -373,7 +373,8 @@
         }
 
         set_input_focus_for_ie_id(ie_id) {
-            this.get_internal_state_for_ie_id(ie_id).cm.focus();
+            // set focus on next tick, otherwise it doesn't stick...
+            setTimeout(() => this.get_internal_state_for_ie_id(ie_id).cm.focus());
         }
 
         handle_command(command) {
@@ -873,7 +874,7 @@ console.log('file_handle', file_handle);//!!!
                 // check for mode update:
                 if (changes.some(c => (c.from.line === 0 || c.to.line === 0))) {
                     // change affected first line; check if mode changed
-                    const mdmj_mode = cm.getLine(0).trim().startsWith(this.constructor._input_text_type_header_sequence);
+                    const mdmj_mode = cm.getLine(0).trim().startsWith(this.constructor._input_mdmj_header_sequence);
                     if (!!internal_state.mdmj_mode != !!mdmj_mode) {
                         internal_state.mdmj_mode = mdmj_mode;
                         if (mdmj_mode) {
@@ -1038,7 +1039,7 @@ console.log('file_handle', file_handle);//!!!
         // may throw an error
         async evaluate_input_text(ie, output_data_collection, input_text) {
             let is_expression, text;
-            const mdmj_header_match = input_text.match(this.constructor._input_text_type_header_re);
+            const mdmj_header_match = input_text.match(this.constructor._input_mdmj_header_re);
             if (mdmj_header_match) {
                 is_expression = false;
                 text = input_text.substring(mdmj_header_match[0].length + 1);

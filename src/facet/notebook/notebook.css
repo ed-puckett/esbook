@@ -102,6 +102,11 @@ body {
     background: var(--color-border);
 }
 
+.interaction_element.mdmj:not(.selected) .input {
+    /* auto-hide markdown/MathJax inputs when not selected */
+    display: none;
+}
+
 .interaction_element.selected .input {
     outline: 1px solid var(--color-ie-input-outline-selected);
 }

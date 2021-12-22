@@ -123,11 +123,9 @@
             try {
                 return await picker(options);
             } catch (err) {
-                if (err instanceof AbortError) {
-                    return undefined;  // indicate: canceled
-                } else {
-                    throw err;
-                }
+                // Chromium not longer throws AbortError, instead it throws
+                // a DOMException, so just count any exception as "canceled"
+                return undefined;  // indicate: canceled
             }
         }
     }
