@@ -241,12 +241,21 @@
         // called exactly once (by setup())
         init_event_handlers() {
             KeyBindingCommandEvent.subscribe((event) => this.handle_command(event.command));
+
+            window.onbeforeunload = (event) => {
+                // On Chromium, don't try any of the typical things like event.preventDefault()
+                // or setting event.returnValue, they won't work.  Simply return something truthy
+                // to cause a user warning to be shown.
+                if (this.notebook_modified()) {
+                    return true;
+                }
+            };
+
         }
 
         init_ie_event_handlers(ie) {
             ie.addEventListener('click', this._ie_click_handler.bind(this), true);
         }
-
         _ie_click_handler(event) {
             if (!event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
                 const ie = event.target.closest('.interaction_element');
