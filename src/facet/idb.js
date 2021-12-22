@@ -5,7 +5,7 @@
     const DEFAULT_DATABASE_NAME       = 'property-database';
     const DEFAULT_DATABASE_STORE_NAME = 'property-database-store';
 
-    class IndexedDBStoreInterface {
+    class IndexedDBInterface {
         constructor(database_name=DEFAULT_DATABASE_NAME, database_store_name=DEFAULT_DATABASE_STORE_NAME) {
             Object.defineProperties(this, {
                 database_name: {
@@ -77,7 +77,7 @@
     facet_export({
         DEFAULT_DATABASE_NAME,
         DEFAULT_DATABASE_STORE_NAME,
-        IndexedDBStoreInterface,
+        IndexedDBInterface,
     });
 
 } catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end

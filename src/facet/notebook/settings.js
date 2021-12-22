@@ -4,6 +4,11 @@
 
     const define_subscribable = await facet('facet/subscribable.js');
 
+    const {
+        db_key_settings,
+        storage_db,
+    } = await facet('facet/notebook/storage.js');
+
 
     // === EVENT INTERFACE ===
 
@@ -21,10 +26,6 @@
 
     // === STORAGE ===
 
-    // settings_storage_key uses a UUID, but this must be constant,
-    // not generated each time the system is loaded.
-    const settings_storage_key = 'settings-87a4c2ee-a607-45f9-b648-935ecfc0c059';
-
     const initial_settings = {
         editor_options: {
             indentUnit:     2,
@@ -35,28 +36,29 @@
     };
 
     // may throw an error if the settings value is corrupt or circular
-    function put_settings_to_storage(settings) {
-        localStorage.setItem(settings_storage_key, JSON.stringify(settings));
+    async function put_settings_to_storage(settings) {
+        return storage_db.put(db_key_settings, settings);
     }
 
     // may throw an error if settings value corrupt and unable to store initial settings
-    function get_settings_from_storage() {
+    async function get_settings_from_storage() {
         try {
-            const settings_string = localStorage.getItem(settings_storage_key);
-            if (settings_string) {
-                return JSON.parse(settings_string);
+            const settings = await storage_db.get(db_key_settings);
+            if (settings) {
+                return settings;
             }
+            // otherwise, if !settings, fall out to reset...
         } catch (_) {
-            // fall out to reset...
+            // if error, fall out to reset...
         }
         // Either settings_string was null or an error occurred when parsing, so reset
-        put_settings_to_storage(initial_settings);
+        await put_settings_to_storage(initial_settings);
         return initial_settings;
     }
 
-    let current_settings = get_settings_from_storage();
-    function _reset_settings() {
-        update_settings(initial_settings);
+    let current_settings = await get_settings_from_storage();
+    async function _reset_settings() {
+        return update_settings(initial_settings);
     }
     function get_settings() {
         // return a copy to insulate receivers from each others' modifications
@@ -64,8 +66,8 @@
     }
 
     // may throw an error if the new_settings value is corrupt or circular
-    function update_settings(new_settings) {
-        put_settings_to_storage(new_settings);  // may throw an error
+    async function update_settings(new_settings) {
+        await put_settings_to_storage(new_settings);  // may throw an error
         current_settings = new_settings;
         SettingsUpdatedEvent.dispatch_event(new_settings);
     }
