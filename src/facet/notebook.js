@@ -161,7 +161,7 @@
                 this.init_event_handlers();
 
                 // initialize empty notebook
-                this.clear_notebook(true);
+                await this.clear_notebook(true);
 
             } catch (err) {
 
@@ -388,26 +388,26 @@
                 break;
             }
             case 'clear_notebook': {
-                this.clear_notebook();
+                this.clear_notebook();  //!!! not waiting for this async function...
                 break;
             }
             case 'open_notebook': {
                 const do_import = false;
-                this.open_notebook(do_import);
+                this.open_notebook(do_import);  //!!! not waiting for this async function...
                 break;
             }
             case 'import_notebook': {
                 const do_import = true;
-                this.open_notebook(do_import);
+                this.open_notebook(do_import);  //!!! not waiting for this async function...
                 break;
             }
             case 'reopen_notebook': {
                 if (!this.notebook_file_handle) {
-                    this.clear_notebook();
+                    this.clear_notebook();  //!!! not waiting for this async function...
                 } else {
                     const do_import = false;
                     const force     = false;
-                    this.open_notebook_from_file_handle(this.notebook_file_handle, do_import, force);
+                    this.open_notebook_from_file_handle(this.notebook_file_handle, do_import, force);  //!!! not waiting for this async function...
                 }
                 break;
             }
@@ -470,7 +470,7 @@
             case 'open_last_recent': {//!!!
                 get_recents().then(recents => {
                     if (recents.length > 0) {
-                        this.open_notebook_from_file_handle(recents[0]);
+                        this.open_notebook_from_file_handle(recents[0]);  //!!! not waiting for this async function...
                     } else {
                         beep();
                     }
@@ -533,9 +533,9 @@
         }
 
         // create a new empty notebook with a single interaction_element element
-        clear_notebook(force=false) {
+        async clear_notebook(force=false) {
             if (!force && this.notebook_modified()) {
-                if (! message_controller.confirm_sync('Warning: changes not saved, clear document anyway?')) {
+                if (! await message_controller.confirm('Warning: changes not saved, clear document anyway?')) {
                     return;
                 }
             }
@@ -563,7 +563,7 @@
         async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
             try {
                 if (!force && this.notebook_modified()) {
-                    if (! message_controller.confirm_sync('Warning: changes not saved, load new document anyway?')) {
+                    if (! await message_controller.confirm('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
@@ -587,14 +587,14 @@
                 console.error('open failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
                 await message_controller.alert(`open failed: ${err.message}\n(initializing empty document)`);
-                this.clear_notebook(true);  // initialize empty notebook
+                await this.clear_notebook(true);  // initialize empty notebook
             }
         }
 
         async open_notebook(do_import=false) {
             try {
                 if (this.notebook_modified()) {
-                    if (! message_controller.confirm_sync('Warning: changes not saved, load new document anyway?')) {
+                    if (! await message_controller.confirm('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
@@ -612,16 +612,15 @@
                           },
                       };
                 const { canceled, file_handle } = await fs_interface.prompt_for_open(open_dialog_options)
-console.log('file_handle', file_handle);//!!!
                 if (!canceled) {
-                    this.open_notebook_from_file_handle(file_handle, do_import);
+                    await this.open_notebook_from_file_handle(file_handle, do_import);
                 }
 
             } catch (err) {
                 console.error('open failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
                 await message_controller.alert(`open failed: ${err.message}\n(initializing empty document)`);
-                this.clear_notebook(true);  // initialize empty notebook
+                await this.clear_notebook(true);  // initialize empty notebook
             }
         }
 
@@ -641,7 +640,7 @@ console.log('file_handle', file_handle);//!!!
             }
             try {
                 if (timestamp_mismatch) {
-                    if (! message_controller.confirm_sync('Warning: notebook file modified by another process, save anyway?')) {
+                    if (! await message_controller.confirm('Warning: notebook file modified by another process, save anyway?')) {
                         return;
                     }
                 }
@@ -793,7 +792,7 @@ console.log('file_handle', file_handle);//!!!
 
         // may throw an error
         async import_nb_state(text) {
-            this.clear_notebook(true);
+            await this.clear_notebook(true);
             this.set_input_text_for_ie_id(this.current_ie.id, text);
             this.update_nb_state(this.current_ie);  // make sure new text is present in this.nb_state
         }
