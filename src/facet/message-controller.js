@@ -1,8 +1,8 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
-    const MESSAGE_CONTROL_ID = `message-${uuidv4()}`;
+    const MESSAGE_CONTROL_ID = `message-${globalThis.core.uuidv4()}`;
 
     const CSS_CLASS_ACTIVE = 'active';
 
@@ -67,15 +67,15 @@
             // </div>
             // <div id="message_event_blocker" tabindex="0"></div>
 
-            this._control_el = create_element('div', 'id', this._control_id);
-            this._text_el = create_child_element(this._control_el, 'div', 'id', this._text_id);
-            const button_span = create_child_element(this._control_el, 'span');
-            this._cancel_el = create_child_element(button_span, 'button', 'id', this._cancel_id);
+            this._control_el = globalThis.core.create_element('div', 'id', this._control_id);
+            this._text_el = globalThis.core.create_child_element(this._control_el, 'div', 'id', this._text_id);
+            const button_span = globalThis.core.create_child_element(this._control_el, 'span');
+            this._cancel_el = globalThis.core.create_child_element(button_span, 'button', 'id', this._cancel_id);
             this._cancel_el.appendChild(document.createTextNode('Cancel'));
-            this._ok_el = create_child_element(button_span, 'button', 'id', this._ok_id);
+            this._ok_el = globalThis.core.create_child_element(button_span, 'button', 'id', this._ok_id);
             this._ok_el.appendChild(document.createTextNode('Ok'));
 
-            this._blocker_el = create_element('div', 'id', this._blocker_id, 'tabindex', 0);
+            this._blocker_el = globalThis.core.create_element('div', 'id', this._blocker_id, 'tabindex', 0);
 
             document.body.insertBefore(this._blocker_el, document.body.firstChild);
             document.body.insertBefore(this._control_el, this._blocker_el);
@@ -100,7 +100,7 @@
 
         _create_pending_promise() {
             this._clear_current_pending_promise();  // clear previous message, if any
-            this._current_message_id = uuidv4();  // for identification of this message
+            this._current_message_id = globalThis.core.uuidv4();  // for identification of this message
             this._current_pending_promise = new Promise((resolve, reject) => {
                 this._resolve_op = (message) => {
                     this._reset();
@@ -230,7 +230,7 @@
 }
 `;
     // add style sheet
-    create_inline_stylesheet(document.head, stylesheet_text.replaceAll('#message', `#${MESSAGE_CONTROL_ID}`));
+    globalThis.core.create_inline_stylesheet(document.head, stylesheet_text.replaceAll('#message', `#${MESSAGE_CONTROL_ID}`));
 
 
     // === EXPORT ===
@@ -238,4 +238,4 @@
     // export message controller instance
     facet_export(new MessageController());
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

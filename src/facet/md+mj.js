@@ -1,6 +1,6 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     const mathjax_static_config_identifying_property = 'this_is_initial_static_data';
 
@@ -26,11 +26,11 @@ globalThis.MathJax = {
     ${mathjax_static_config_identifying_property}: true,  // used to detect when MathJax has replaced this initialization object with itself
 };
 `;
-    create_inline_script(document.head, mathjax_static_config_js);
+    globalThis.core.create_inline_script(document.head, mathjax_static_config_js);
 
     const export_data = await Promise.all([
-        load_script(document.head, new URL('../../node_modules/marked/marked.min.js', current_script.src)),
-        load_script_and_wait_for_condition(document.head, new URL('../../node_modules/mathjax/latest.js', current_script.src), () => {
+        globalThis.core.load_script(document.head, new URL('../../node_modules/marked/marked.min.js', current_script.src)),
+        globalThis.core.load_script_and_wait_for_condition(document.head, new URL('../../node_modules/mathjax/latest.js', current_script.src), () => {
             return !globalThis.MathJax[mathjax_static_config_identifying_property];
         }),
     ])
@@ -51,4 +51,4 @@ globalThis.MathJax = {
 
     facet_export(export_data);
 
-} catch (err) { facet_load_error(err); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err); } })(globalThis.core.facet_init());  // facet end

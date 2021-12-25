@@ -4,9 +4,12 @@
 
 (() => {
 
+    globalThis.core = globalThis.core ?? {};
+
+
     /** a Promise-like object with its resolve and reject methods exposed externally
      */
-    globalThis.OpenPromise = class OpenPromise {
+    globalThis.core.OpenPromise = class OpenPromise {
         constructor() {
             let resolve, reject;
             const promise = new Promise((o, x) => { resolve = o; reject = x; });
@@ -39,7 +42,7 @@
      *  A promise that will resolve when initial facets have been loaded
      */
     let _resolve_esbook_ready, _reject_esbook_ready;
-    globalThis.esbook_ready = new Promise((resolve, reject) => {
+    globalThis.core.esbook_ready = new Promise((resolve, reject) => {
         _resolve_esbook_ready = resolve;
         _reject_esbook_ready  = reject;
     });
@@ -52,7 +55,7 @@
      *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
      *  @return {Element} the new element
      */
-    globalThis.create_element = function create_element(tag_name, ...attribute_pairs) {
+    globalThis.core.create_element = function create_element(tag_name, ...attribute_pairs) {
         if (typeof tag_name !== 'string' || tag_name.length <= 0) {
             throw new Error('tag_name must be a non-empty string');
         }
@@ -74,11 +77,11 @@
      *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
      *  @return {Element} the new element
      */
-    globalThis.create_child_element = function create_child_element(parent, tag_name, ...attribute_pairs) {
+    globalThis.core.create_child_element = function create_child_element(parent, tag_name, ...attribute_pairs) {
         if (typeof parent !== 'object' || !(parent instanceof Element)) {
             throw new Error('parent must be an Element');
         }
-        const el = create_element(tag_name, ...attribute_pairs);
+        const el = globalThis.core.create_element(tag_name, ...attribute_pairs);
         parent.appendChild(el);
         return el;
     };
@@ -89,8 +92,8 @@
      *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
      *  @return {HTMLStyleElement} the new <style> element
      */
-    globalThis.create_stylesheet = function create_stylesheet(parent, stylesheet_url, ...attribute_pairs) {
-        return create_child_element(
+    globalThis.core.create_stylesheet = function create_stylesheet(parent, stylesheet_url, ...attribute_pairs) {
+        return globalThis.core.create_child_element(
             parent,
             'link',
             'rel', "stylesheet",
@@ -104,8 +107,8 @@
      *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
      *  @return {HTMLStyleElement} the new <style> element
      */
-    globalThis.create_inline_stylesheet = function create_inline_stylesheet(parent, stylesheet_text, ...attribute_pairs) {
-        const style_el = create_element('style', ...attribute_pairs);
+    globalThis.core.create_inline_stylesheet = function create_inline_stylesheet(parent, stylesheet_text, ...attribute_pairs) {
+        const style_el = globalThis.core.create_element('style', ...attribute_pairs);
         style_el.appendChild(document.createTextNode(stylesheet_text));
         parent.appendChild(style_el);
         return style_el;
@@ -117,8 +120,8 @@
      *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
      *  @return {HTMLStyleElement} the new <style> element
      */
-    globalThis.create_script = function create_script(parent, script_url, ...attribute_pairs) {
-        return create_child_element(
+    globalThis.core.create_script = function create_script(parent, script_url, ...attribute_pairs) {
+        return globalThis.core.create_child_element(
             parent,
             'script',
             'src', script_url,
@@ -131,8 +134,8 @@
      *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
      *  @return {HTMLScriptElement} the new <script> element
      */
-    globalThis.create_inline_script = function create_inline_script(parent, script_text, ...attribute_pairs) {
-        const script_el = create_element('script', ...attribute_pairs);
+    globalThis.core.create_inline_script = function create_inline_script(parent, script_text, ...attribute_pairs) {
+        const script_el = globalThis.core.create_element('script', ...attribute_pairs);
         script_el.appendChild(document.createTextNode(script_text));
         parent.appendChild(script_el);
         return script_el;
@@ -173,7 +176,7 @@
      *  the script element.  Others will simply wait for the script to load
      *  or for error.
      */
-    globalThis.load_script = async function load_script(parent, script_url) {
+    globalThis.core.load_script = async function load_script(parent, script_url) {
         const { promise_data, initial } = establish_script_promise_data(script_url);
         if (initial) {
             let script_el;
@@ -194,7 +197,7 @@
                 promise_data.reject  = undefined;
             }
             try {
-                script_el = create_script(parent, script_url);
+                script_el = globalThis.core.create_script(parent, script_url);
                 script_el.addEventListener('load',  script_load_handler,       { once: true });
                 script_el.addEventListener('error', script_load_error_handler, { once: true });
             } catch (err) {
@@ -219,7 +222,7 @@
      *  the script element.  Others will simply wait for the script to load
      *  or for error.
      */
-    globalThis.load_script_and_wait_for_condition = async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn) {
+    globalThis.core.load_script_and_wait_for_condition = async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn) {
         const { promise_data, initial } = establish_script_promise_data(script_url);
         if (initial) {
             let script_el;
@@ -248,7 +251,7 @@
                 promise_data.reject  = undefined;
             }
             try {
-                script_el = create_script(parent, script_url);
+                script_el = globalThis.core.create_script(parent, script_url);
                 script_el.addEventListener('error', script_load_error_handler, { once: true });
                 wait();
             } catch (err) {
@@ -309,10 +312,10 @@
      *  the facet element.  Others will simply wait for the facet to load
      *  or for error.
      */
-    globalThis.facet = async function facet(facet_url) {
+    globalThis.core.facet = async function facet(facet_url) {
         const { promise_data, initial } = establish_facet_promise_data(facet_url);
         if (initial) {
-            const script_el = create_script(document.head, facet_url,
+            const script_el = globalThis.core.create_script(document.head, facet_url,
                 'defer', undefined,
             );
             function handle_facet_export_event(event) {
@@ -352,7 +355,7 @@
      *  Pass target_script when using asynchronously from facet code, passing original value of document.currentScript.
      *  The promise returned from facet() will resolve to export_data.
      */
-    globalThis.facet_export = function facet_export(export_data, target_script=document.currentScript) {
+    globalThis.core.facet_export = function facet_export(export_data, target_script=document.currentScript) {
         const event = new FacetExportEvent(null, export_data);
         target_script.dispatchEvent(event);
     };
@@ -367,7 +370,7 @@
      *  directly caused by facet() to be undone and causes
      *  the promise that was returned from facet() to reject.
      */
-    globalThis.facet_load_error = function facet_load_error(err, target_script=document.currentScript) {
+    globalThis.core.facet_load_error = function facet_load_error(err, target_script=document.currentScript) {
         const event = new FacetExportEvent(err);
         target_script.dispatchEvent(event);
     };
@@ -381,12 +384,13 @@
      *  the facet_export() and facet_load_error() functions in a context
      *  where document.currentScript is no longer valid.
      */
-    globalThis.facet_init = function facet_init() {
+    globalThis.core.facet_init = function facet_init() {
         const current_script = document.currentScript;
         return {
             current_script,
-            facet_export:     (export_data, target_script=current_script) => facet_export(export_data, target_script),
-            facet_load_error: (err, target_script=current_script) => facet_load_error(err, target_script),
+            facet:            globalThis.core.facet,
+            facet_export:     (export_data, target_script=current_script) => globalThis.core.facet_export(export_data, target_script),
+            facet_load_error: (err, target_script=current_script) => globalThis.core.facet_load_error(err, target_script),
         };
     };
 
@@ -398,22 +402,23 @@
     const cpb_url = new URL('../build/core-package-bundle.js', document.currentScript.src);
 
     const lcf_url = new URL('./load-core-facets.js', document.currentScript.src);
-    const lcf_loaded = () => globalThis.load_core_facets_result;  // load-core-facets.js sets globalThis.load_core_facets_result
+    const lcf_loaded = () => globalThis.core.load_core_facets_result;  // load-core-facets.js sets globalThis.core.load_core_facets_result
 
-    load_script(document.head, csp_url)
-        .then(() => load_script(document.head, cpb_url))
-        .then(() => load_script_and_wait_for_condition(document.head, lcf_url, lcf_loaded))
+    globalThis.core.load_script(document.head, csp_url)
+        .then(() => globalThis.core.load_script(document.head, cpb_url))
+        .then(() => globalThis.core.load_script_and_wait_for_condition(document.head, lcf_url, lcf_loaded))
         .then(() => {
-            if (globalThis.load_core_facets_result instanceof Error) {
-                _reject_esbook_ready(globalThis.load_core_facets_result);
+            if (globalThis.core.load_core_facets_result instanceof Error) {
+                _reject_esbook_ready(globalThis.core.load_core_facets_result);
             } else {
                 _resolve_esbook_ready();
             }
         })
         .catch(err => _reject_esbook_ready(err))
-        .then(
+        .finally(
             () => {
                 _resolve_esbook_ready = undefined;
                 _reject_esbook_ready  = undefined;
-            } );
+                Object.freeze(globalThis.core);
+        } );
 })();

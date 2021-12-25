@@ -1,6 +1,6 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     // === CONSTANTS ===
 
@@ -191,12 +191,12 @@
             //         </div>
             //     </div>
 
-            const content_el = create_child_element(document.body, 'div', 'id', 'content');
-            this.interaction_area = create_child_element(content_el, 'div', 'id', 'interaction_area');
+            const content_el = globalThis.core.create_child_element(document.body, 'div', 'id', 'content');
+            this.interaction_area = globalThis.core.create_child_element(content_el, 'div', 'id', 'interaction_area');
 
             // add notebook stylesheet:
             const stylesheet_url = new URL('notebook/notebook.css', current_script.src);
-            create_stylesheet(document.head, stylesheet_url);
+            globalThis.core.create_stylesheet(document.head, stylesheet_url);
 
             // load CodeMirror scripts:
             for (const script_path of [
@@ -214,7 +214,7 @@
                 'notebook/codemirror-md+mj-mode.js',
             ]) {
                 const script_url = new URL(script_path, current_script.src);
-                await load_script(document.head, script_url);
+                await globalThis.core.load_script(document.head, script_url);
             }
 
             // load CodeMirror stylesheets:
@@ -224,12 +224,12 @@
                 '../../node_modules/codemirror/addon/dialog/dialog.css',
             ]) {
                 const stylesheet_url = new URL(stylesheet_path, current_script.src);
-                create_stylesheet(document.head, stylesheet_url);
+                globalThis.core.create_stylesheet(document.head, stylesheet_url);
             }
         }
 
         _object_hasher(obj) {
-            return sha256(JSON.stringify(obj));
+            return globalThis.core.sha256(JSON.stringify(obj));
         }
 
         update_from_settings() {
@@ -822,7 +822,7 @@
             } else {
                 ie = document.createElement('div');
                 ie.classList.add('interaction_element');
-                ie.id = new_ie_id ?? generate_object_id();
+                ie.id = new_ie_id ?? globalThis.core.generate_object_id();
                 ie.setAttribute('tabindex', 0);
                 const selected_indicator = document.createElement('div');
                 selected_indicator.classList.add('selected_indicator');
@@ -1099,9 +1099,7 @@
         }
     }
 
-    facet_export({
-        Notebook,
-    });
+    facet_export(true);
 
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

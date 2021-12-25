@@ -1,6 +1,6 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     // getSVGString() and svgString2Image():
     // From: http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
@@ -135,4 +135,4 @@
         get_all_css_with_selector_prefix,
     });
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

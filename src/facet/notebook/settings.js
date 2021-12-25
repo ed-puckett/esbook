@@ -1,6 +1,6 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     const define_subscribable = await facet('facet/subscribable.js');
 
@@ -82,4 +82,4 @@
         update_settings,
     });
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

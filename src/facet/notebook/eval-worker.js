@@ -1,13 +1,13 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     const {
         output_handlers,
     } = await facet('facet/notebook/output-handlers.js');
 
     const nerdamer_script_url = new URL('../../../node_modules/nerdamer/all.min.js', current_script.src);
-    await load_script(document.head, nerdamer_script_url);
+    await globalThis.core.load_script(document.head, nerdamer_script_url);
 
     class TextuallyLocatedError extends Error {
         constructor(message, line_col) {
@@ -143,7 +143,7 @@
         constructor(ie, output_data_collection, expression) {
             Object.defineProperties(this, {
                 id: {
-                    value: generate_uuid(),
+                    value: globalThis.core.generate_uuid(),
                     enumerable: true,
                 },
                 ie: {
@@ -215,7 +215,7 @@ self.output_data_collection = undefined;//!!!
                         w.resolve();
                     } else {
                         consume_pending_values();
-                        waiting_for_value = new OpenPromise();
+                        waiting_for_value = new globalThis.core.OpenPromise();
                         waiting_for_value.then(process_pending_values, process_error);
                     }
                 }
@@ -262,4 +262,4 @@ self.output_data_collection = undefined;//!!!
         EvalWorker,
     });
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

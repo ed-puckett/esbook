@@ -1,6 +1,6 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     const define_subscribable = await facet('facet/subscribable.js');
 
@@ -35,7 +35,7 @@
 
     // add theme-settings/theme-colors.css stylesheet
     const theme_colors_stylesheet_url = new URL('theme-settings/theme-colors.css', current_script.src);
-    create_stylesheet(document.head, theme_colors_stylesheet_url);
+    globalThis.core.create_stylesheet(document.head, theme_colors_stylesheet_url);
 
     const dark_mode_class = 'dark';
 
@@ -58,4 +58,4 @@
         update_document_dark_state,
     });
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

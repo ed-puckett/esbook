@@ -1,6 +1,6 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     class Change {
         // STATIC
@@ -263,7 +263,7 @@
         constructor(notebook, position) {
             super(notebook);
             this.position = position;
-            this.ie_id    = generate_object_id();
+            this.ie_id    = globalThis.core.generate_object_id();
             this.ie       = undefined;  // will be set in redo_change() aka do_change()
         }
 
@@ -444,4 +444,4 @@
         add_ie_output_change,
     });
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

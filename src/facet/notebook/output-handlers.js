@@ -1,6 +1,6 @@
 'use strict';
 
-(async ({ current_script, facet_export, facet_load_error }) => { try {  // facet begin
+(async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
     const svg_image_util = await facet(new URL('output-handlers/svg-image-util.js', current_script.src));
 
@@ -11,11 +11,11 @@
             '../../../node_modules/d3/dist/d3.min.js',              // defines globalThis.d3
             '../../../node_modules/dagre-d3/dist/dagre-d3.min.js',  // defines globalThis.dagreD3
             '../../../node_modules/plotly.js-dist/plotly.js',       // defines globalThis.Plotly
-        ].map(p => load_script(document.head, new URL(p, current_script.src)))
+        ].map(p => globalThis.core.load_script(document.head, new URL(p, current_script.src)))
     );
 
     const dagreD3_stylesheet_url = new URL('output-handlers/dagre-d3.css', current_script.src);
-    create_stylesheet(document.head, dagreD3_stylesheet_url);
+    globalThis.core.create_stylesheet(document.head, dagreD3_stylesheet_url);
 
 
     // === CONSTANTS ===
@@ -71,7 +71,7 @@
     class OutputHandler {
         constructor(type) {
             this._type = type;
-            this._id   = generate_object_id();
+            this._id   = globalThis.core.generate_object_id();
         }
 
         get type (){ return this._type; }
@@ -136,7 +136,7 @@
             // See: https://stackoverflow.com/questions/19847582/chart-js-canvas-resize.
             // (Note: doing this for all text/graphics types)
             const output_element = document.createElement('div');
-            output_element.id = generate_object_id();
+            output_element.id = globalThis.core.generate_object_id();
             const output_element_collection = ie.querySelector('.output');
             output_element_collection.appendChild(output_element);
             let child;
@@ -146,7 +146,7 @@
                 } else {
                     child = document.createElement(child_tag);
                 }
-                child.id = generate_object_id();
+                child.id = globalThis.core.generate_object_id();
             }
             if (size_config) {
                 const [ width, height ] = size_config;
@@ -477,7 +477,8 @@
             const inner = svg_d3.select("g");
             // set up zoom support
             const zoom = d3.zoom().on("zoom", function() {
-                inner.attr("transform", d3.event.transform);
+console.log('>>>', d3.event);//!!!
+                if (d3.event) inner.attr("transform", d3.event.transform);
             });
             svg_d3.call(zoom);
             // create and run the renderer
@@ -641,4 +642,4 @@
         output_handlers,
     });
 
-} catch (err) { facet_load_error(err, current_script); } })(facet_init());  // facet end
+} catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end
