@@ -4,11 +4,11 @@
 
     await Promise.all(
         [
-            '../../../node_modules/dompurify/dist/purify.min.js',   // defines globalThis.DOMPurify
-            '../../../node_modules/chart.js/dist/chart.min.js',     // defines globalThis.Chart
-            '../../../node_modules/d3/dist/d3.min.js',              // defines globalThis.d3
-            '../../../node_modules/dagre-d3/dist/dagre-d3.min.js',  // defines globalThis.dagreD3
-            '../../../node_modules/plotly.js-dist/plotly.js',       // defines globalThis.Plotly
+            '../../../node_modules/dompurify/dist/purify.min.js',       // defines globalThis.DOMPurify
+            '../../../node_modules/chart.js/dist/Chart.bundle.min.js',  // defines globalThis.Chart
+            '../../../node_modules/d3/dist/d3.min.js',                  // defines globalThis.d3
+            '../../../node_modules/dagre-d3/dist/dagre-d3.min.js',      // defines globalThis.dagreD3
+            '../../../node_modules/plotly.js-dist/plotly.js',           // defines globalThis.Plotly
         ].map(p => globalThis.core.load_script(document.head, new URL(p, current_script.src)))
     );
 

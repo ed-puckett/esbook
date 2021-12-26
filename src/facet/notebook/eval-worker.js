@@ -2,10 +2,6 @@
 
 (async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
-    const {
-        output_handlers,
-    } = await facet('facet/notebook/output-handlers.js');
-
     const nerdamer_script_url = new URL('../../../node_modules/nerdamer/all.min.js', current_script.src);
     await globalThis.core.load_script(document.head, nerdamer_script_url);
 
@@ -197,13 +193,8 @@
             function consume_pending_actions() {
                 while (pending_actions.length > 0) {
                     const action = pending_actions.shift();
-                    const handler = output_handlers[action.type];
-                    if (!handler) {
-                        process_error(new Error(`unknown output type: ${action.type}`));
-                    } else {
-                        //!!! update_notebook is an async method, but not waiting...
-                        handler.update_notebook(self.output_context, action);
-                    }
+                    //!!! calling an async method, but not waiting...
+                    self.output_context.output_handler_update_notebook(action.type, action);
                 }
             }
 
@@ -227,8 +218,8 @@
                 if (self._stopped) {
                     cleanup_after_stopped();
                 } else {
-                    //!!! update_notebook is an async method, but not waiting...
-                    output_handlers.error.update_notebook(self.output_context, error)
+                    //!!! calling an async method, but not waiting...
+                    self.output_context.output_handler_update_notebook('error', error);
                 }
             }
 

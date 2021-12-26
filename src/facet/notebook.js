@@ -1058,6 +1058,15 @@
         _create_output_context(ie, output_data_collection) {
             // define instance this way to isolate references to notebook, ie and output_data_collection
             return {
+                async output_handler_update_notebook(type, value) {
+                    const handler = output_handlers[type];
+                    if (!handler) {
+                        throw new Error(`unknown output type: ${type}`);
+                    } else {
+                        await handler.update_notebook(this, value);
+                    }                    
+                },
+
                 validate_size_config(size_config) {
                     if ( !Array.isArray(size_config) ||
                          size_config.length !== 2 ||
@@ -1134,7 +1143,7 @@
                         const previous_output_data = output_data_collection[output_data_collection.length-1];
                         if (previous_output_data?.type === 'text') {
                             // new data and the previous are both 'text'; merge new data into previous
-                            previous_output_data.text += output_data.text;
+                            previous_output_data.text += text;
                             // connect output_data and output_element into notebook and ui
                             const merged_output_element = await static_element_generator(previous_output_data);
                             merged_output_element.id = output_element_collection.lastChild.id;  // preserve id
