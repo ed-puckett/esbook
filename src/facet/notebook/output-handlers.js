@@ -2,8 +2,6 @@
 
 (async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
-    const svg_image_util = await facet(new URL('output-handlers/svg-image-util.js', current_script.src));
-
     await Promise.all(
         [
             '../../../node_modules/dompurify/dist/purify.min.js',   // defines globalThis.DOMPurify
@@ -68,6 +66,19 @@
     //    output handler.
     // 5. Update help to reflect the new interface to the new output handler.
 
+    // FUNCTIONS OF AN OUTPUT_HANDLER
+    // ------------------------------
+    // 1. During Eval: create new output elements through the use of the
+    //    output_context (which is provided by the notebook and encapsulates
+    //    the ie and output_data_collection).  The output elements include
+    //    both the UI elements and the output_data accumulated in the
+    //    output_data_collection.
+    //    Method: update_notebook()
+    // 2. Validate output_data received from a file.
+    //    Method: validate_output_data()
+    // 3. Display non-evaluated output_data received from a file.
+    //    Method: generate_static_element()
+
     class OutputHandler {
         constructor(type) {
             this._type = type;
@@ -82,7 +93,7 @@
         // representation is appended to output_data_collection.
         // Must be defined by each extension.
         // May throw an error.
-        async update_notebook(ie, output_data_collection, value) {
+        async update_notebook(output_context, value) {
             throw new Error('unimplemented');
         }
 
@@ -94,120 +105,9 @@
                      output_data?.type === this.type );
         }
 
-
         // Returns a non-live node for the given output_data.
         async generate_static_element(output_data) {
             throw new Error('unimplemented');
-        }
-
-        // internal/utility methods
-
-        _validate_size_config(size_config) {
-            if ( !Array.isArray(size_config) ||
-                 size_config.length !== 2 ||
-                 typeof size_config[0] !== 'number' ||
-                 typeof size_config[1] !== 'number' ) {
-                throw new Error('size_config must be an array containing two numbers');
-            }
-        }
-
-        _parse_graphics_args(args, error_message) {
-            if (args.length < 1 || args.length > 2) {
-                throw new Error(error_message);
-            }
-            let size_config, config;
-            if (args.length < 2) {
-                config = args[0];
-            } else {
-                [ size_config, config ] = args;
-            }
-            if (size_config) {
-                this._validate_size_config(size_config);
-            }
-            if (config === null || typeof config !== 'object') {
-                throw new Error('config must be a non-null object');
-            }
-            return [ size_config, config ];
-        }
-
-        _create_output_element(ie, size_config=null, child_tag=null, child_element_namespace=null) {
-            // Re: Chart.js:
-            // Wrap the canvas element in a div to prevent quirky behavious of Chart.js size handling.
-            // See: https://stackoverflow.com/questions/19847582/chart-js-canvas-resize.
-            // (Note: doing this for all text/graphics types)
-            const output_element = document.createElement('div');
-            output_element.id = globalThis.core.generate_object_id();
-            const output_element_collection = ie.querySelector('.output');
-            output_element_collection.appendChild(output_element);
-            let child;
-            if (child_tag) {
-                if (child_element_namespace) {
-                    child = document.createElementNS(child_element_namespace, child_tag);
-                } else {
-                    child = document.createElement(child_tag);
-                }
-                child.id = globalThis.core.generate_object_id();
-            }
-            if (size_config) {
-                const [ width, height ] = size_config;
-                output_element.width  = width;
-                output_element.height = height;
-                output_element.style.width  = `${width}px`;
-                output_element.style.height = `${height}px`;
-                if (child) {
-                    child.width  = width;
-                    child.height = height;
-                }
-            }
-            if (child) {
-                output_element.appendChild(child);
-            }
-            return child ? child : output_element;
-        }
-
-        async _render_canvas_image_data(canvas) {
-            // Save an image of the rendered canvas.  This will be used if this
-            // notebook is saved and then loaded again later.
-            // Note: using image/png because image/jpeg fails on Firefox (as of writing)
-            const image_format = 'image/png';
-            const image_format_quality = 1.0;
-            const image_uri = canvas.toDataURL(image_format, image_format_quality);
-            return {
-                type: this.type,
-                image_format,
-                image_format_quality,
-                image_uri,
-            };
-        }
-
-        async _render_svg_image_data(svg) {
-            // Save an image of the rendered canvas.  This will be used if this
-            // notebook is saved and then loaded again later.
-            const css = svg_image_util.get_all_css_with_selector_prefix('svg.dagre');//!!! 'svg.dagre' should not be hard-coded here
-            const svg_string = svg_image_util.getSVGString(svg, css);
-            const width  = svg.clientWidth;
-            const height = svg.clientHeight;
-            const image_format = 'image/svg+xml';
-            const image_uri = `data:${image_format};utf8,${encodeURIComponent(svg_string)}`;
-            // The width and height are necessary because when we load this later (using the svg data uri)
-            // the image width and height will not be set (as opposed to a png data uri which encodes
-            // the width and height in its content).
-            return {
-                type: this.type,
-                width,
-                height,
-                image_format,
-                image_uri,
-            };
-        }
-
-        _scroll_output_into_view(ie) {
-            const interaction_area = document.getElementById('interaction_area');
-            const ia_rect = interaction_area.getBoundingClientRect();
-            const ie_rect = ie.getBoundingClientRect();
-            if (ie_rect.bottom > ia_rect.bottom) {
-                interaction_area.scrollBy(0, (ie_rect.bottom - ia_rect.bottom));
-            }
         }
     }
 
@@ -218,31 +118,13 @@
         // is merged into it.
         // value: string | { text: string, is_tex?: boolean, inline_tex?: boolean }
         // output_data: { type: 'text', text: string }
-        async update_notebook(ie, output_data_collection, value) {
+        async update_notebook(output_context, value) {
             if (typeof value === 'string') {
                 value = { text: value };
             }
             const tex_delimiter = value.inline_tex ? '$' : '$$';
-            const output_data= {
-                type: this.type,
-                text: (value.is_tex ? `${tex_delimiter}${escape_unescaped_$(value.text)}${tex_delimiter}` : value.text),
-            };
-            const output_element_collection = ie.querySelector('.output');
-            const previous_output_data = output_data_collection[output_data_collection.length-1];
-            // connect output_data and output_element into notebook and ui
-            if (previous_output_data?.type === this.type) {
-                // merge new data into previous
-                previous_output_data.text += output_data.text;
-                const merged_output_element = await this.generate_static_element(previous_output_data);
-                merged_output_element.id = output_element_collection.lastChild.id;  // preserve id
-                output_element_collection.lastChild.replaceWith(merged_output_element);
-            } else {
-                // add new output_data and output_element
-                const output_element = await this.generate_static_element(output_data);
-                output_element_collection.appendChild(output_element);
-                output_data_collection.push(output_data);
-                this._scroll_output_into_view(ie);
-            }
+            const text = (value.is_tex ? `${tex_delimiter}${escape_unescaped_$(value.text)}${tex_delimiter}` : value.text);
+            await output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
         }
 
         async generate_static_element(output_data) {
@@ -261,24 +143,16 @@
     class ErrorOutputHandler extends OutputHandler {
         constructor() { super('error'); }
 
-        // output_data: { type: 'error', message: string }
-        async update_notebook(ie, output_data_collection, error_object) {
-            const message_segments = [];
+        // output_data: { type: 'error', text: string }
+        async update_notebook(output_context, error_object) {
+            const text_segments = [];
             if (error_object.stack) {
-                message_segments.push(error_object.stack);
+                text_segments.push(error_object.stack);
             } else {
-                message_segments.push(error_object.message || 'error');
+                text_segments.push(error_object.message || 'error');
             }
-            const output_data = {
-                type: this.type,
-                message: clean_for_html(message_segments.join('\n')),
-            };
-            const output_element = await this.generate_static_element(output_data);
-            // connect output_data and output_element into notebook and ui
-            const output_element_collection = ie.querySelector('.output');
-            output_element_collection.appendChild(output_element);
-            output_data_collection.push(output_data);
-            this._scroll_output_into_view(ie);
+            const text = clean_for_html(text_segments.join('\n'));
+            await output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
         }
 
         async generate_static_element(output_data) {
@@ -287,7 +161,7 @@
             }
             const element = document.createElement('pre');
             element.classList.add('error');
-            element.textContent = output_data.message;
+            element.textContent = output_data.text;
             return element;
         }
     }
@@ -347,16 +221,14 @@
 
         // may throw an error
         // output_data: { type: 'chart', image_format: string, image_format_quality: number, image_uri: string }
-        async update_notebook(ie, output_data_collection, value) {
-            const [ size_config, config ] = this._parse_graphics_args(value.args, 'usage: chart([size_config], config)');
-            const canvas = this._create_output_element(ie, size_config, 'canvas');
+        async update_notebook(output_context, value) {
+            const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: chart([size_config], config)');
+            const canvas = output_context.create_output_element(size_config, 'canvas');
             const ctx = canvas.getContext('2d');
             // eliminate animation so that the canvas.toDataURL() call below will have something to render:
             Chart.defaults.global.animation.duration = 0;
             const chart_object = new Chart(ctx, config);
-            const output_data = await this._render_canvas_image_data(canvas);
-            output_data_collection.push(output_data);
-            this._scroll_output_into_view(ie);
+            await output_context.create_canvas_output_data(this.type, canvas);
         }
     }
 
@@ -393,12 +265,12 @@
 
         // may throw an error
         // output_data: { type: 'dagre', image_format: string, image_format_quality: number, image_uri: string }
-        async update_notebook(ie, output_data_collection, value) {
-            const [ size_config, dagre_config ] = this._parse_graphics_args(value.args, 'usage: dagre([size_config], config)');
+        async update_notebook(output_context, value) {
+            const [ size_config, dagre_config ] = output_context.parse_graphics_args(value.args, 'usage: dagre([size_config], config)');
             // svg elements must be created with a special namespace
             // (otherwise, will get error when rendering: xxx.getBBox is not a function)
             const element_namespace = 'http://www.w3.org/2000/svg';
-            const svg = this._create_output_element(ie, size_config, 'svg', element_namespace);
+            const svg = output_context.create_output_element(size_config, 'svg', element_namespace);
             svg.classList.add('dagre');
             svg.appendChild(document.createElementNS(element_namespace, 'g'));  // required by dagreD3
             svg.addEventListener('wheel', function (event) {
@@ -492,9 +364,7 @@ console.log('>>>', d3.event);//!!!
             svg_d3.call(zoom.transform, d3.zoomIdentity.translate(left_margin, height_margin/2).scale(initial_scale));
             svg_d3.attr('height', (g_height*initial_scale + height_margin));
             // finally, render the data uri
-            const output_data = await this._render_svg_image_data(svg);
-            output_data_collection.push(output_data);
-            this._scroll_output_into_view(ie);
+            await output_context.create_svg_output_data(this.type, svg);
         }
     }
 
@@ -510,17 +380,15 @@ console.log('>>>', d3.event);//!!!
 
         // may throw an error
         // output_data: { type: 'image_data', image_format: string, image_format_quality: number, image_uri: string }
-        async update_notebook(ie, output_data_collection, value) {
-            const [ size_config, config ] = this._parse_graphics_args(value.args, 'usage: image_data([size_config], config)');
-            const canvas = this._create_output_element(ie, size_config, 'canvas');
+        async update_notebook(output_context, value) {
+            const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: image_data([size_config], config)');
+            const canvas = output_context.create_output_element(size_config, 'canvas');
             const ctx = canvas.getContext('2d');
             const iter_config = Array.isArray(config) ? config : [ config ];
             for (const { x = 0, y = 0, image_data } of iter_config) {
                 ctx.putImageData(image_data, x, y);
             }
-            const output_data = await this._render_canvas_image_data(canvas);
-            output_data_collection.push(output_data);
-            this._scroll_output_into_view(ie);
+            await output_context.create_canvas_output_data(this.type, canvas);
         }
     }
 
@@ -543,9 +411,9 @@ console.log('>>>', d3.event);//!!!
 
         // may throw an error
         // output_data: { type: 'canvas2d', image_format: string, image_format_quality: number, image_uri: string }
-        async update_notebook(ie, output_data_collection, value) {
-            const [ size_config, config ] = this._parse_graphics_args(value.args, 'usage: canvas2d([size_config], config)');
-            const canvas = this._create_output_element(ie, size_config, 'canvas');
+        async update_notebook(output_context, value) {
+            const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: canvas2d([size_config], config)');
+            const canvas = output_context.create_output_element(size_config, 'canvas');
             const ctx = canvas.getContext('2d');
             for (const spec of config) {
                 try {
@@ -560,9 +428,7 @@ console.log('>>>', d3.event);//!!!
                     throw new Error(`illegal Canvas2d ${spec.setter ? `setter instruction: field: ${spec.field}` : `method instruction: method: ${spec.method}`}`);
                 }
             }
-            const output_data = await this._render_canvas_image_data(canvas);
-            output_data_collection.push(output_data);
-            this._scroll_output_into_view(ie);
+            await output_context.create_canvas_output_data(this.type, canvas);
         }
     }
 
@@ -574,14 +440,13 @@ console.log('>>>', d3.event);//!!!
 
         // may throw an error
         // output_data: { type: 'plotly', image_format: string, image_format_quality: number, image_uri: string }
-        async update_notebook(ie, output_data_collection, value) {
-            const [ size_config, config ] = this._parse_graphics_args(value.args, 'usage: plotly([size_config], { data, layout?, config?, frames? })');
-            const output_element = this._create_output_element(ie, size_config, 'div');
-            const type = this.type;  // graphics type
+        async update_notebook(output_context, value) {
+            const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: plotly([size_config], { data, layout?, config?, frames? })');
+            const output_element = output_context.create_output_element(size_config, 'div');
             const image_type = 'png';
             const image_format = 'image/png';
             const image_format_quality = 1.0;
-            const output_data = await Plotly.newPlot(output_element, config)  // render to the output_element
+            const output_data_props = await Plotly.newPlot(output_element, config)  // render to the output_element
                   .then(gd => Plotly.toImage(gd, {  // render data uri
                       format: image_type,  // note: not image_format
                       width:  output_element.clientWidth,
@@ -591,14 +456,11 @@ console.log('>>>', d3.event);//!!!
                       return image_uri;
                   })
                   .then(image_uri => ({  // convert to format for output_data
-                      type,
                       image_format,
                       image_format_quality,
                       image_uri,
                   }));
-
-            output_data_collection.push(output_data);
-            this._scroll_output_into_view(ie);
+            await output_context.create_generic_graphics_output_data(type, output_data_props);
         }
     }
 

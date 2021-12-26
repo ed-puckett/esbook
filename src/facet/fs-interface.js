@@ -30,7 +30,7 @@
             const contents = JSON.stringify(obj, null, 4);
             await writable.write(contents);
             await writable.close();
-            const stats = await get_fs_stats_for_file_handle(file_handle);
+            const stats = await this.get_fs_stats_for_file_handle(file_handle);
             return stats;
         }
 
@@ -65,7 +65,7 @@
         async get_fs_stats_for_file_handle(file_handle) {
             await this.verify_permission(file_handle);
             const file = await file_handle.getFile();
-            return get_fs_stats_for_file(file);
+            return this.get_fs_stats_for_file(file);
         }
 
         /** Return stats for the file

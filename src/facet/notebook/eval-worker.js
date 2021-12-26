@@ -140,21 +140,15 @@
     }
 
     class EvalWorker {
-        constructor(ie, output_data_collection, expression) {
+        constructor(output_context, expression) {
             Object.defineProperties(this, {
                 id: {
                     value: globalThis.core.generate_uuid(),
                     enumerable: true,
                 },
-                ie: {
-                    value: ie,
+                output_context: {
+                    value: output_context,
                     enumerable: true,
-writable: true,//!!!
-                },
-                output_data_collection : {
-                    value: output_data_collection,
-                    enumerable: true,
-writable: true,//!!!
                 },
                 expression: {
                     value: expression,
@@ -188,8 +182,6 @@ writable: true,//!!!
                     const w = waiting_for_value;
                     waiting_for_value = undefined;
                     w.reject(new Error('stopped'));
-self.ie = undefined;//!!!
-self.output_data_collection = undefined;//!!!
                 }
             }
             function consume_pending_values() {
@@ -199,8 +191,8 @@ self.output_data_collection = undefined;//!!!
                     if (!handler) {
                         process_error(new Error(`unknown output type: ${value.type}`));
                     } else {
-                        //!!! update_notebook is an async method, but not waiing...
-                        handler.update_notebook(self.ie, self.output_data_collection, value);
+                        //!!! update_notebook is an async method, but not waiting...
+                        handler.update_notebook(self.output_context, value);
                     }
                 }
             }
@@ -225,7 +217,8 @@ self.output_data_collection = undefined;//!!!
                 if (self._stopped) {
                     cleanup_after_stopped();
                 } else {
-                    output_handlers.error.update_notebook(self.ie, self.output_data_collection, error)
+                    //!!! update_notebook is an async method, but not waiting...
+                    output_handlers.error.update_notebook(self.output_context, error)
                 }
             }
 

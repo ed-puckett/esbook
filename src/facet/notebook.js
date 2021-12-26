@@ -39,6 +39,8 @@
         output_handlers,
     } = await facet('facet/notebook/output-handlers.js');
 
+    const svg_image_util = await facet('facet/notebook/svg-image-util.js');
+
     const {
         Change,
         add_edit_change,
@@ -1013,14 +1015,16 @@
             this.update_nb_state(ie);
 
             const output_data_collection = this.reset_output(ie);
+            const output_context = this._create_output_context(ie, output_data_collection);
+
             try {
 
                 const input_text = this.get_input_text_for_ie_id(ie.id);
-                await this.evaluate_input_text(ie, output_data_collection, input_text);
+                await this.evaluate_input_text(output_context, input_text);
 
             } catch (err) {
 
-                await output_handlers.error.update_notebook(ie, output_data_collection, err);
+                await output_handlers.error.update_notebook(output_context, err);
                 if (err instanceof TextuallyLocatedError) {
                     this.set_input_selection_for_ie_id(ie.id, err.line_col);
                 }
@@ -1046,8 +1050,182 @@
             return true;
         }
 
+        _create_output_context(ie, output_data_collection) {
+            // define class this way to isolate references to notebook, ie and output_data_collection
+            class OutputContext {
+                create_eval_worker(expression) {
+                    const eval_worker = new EvalWorker(this, expression);
+                    notebook.set_eval_worker_for_ie_id(ie.id, eval_worker);
+                }
+
+                validate_size_config(size_config) {
+                    if ( !Array.isArray(size_config) ||
+                         size_config.length !== 2 ||
+                         typeof size_config[0] !== 'number' ||
+                         typeof size_config[1] !== 'number' ) {
+                        throw new Error('size_config must be an array containing two numbers');
+                    }
+                }
+
+                parse_graphics_args(args, error_message) {
+                    if (args.length < 1 || args.length > 2) {
+                        throw new Error(error_message);
+                    }
+                    let size_config, config;
+                    if (args.length < 2) {
+                        config = args[0];
+                    } else {
+                        [ size_config, config ] = args;
+                    }
+                    if (size_config) {
+                        this.validate_size_config(size_config);
+                    }
+                    if (config === null || typeof config !== 'object') {
+                        throw new Error('config must be a non-null object');
+                    }
+                    return [ size_config, config ];
+                }
+
+                create_output_element(size_config=null, child_tag=null, child_element_namespace=null) {
+                    // Re: Chart.js:
+                    // Wrap the canvas element in a div to prevent quirky behavious of Chart.js size handling.
+                    // See: https://stackoverflow.com/questions/19847582/chart-js-canvas-resize.
+                    // (Note: doing this for all text/graphics types)
+                    const output_element = document.createElement('div');
+                    output_element.id = globalThis.core.generate_object_id();
+                    const output_element_collection = ie.querySelector('.output');
+                    output_element_collection.appendChild(output_element);
+                    let child;
+                    if (child_tag) {
+                        if (child_element_namespace) {
+                            child = document.createElementNS(child_element_namespace, child_tag);
+                        } else {
+                            child = document.createElement(child_tag);
+                        }
+                        child.id = globalThis.core.generate_object_id();
+                    }
+                    if (size_config) {
+                        const [ width, height ] = size_config;
+                        output_element.width  = width;
+                        output_element.height = height;
+                        output_element.style.width  = `${width}px`;
+                        output_element.style.height = `${height}px`;
+                        if (child) {
+                            child.width  = width;
+                            child.height = height;
+                        }
+                    }
+                    if (child) {
+                        output_element.appendChild(child);
+                    }
+                    return child ? child : output_element;
+                }
+
+                async create_generic_output_data(type, props, leave_scroll_position_alone=false) {
+                    props = props ?? {};
+                    const output_data = {
+                        type,
+                        ...props,
+                    };
+                    output_data_collection.push(output_data);
+                    if (!leave_scroll_position_alone) {
+                        this.scroll_output_into_view();
+                    }
+                    return output_data;
+                }
+
+                // Also creates the output element (via static_element_generator()).
+                // If type === 'text', then the text may be merged into the previous element if
+                // the previous element was also of type 'text'.
+                async create_text_output_data(type, text, static_element_generator, leave_scroll_position_alone=false) {
+                    const output_element_collection = ie.querySelector('.output');
+
+                    // try to merge
+                    if (type === 'text') {
+                        // may coalesce with previous element if it is also a text type element
+                        const previous_output_data = output_data_collection[output_data_collection.length-1];
+                        if (previous_output_data?.type === 'text') {
+                            // new data and the previous are both 'text'; merge new data into previous
+                            previous_output_data.text += output_data.text;
+                            // connect output_data and output_element into notebook and ui
+                            const merged_output_element = await static_element_generator(previous_output_data);
+                            merged_output_element.id = output_element_collection.lastChild.id;  // preserve id
+                            output_element_collection.lastChild.replaceWith(merged_output_element);
+                            return;
+                        }
+                    }
+
+                    // if we get here, we were not able to merge
+                    const output_data = {
+                        type,
+                        text,
+                    };
+                    const output_element = await static_element_generator(output_data);
+                    // connect output_data and output_element into notebook and ui
+                    output_element_collection.appendChild(output_element);
+                    output_data_collection.push(output_data);
+                    if (!leave_scroll_position_alone) {
+                        this.scroll_output_into_view();
+                    }
+                    return output_data;
+                }
+
+                async create_generic_graphics_output_data(type, props, leave_scroll_position_alone=false) {
+                    if (typeof props?.image_uri !== 'string') {
+                        throw new Error('output_data must have an image_uri property which is a string');
+                    }
+                    await this.create_generic_output_data(type, props, leave_scroll_position_alone);
+                }
+
+                async create_canvas_output_data(type, canvas, leave_scroll_position_alone=false) {
+                    // Save an image of the rendered canvas.  This will be used if this
+                    // notebook is saved and then loaded again later.
+                    // Note: using image/png because image/jpeg fails on Firefox (as of writing)
+                    const image_format = 'image/png';
+                    const image_format_quality = 1.0;
+                    const image_uri = canvas.toDataURL(image_format, image_format_quality);
+                    return this.create_generic_graphics_output_data(type, {
+                        image_format,
+                        image_format_quality,
+                        image_uri,
+                    }, leave_scroll_position_alone);
+                }
+
+                async create_svg_output_data(type, svg, leave_scroll_position_alone=false) {
+                    // Save an image of the rendered canvas.  This will be used if this
+                    // notebook is saved and then loaded again later.
+                    const css = svg_image_util.get_all_css_with_selector_prefix('svg.dagre');//!!! 'svg.dagre' should not be hard-coded here
+                    const svg_string = svg_image_util.getSVGString(svg, css);
+                    const width  = svg.clientWidth;
+                    const height = svg.clientHeight;
+                    const image_format = 'image/svg+xml';
+                    const image_uri = `data:${image_format};utf8,${encodeURIComponent(svg_string)}`;
+                    // The width and height are necessary because when we load this later (using the svg data uri)
+                    // the image width and height will not be set (as opposed to a png data uri which encodes
+                    // the width and height in its content).
+                    return this.create_generic_graphics_output_data(type, {
+                        width,
+                        height,
+                        image_format,
+                        image_uri,
+                    }, leave_scroll_position_alone);
+                }
+
+                scroll_output_into_view() {
+                    const interaction_area = document.getElementById('interaction_area');
+                    const ia_rect = interaction_area.getBoundingClientRect();
+                    const ie_rect = ie.getBoundingClientRect();
+                    if (ie_rect.bottom > ia_rect.bottom) {
+                        interaction_area.scrollBy(0, (ie_rect.bottom - ia_rect.bottom));
+                    }
+                }
+            };
+
+            return new OutputContext();
+        }
+
         // may throw an error
-        async evaluate_input_text(ie, output_data_collection, input_text) {
+        async evaluate_input_text(output_context, input_text) {
             let is_expression, text;
             const mdmj_header_match = input_text.match(this.constructor._input_mdmj_header_re);
             if (mdmj_header_match) {
@@ -1059,10 +1237,9 @@
             }
             if (text.length > 0) {
                 if (is_expression) {
-                    const eval_worker = new EvalWorker(ie, output_data_collection, text);
-                    this.set_eval_worker_for_ie_id(ie.id, eval_worker);
+                    output_context.create_eval_worker(text);
                 } else {  // markdown
-                    await output_handlers.text.update_notebook(ie, output_data_collection, text);
+                    await output_handlers.text.update_notebook(output_context, text);
                 }
             }
         }
@@ -1109,20 +1286,6 @@
             }
         }
     }
-
-    // === NOTEBOOK INTERFACE ===
-
-    const nbi_ready =  notebook_ready.then(() => {
-        const nbi = {};
-
-        nbi.create_output_context = function (ie, output_data_collection) {
-            // define class this way to isolate references to notebook, ie and output_data_collection
-            return class OutputContext {
-            };
-        };
-
-        return Object.freeze(nbi);
-    });
 
 
     // === EXPORT ===
