@@ -51,20 +51,12 @@
 
     // CREATING A NEW OUTPUT HANDLER
     // -----------------------------
-    // !!! UPDATE ME !!!
     // 1. Define a new output handler class which extends OutputHandler,
     //    creating a new update_notebook() method, and if the new output
     //    type is significantly different than its base class, new
     //    validate_output_data() and generate_static_element() methods.
     // 2. Add the new class to the expression which creates the
     //    output_handler_id_to_handler mapping.
-    // 3. (Optional) add a new function for the output handler in
-    //    the eval code.  This function will call the self.output()
-    //    function with the first argument as the "type" string you
-    //    provided in the super() call in the new OutputHandler constructor.
-    // 4. Add a new interface in ../eval-worker/eval-worker.js for the new
-    //    output handler.
-    // 5. Update help to reflect the new interface to the new output handler.
 
     // FUNCTIONS OF AN OUTPUT_HANDLER
     // ------------------------------
@@ -127,6 +119,11 @@
             await output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
         }
 
+        validate_output_data(output_data) {
+            return ( super.validate_output_data(output_data) &&
+                     typeof output_data.text === 'string' );
+        }
+
         async generate_static_element(output_data) {
             if (output_data.type !== this.type) {
                 throw new Error(`output_data type does not match (${this.type})`);
@@ -155,6 +152,11 @@
             await output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
         }
 
+        validate_output_data(output_data) {
+            return ( super.validate_output_data(output_data) &&
+                     typeof output_data.text === 'string' );
+        }
+
         async generate_static_element(output_data) {
             if (output_data.type !== this.type) {
                 throw new Error(`output_data type does not match (${this.type})`);
@@ -163,6 +165,53 @@
             element.classList.add('error');
             element.textContent = output_data.text;
             return element;
+        }
+    }
+
+    function _generate_image_element_from_output_data(output_data) {
+        if (!output_data.image_uri) {
+            return undefined;
+        } else {
+            const img_element = document.createElement('img');
+            const size_styles = [];
+            if (typeof output_data.width !== 'undefined') {
+                size_styles.push(`width: ${output_data.width}px`);
+            }
+            if (typeof output_data.height !== 'undefined') {
+                size_styles.push(`height: ${output_data.height}px`);
+            }
+            if (size_styles.length > 0) {
+                img_element.style = size_styles.join('; ');
+            }
+            img_element.src = output_data.image_uri;
+            img_element.alt = `${output_data.type ? `${output_data.type} ` : ''}graphics`;
+            return img_element;
+        }
+    }
+
+    class OutputContextMethodOutputHandler extends OutputHandler {
+        constructor() { super('output_context_method'); }
+
+        async update_notebook(output_context, call_spec) {
+            const { method, args } = call_spec;
+            if (typeof output_context[method] !== 'function' || Array.isArray(args)) {
+                throw new Error('invalid call_spec');
+            }
+            await output_context[method].apply(output_context, args);
+        }
+
+        validate_output_data(output_data) {
+            return ( super.validate_output_data(output_data) &&
+                     typeof output_data.method === 'string'  &&
+                     Array.isArray(output_data.args)            );
+        }
+
+        async generate_static_element(output_data) {
+            if (output_data.type !== this.type) {
+                throw new Error(`output_data type does not match (${this.type})`);
+            }
+            // will return undefined if output_data does not have an image_uri property
+            return _generate_image_element_from_output_data(output_data);
         }
     }
 
@@ -185,34 +234,13 @@
             if (output_data.type !== this.type) {
                 throw new Error(`output_data type does not match (${this.type})`);
             }
-            // graphics (display image included in output_data)
-            const img_element = document.createElement('img');
-            const size_styles = [];
-            if (typeof output_data.width !== 'undefined') {
-                size_styles.push(`width: ${output_data.width}px`);
+            const static_element = _generate_image_element_from_output_data(output_data);
+            if (!static_element) {
+                throw new Error('unexpected: _generate_image_element_from_output_data() did not produce an element');
             }
-            if (typeof output_data.height !== 'undefined') {
-                size_styles.push(`height: ${output_data.height}px`);
-            }
-            if (size_styles.length > 0) {
-                img_element.style = size_styles.join('; ');
-            }
-            img_element.src = output_data.image_uri;
-            img_element.alt = `${output_data.type} graphics`;
-            return img_element;
+            return static_element;
         }
     }
-
-    class CustomGraphicsOutputHandler extends _GraphicsOutputHandlerBase {
-        constructor() { super('custom'); }
-        // This class is for custom graphics-type output
-        // that is created programmatically by a notebook
-        // interaction element.  The only requirement is that
-        // output_data must have a "type" property equal to
-        // "custom" and that it pass the validate_output_data()
-        // method of this class.  Rendering of the "live" object
-        // is entirely up to the code in the interaction element.
-    };
 
     class ChartOutputHandler extends _GraphicsOutputHandlerBase {
         constructor() { super('chart'); }
@@ -472,7 +500,7 @@ console.log('>>>', d3.event);//!!!
               [
                   TextOutputHandler,
                   ErrorOutputHandler,
-                  CustomGraphicsOutputHandler,
+                  OutputContextMethodOutputHandler,
                   ChartOutputHandler,
                   DagreOutputHandler,
                   ImageDataOutputHandler,

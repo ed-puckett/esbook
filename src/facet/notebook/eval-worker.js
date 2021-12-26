@@ -38,7 +38,7 @@
         return { type: 'text', text, is_tex, inline_tex };
     }
 
-    function create_eval_context(post_value) {
+    function create_eval_context(post_action) {
         function pp(thing, indent=4) {
             let rest_args = [];
             if (indent !== null && typeof indent !== 'undefined') {
@@ -52,16 +52,25 @@
 
         function println(output) {
             output = (typeof output === 'undefined') ? '' : output;
-            post_value(transform_text_result(output + '\n'));  // value: { type: 'text', text, is_tex, inline_tex }
+            post_action(transform_text_result(output + '\n'));  // action: { type: 'text', text, is_tex, inline_tex }
         }
 
         function printf(format, ...args) {
             format = (typeof format === 'undefined') ? '' : format.toString();
-            post_value(transform_text_result(sprintf(format, ...args)));  // value: { type: 'text', text, is_tex, inline_tex }
+            post_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
+        }
+
+        function output_context_method(method, args, image_uri=null) {
+            post_action({
+                type: 'output_context_method',
+                method,
+                args,
+                image_uri,
+            });
         }
 
         function graphics(type, args) {
-            post_value({
+            post_action({
                 type,
                 args,
             });
@@ -106,8 +115,8 @@
         return eval_context;
     }
 
-    function expression_evaluator(expression, post_value) {
-        const eval_context = create_eval_context(post_value);
+    function expression_evaluator(expression, post_action) {
+        const eval_context = create_eval_context(post_action);
 
         // Create a "full expression" that is a block containing bindings for
         // all the values in eval_context.  This allows us to evaluate
@@ -134,7 +143,7 @@
             .then(result_value => {
                 // if expression does not end with ';', include the final result in outputs
                 if (!expression.trim().endsWith(';')) {
-                    post_value(transform_text_result(result_value));  // value: { type: 'text', text, is_tex, inline_tex }
+                    post_action(transform_text_result(result_value));  // action: { type: 'text', text, is_tex, inline_tex }
                 }
             });
     }
@@ -169,46 +178,46 @@
         _eval_expression() {
             const self = this;
 
-            const pending_values = [];
-            let waiting_for_value;  // set when pending_values is empty; a promise on which the value processor is waiting
+            const pending_actions = [];
+            let waiting_for_action;  // set when pending_actions is empty; a promise on which the action processor is waiting
 
-            function clear_pending_values() {
-                pending_values.splice(0, pending_values.length);  // make pending_values empty
+            function clear_pending_actions() {
+                pending_actions.splice(0, pending_actions.length);  // make pending_actions empty
             }
 
             function cleanup_after_stopped() {
-                clear_pending_values();
-                if (waiting_for_value) {
-                    const w = waiting_for_value;
-                    waiting_for_value = undefined;
+                clear_pending_actions();
+                if (waiting_for_action) {
+                    const w = waiting_for_action;
+                    waiting_for_action = undefined;
                     w.reject(new Error('stopped'));
                 }
             }
-            function consume_pending_values() {
-                while (pending_values.length > 0) {
-                    const value = pending_values.shift();
-                    const handler = output_handlers[value.type];
+            function consume_pending_actions() {
+                while (pending_actions.length > 0) {
+                    const action = pending_actions.shift();
+                    const handler = output_handlers[action.type];
                     if (!handler) {
-                        process_error(new Error(`unknown output type: ${value.type}`));
+                        process_error(new Error(`unknown output type: ${action.type}`));
                     } else {
                         //!!! update_notebook is an async method, but not waiting...
-                        handler.update_notebook(self.output_context, value);
+                        handler.update_notebook(self.output_context, action);
                     }
                 }
             }
 
-            function process_pending_values() {
+            function process_pending_actions() {
                 if (self._stopped) {
                     cleanup_after_stopped();
                 } else {
-                    if (waiting_for_value) {
-                        const w = waiting_for_value;
-                        waiting_for_value = undefined;
+                    if (waiting_for_action) {
+                        const w = waiting_for_action;
+                        waiting_for_action = undefined;
                         w.resolve();
                     } else {
-                        consume_pending_values();
-                        waiting_for_value = new globalThis.core.OpenPromise();
-                        waiting_for_value.then(process_pending_values, process_error);
+                        consume_pending_actions();
+                        waiting_for_action = new globalThis.core.OpenPromise();
+                        waiting_for_action.then(process_pending_actions, process_error);
                     }
                 }
             }
@@ -222,13 +231,13 @@
                 }
             }
 
-            function post_value(value) {
+            function post_action(action) {
                 if (self._stopped) {
-                    console.warn('** value received after stopped', value);
+                    console.warn('** action received after stopped', action);
                     cleanup_after_stopped();
                 } else {
-                    pending_values.push(value);
-                    process_pending_values();
+                    pending_actions.push(action);
+                    process_pending_actions();
                 }
             }
 
@@ -243,7 +252,7 @@
 
             // run the evaluation:
             try {
-                expression_evaluator(self.expression, post_value);
+                expression_evaluator(self.expression, post_action);
             } catch (err) {
                 post_error(err);
             }

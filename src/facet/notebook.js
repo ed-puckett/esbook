@@ -776,7 +776,9 @@
                         nb_data.output.push(JSON.parse(JSON.stringify(output_data)));  // make a copy
                         const handler = output_handlers[output_data.type];
                         const static_output_element = await handler.generate_static_element(output_data);
-                        output_element_collection.appendChild(static_output_element);
+                        if (static_output_element) {
+                            output_element_collection.appendChild(static_output_element);
+                        }
                     }
                 }
                 this.set_current_ie(this.interaction_area.querySelector('.interaction_element'));
@@ -1020,7 +1022,10 @@
             try {
 
                 const input_text = this.get_input_text_for_ie_id(ie.id);
-                await this.evaluate_input_text(output_context, input_text);
+                const eval_worker = await this.evaluate_input_text(output_context, input_text);
+                if (eval_worker) {
+                    this.set_eval_worker_for_ie_id(ie.id, eval_worker);
+                }
 
             } catch (err) {
 
@@ -1053,11 +1058,6 @@
         _create_output_context(ie, output_data_collection) {
             // define instance this way to isolate references to notebook, ie and output_data_collection
             return {
-                create_eval_worker(expression) {
-                    const eval_worker = new EvalWorker(this, expression);
-                    notebook.set_eval_worker_for_ie_id(ie.id, eval_worker);
-                },
-
                 validate_size_config(size_config) {
                     if ( !Array.isArray(size_config) ||
                          size_config.length !== 2 ||
@@ -1124,6 +1124,7 @@
                 // Also creates the output element (via static_element_generator()).
                 // If type === 'text', then the text may be merged into the previous element if
                 // the previous element was also of type 'text'.
+                // Note: static_element_generator() is assumed to always return an element.
                 async create_text_output_data(type, text, static_element_generator, leave_scroll_position_alone=false) {
                     const output_element_collection = ie.querySelector('.output');
 
@@ -1219,6 +1220,7 @@
         }
 
         // may throw an error
+        // returns an EvalWorker instance or undefined if none
         async evaluate_input_text(output_context, input_text) {
             let is_expression, text;
             const mdmj_header_match = input_text.match(this.constructor._input_mdmj_header_re);
@@ -1231,9 +1233,10 @@
             }
             if (text.length > 0) {
                 if (is_expression) {
-                    output_context.create_eval_worker(text);
+                    return new EvalWorker(output_context, text);
                 } else {  // markdown
                     await output_handlers.text.update_notebook(output_context, text);
+                    return undefined;  // indicate: no EvalWorker instance
                 }
             }
         }
