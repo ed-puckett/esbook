@@ -626,7 +626,7 @@
                       };
                 const { canceled, file_handle } = await fs_interface.prompt_for_open(open_dialog_options)
                 if (!canceled) {
-                    await this.open_notebook_from_file_handle(file_handle, do_import);
+                    await this.open_notebook_from_file_handle(file_handle, do_import, true);
                 }
 
             } catch (err) {
@@ -1051,12 +1051,12 @@
         }
 
         _create_output_context(ie, output_data_collection) {
-            // define class this way to isolate references to notebook, ie and output_data_collection
-            class OutputContext {
+            // define instance this way to isolate references to notebook, ie and output_data_collection
+            return {
                 create_eval_worker(expression) {
                     const eval_worker = new EvalWorker(this, expression);
                     notebook.set_eval_worker_for_ie_id(ie.id, eval_worker);
-                }
+                },
 
                 validate_size_config(size_config) {
                     if ( !Array.isArray(size_config) ||
@@ -1065,7 +1065,7 @@
                          typeof size_config[1] !== 'number' ) {
                         throw new Error('size_config must be an array containing two numbers');
                     }
-                }
+                },
 
                 parse_graphics_args(args, error_message) {
                     if (args.length < 1 || args.length > 2) {
@@ -1084,7 +1084,7 @@
                         throw new Error('config must be a non-null object');
                     }
                     return [ size_config, config ];
-                }
+                },
 
                 create_output_element(size_config=null, child_tag=null, child_element_namespace=null) {
                     // Re: Chart.js:
@@ -1119,20 +1119,7 @@
                         output_element.appendChild(child);
                     }
                     return child ? child : output_element;
-                }
-
-                async create_generic_output_data(type, props, leave_scroll_position_alone=false) {
-                    props = props ?? {};
-                    const output_data = {
-                        type,
-                        ...props,
-                    };
-                    output_data_collection.push(output_data);
-                    if (!leave_scroll_position_alone) {
-                        this.scroll_output_into_view();
-                    }
-                    return output_data;
-                }
+                },
 
                 // Also creates the output element (via static_element_generator()).
                 // If type === 'text', then the text may be merged into the previous element if
@@ -1168,14 +1155,23 @@
                         this.scroll_output_into_view();
                     }
                     return output_data;
-                }
+                },
 
                 async create_generic_graphics_output_data(type, props, leave_scroll_position_alone=false) {
-                    if (typeof props?.image_uri !== 'string') {
+                    props = props ?? {};
+                    if (typeof props.image_uri !== 'string') {
                         throw new Error('output_data must have an image_uri property which is a string');
                     }
-                    await this.create_generic_output_data(type, props, leave_scroll_position_alone);
-                }
+                    const output_data = {
+                        type,
+                        ...props,
+                    };
+                    output_data_collection.push(output_data);
+                    if (!leave_scroll_position_alone) {
+                        this.scroll_output_into_view();
+                    }
+                    return output_data;
+                },
 
                 async create_canvas_output_data(type, canvas, leave_scroll_position_alone=false) {
                     // Save an image of the rendered canvas.  This will be used if this
@@ -1189,7 +1185,7 @@
                         image_format_quality,
                         image_uri,
                     }, leave_scroll_position_alone);
-                }
+                },
 
                 async create_svg_output_data(type, svg, leave_scroll_position_alone=false) {
                     // Save an image of the rendered canvas.  This will be used if this
@@ -1209,7 +1205,7 @@
                         image_format,
                         image_uri,
                     }, leave_scroll_position_alone);
-                }
+                },
 
                 scroll_output_into_view() {
                     const interaction_area = document.getElementById('interaction_area');
@@ -1218,10 +1214,8 @@
                     if (ie_rect.bottom > ia_rect.bottom) {
                         interaction_area.scrollBy(0, (ie_rect.bottom - ia_rect.bottom));
                     }
-                }
+                },
             };
-
-            return new OutputContext();
         }
 
         // may throw an error
