@@ -168,7 +168,7 @@
                     writable: true,
                 },
             });
-            this._eval_expression(expression);
+            this._eval_expression();
         }
 
         stop() {
@@ -193,6 +193,7 @@
                     w.reject(new Error('stopped'));
                 }
             }
+
             function consume_pending_actions() {
                 while (pending_actions.length > 0) {
                     const action = pending_actions.shift();
