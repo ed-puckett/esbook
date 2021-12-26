@@ -65,7 +65,7 @@
 
     // === NOTEBOOK INSTANCE ===
 
-    let notebook;  // initialized in document_ready() below
+    let notebook;  // initialized by document_ready then clause below
 
 
     // === SETTINGS ===
@@ -86,18 +86,28 @@
 
     // === NOTEBOOK LOAD BOOTSTRAP ===
 
-    // We are using MathJax v2.7.x instead of v3.x.x because Plotly
-    // (used in ./output-handlers.js) still requires the older version.
-    // We want to upgrade when Plotly supports it.
+    const notebook_ready = new Promise((resolve, reject) => {
+        try {
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', document_ready, { once: true });
-    } else {
-        // use setTimeout() so that document_ready()
-        // runs after the rest of this script has loaded
-        setTimeout(document_ready);
-    }
-    async function document_ready() {
+            // We are using MathJax v2.7.x instead of v3.x.x because Plotly
+            // (used in ./output-handlers.js) still requires the older version.
+            // We want to upgrade when Plotly supports it.
+
+            if (document.readyState !== 'loading') {
+                resolve();
+            } else {
+                document.addEventListener('DOMContentLoaded', (event) => {
+                    resolve()
+                }, {
+                    once: true,
+                });
+            }
+
+        } catch (err) {
+            reject(err);
+        }
+    }).then(async () => {
+
         if (!is_MathJax_v2) {
             // only available in MathJax v3
             await MathJax.startup.promise;
@@ -105,7 +115,8 @@
         notebook = new Notebook();
         await notebook.setup();
         notebook.update_from_settings();  // in case setting update already received
-    }
+
+    });
 
 
     // === NOTEBOOK CLASS ===
@@ -1099,7 +1110,25 @@
         }
     }
 
-    facet_export(true);
+    // === NOTEBOOK INTERFACE ===
 
+    const nbi_ready =  notebook_ready.then(() => {
+        const nbi = {};
+
+        nbi.create_output_context = function (ie, output_data_collection) {
+            // define class this way to isolate references to notebook, ie and output_data_collection
+            return class OutputContext {
+            };
+        };
+
+        return Object.freeze(nbi);
+    });
+
+
+    // === EXPORT ===
+
+    facet_export({
+        notebook_ready,
+    });
 
 } catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end

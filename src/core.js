@@ -6,6 +6,8 @@
 
     globalThis.core = globalThis.core ?? {};
 
+    const core_script = document.currentScript;
+
 
     /** a Promise-like object with its resolve and reject methods exposed externally
      */
@@ -150,8 +152,9 @@
     // { promise_data, initial } where promise_data is
     // script_promise_data[script_url] and initial is true
     // iff the promise was newly created.
-    function establish_script_promise_data(script_url) {
-        let promise_data = script_promise_data[script_url];
+    function establish_script_promise_data(full_script_url) {
+        const data_key = full_script_url.toString();
+        let promise_data = script_promise_data[data_key];
         let initial;
         if (promise_data) {
             initial = false;
@@ -161,7 +164,7 @@
                 promise_data.resolve = resolve;
                 promise_data.reject  = reject;
             });
-            script_promise_data[script_url] = promise_data;
+            script_promise_data[data_key] = promise_data;
             initial = true;
         }
         return { initial, promise_data };
@@ -177,7 +180,8 @@
      *  or for error.
      */
     globalThis.core.load_script = async function load_script(parent, script_url) {
-        const { promise_data, initial } = establish_script_promise_data(script_url);
+        const full_script_url = new URL(script_url, core_script.src);
+        const { promise_data, initial } = establish_script_promise_data(full_script_url);
         if (initial) {
             let script_el;
             function script_load_handler(event) {
@@ -185,7 +189,7 @@
                 reset();
             }
             function script_load_error_handler(event) {
-                promise_data.reject?.(new Error(`error loading script ${script_url}`));
+                promise_data.reject?.(new Error(`error loading script ${full_script_url}`));
                 reset();
             }
             function reset() {
@@ -197,7 +201,7 @@
                 promise_data.reject  = undefined;
             }
             try {
-                script_el = globalThis.core.create_script(parent, script_url);
+                script_el = globalThis.core.create_script(parent, full_script_url);
                 script_el.addEventListener('load',  script_load_handler,       { once: true });
                 script_el.addEventListener('error', script_load_error_handler, { once: true });
             } catch (err) {
@@ -223,12 +227,13 @@
      *  or for error.
      */
     globalThis.core.load_script_and_wait_for_condition = async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn) {
-        const { promise_data, initial } = establish_script_promise_data(script_url);
+        const full_script_url = new URL(script_url, core_script.src);
+        const { promise_data, initial } = establish_script_promise_data(full_script_url);
         if (initial) {
             let script_el;
             let wait_timer_id;
             function script_load_error_handler(event) {
-                promise_data.reject?.(new Error(`error loading script ${script_url}`));
+                promise_data.reject?.(new Error(`error loading script ${full_script_url}`));
                 reset();
             }
             function wait() {
@@ -251,7 +256,7 @@
                 promise_data.reject  = undefined;
             }
             try {
-                script_el = globalThis.core.create_script(parent, script_url);
+                script_el = globalThis.core.create_script(parent, full_script_url);
                 script_el.addEventListener('error', script_load_error_handler, { once: true });
                 wait();
             } catch (err) {
@@ -284,8 +289,9 @@
     // { promise_data, initial } where promise_data is
     // facet_promise_data[facet_url] and initial is true
     // iff the promise was newly created.
-    function establish_facet_promise_data(facet_url) {
-        let promise_data = facet_promise_data[facet_url];
+    function establish_facet_promise_data(full_facet_url) {
+        const data_key = full_facet_url.toString();
+        let promise_data = facet_promise_data[data_key];
         let initial;
         if (promise_data) {
             initial = false;
@@ -295,7 +301,7 @@
                 promise_data.resolve = resolve;
                 promise_data.reject  = reject;
             });
-            facet_promise_data[facet_url] = promise_data;
+            facet_promise_data[data_key] = promise_data;
             initial = true;
         }
         return { initial, promise_data };
@@ -313,9 +319,10 @@
      *  or for error.
      */
     globalThis.core.facet = async function facet(facet_url) {
-        const { promise_data, initial } = establish_facet_promise_data(facet_url);
+        const full_facet_url = new URL(facet_url, core_script.src);
+        const { promise_data, initial } = establish_facet_promise_data(full_facet_url);
         if (initial) {
-            const script_el = globalThis.core.create_script(document.head, facet_url,
+            const script_el = globalThis.core.create_script(document.head, full_facet_url,
                 'defer', undefined,
             );
             function handle_facet_export_event(event) {
@@ -333,7 +340,7 @@
                 script_el.removeEventListener('error', handle_facet_script_error);
             }
             function handle_facet_script_error(event) {
-                promise_data.reject(new Error(`failed to load facet script: ${facet_url}`));
+                promise_data.reject(new Error(`failed to load facet script: ${full_facet_url}`));
                 // avoid further resolve/reject of promise
                 promise_data.resolve = undefined;
                 promise_data.reject  = undefined;
