@@ -189,32 +189,6 @@
         }
     }
 
-    class OutputContextMethodOutputHandler extends OutputHandler {
-        constructor() { super('output_context_method'); }
-
-        async update_notebook(output_context, call_spec) {
-            const { method, args } = call_spec;
-            if (typeof output_context[method] !== 'function' || Array.isArray(args)) {
-                throw new Error('invalid call_spec');
-            }
-            await output_context[method].apply(output_context, args);
-        }
-
-        validate_output_data(output_data) {
-            return ( super.validate_output_data(output_data) &&
-                     typeof output_data.method === 'string'  &&
-                     Array.isArray(output_data.args)            );
-        }
-
-        async generate_static_element(output_data) {
-            if (output_data.type !== this.type) {
-                throw new Error(`output_data type does not match (${this.type})`);
-            }
-            // will return undefined if output_data does not have an image_uri property
-            return _generate_image_element_from_output_data(output_data);
-        }
-    }
-
     class _GraphicsOutputHandlerBase extends OutputHandler {
         constructor(type) { super(type); }
 
@@ -251,7 +225,10 @@
         // output_data: { type: 'chart', image_format: string, image_format_quality: number, image_uri: string }
         async update_notebook(output_context, value) {
             const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: chart([size_config], config)');
-            const canvas = output_context.create_output_element(size_config, 'canvas');
+            const canvas = output_context.create_output_element({
+                size_config,
+                child_tag: 'canvas',
+            });
             const ctx = canvas.getContext('2d');
             // eliminate animation so that the canvas.toDataURL() call below will have something to render:
             Chart.defaults.global.animation.duration = 0;
@@ -297,10 +274,14 @@
             const [ size_config, dagre_config ] = output_context.parse_graphics_args(value.args, 'usage: dagre([size_config], config)');
             // svg elements must be created with a special namespace
             // (otherwise, will get error when rendering: xxx.getBBox is not a function)
-            const element_namespace = 'http://www.w3.org/2000/svg';
-            const svg = output_context.create_output_element(size_config, 'svg', element_namespace);
+            const svg_namespace = 'http://www.w3.org/2000/svg';
+            const svg = output_context.create_output_element({
+                size_config,
+                child_tag: 'svg',
+                child_element_namespace: svg_namespace,
+            });
             svg.classList.add('dagre');
-            svg.appendChild(document.createElementNS(element_namespace, 'g'));  // required by dagreD3
+            svg.appendChild(document.createElementNS(svg_namespace, 'g'));  // required by dagreD3
             svg.addEventListener('wheel', function (event) {
                 if (!event.shiftKey) {
                     // stop normal scroll wheel event from zooming the svg
@@ -410,7 +391,10 @@ console.log('>>>', d3.event);//!!!
         // output_data: { type: 'image_data', image_format: string, image_format_quality: number, image_uri: string }
         async update_notebook(output_context, value) {
             const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: image_data([size_config], config)');
-            const canvas = output_context.create_output_element(size_config, 'canvas');
+            const canvas = output_context.create_output_element({
+                size_config,
+                child_tag: 'canvas',
+            });
             const ctx = canvas.getContext('2d');
             const iter_config = Array.isArray(config) ? config : [ config ];
             for (const { x = 0, y = 0, image_data } of iter_config) {
@@ -441,7 +425,10 @@ console.log('>>>', d3.event);//!!!
         // output_data: { type: 'canvas2d', image_format: string, image_format_quality: number, image_uri: string }
         async update_notebook(output_context, value) {
             const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: canvas2d([size_config], config)');
-            const canvas = output_context.create_output_element(size_config, 'canvas');
+            const canvas = output_context.create_output_element({
+                size_config,
+                child_tag: 'canvas',
+            });
             const ctx = canvas.getContext('2d');
             for (const spec of config) {
                 try {
@@ -470,7 +457,10 @@ console.log('>>>', d3.event);//!!!
         // output_data: { type: 'plotly', image_format: string, image_format_quality: number, image_uri: string }
         async update_notebook(output_context, value) {
             const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: plotly([size_config], { data, layout?, config?, frames? })');
-            const output_element = output_context.create_output_element(size_config, 'div');
+            const output_element = output_context.create_output_element({
+                size_config,
+                child_tag: 'div',
+            });
             const image_type = 'png';
             const image_format = 'image/png';
             const image_format_quality = 1.0;
@@ -500,7 +490,6 @@ console.log('>>>', d3.event);//!!!
               [
                   TextOutputHandler,
                   ErrorOutputHandler,
-                  OutputContextMethodOutputHandler,
                   ChartOutputHandler,
                   DagreOutputHandler,
                   ImageDataOutputHandler,

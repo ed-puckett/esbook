@@ -34,116 +34,6 @@
         return { type: 'text', text, is_tex, inline_tex };
     }
 
-    function create_eval_context(post_action) {
-        function pp(thing, indent=4) {
-            let rest_args = [];
-            if (indent !== null && typeof indent !== 'undefined') {
-                if (!Number.isInteger(indent)) {
-                    throw new Error('indent must be an integer');
-                }
-                rest_args = [null, indent];
-            }
-            return JSON.stringify(thing, ...rest_args);
-        }
-
-        function println(output) {
-            output = (typeof output === 'undefined') ? '' : output;
-            post_action(transform_text_result(output + '\n'));  // action: { type: 'text', text, is_tex, inline_tex }
-        }
-
-        function printf(format, ...args) {
-            format = (typeof format === 'undefined') ? '' : format.toString();
-            post_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
-        }
-
-        function output_context_method(method, args, image_uri=null) {
-            post_action({
-                type: 'output_context_method',
-                method,
-                args,
-                image_uri,
-            });
-        }
-
-        function graphics(type, args) {
-            post_action({
-                type,
-                args,
-            });
-        }
-
-        function chart(...args) {
-            graphics('chart', args);
-        }
-
-        function dagre(...args) {
-            graphics('dagre', args);
-        }
-
-        function image_data(...args) {
-            graphics('image_data', args);
-        }
-
-        function create_canvas2d(size_config) {
-            return new Canvas2dContext(graphics, size_config);
-        }
-
-        function plotly(...args) {
-            graphics('plotly', args);
-        }
-
-        const eval_context = {
-            _:        nerdamer,
-            factor:   nerdamer.factor.bind(nerdamer),
-            simplify: nerdamer.simplify.bind(nerdamer),
-            expand:   nerdamer.expand.bind(nerdamer),
-            pp,
-            println,
-            printf,
-            graphics,
-            chart,
-            dagre,
-            image_data,
-            create_canvas2d,
-            plotly,
-         };
-
-        return eval_context;
-    }
-
-    function expression_evaluator(expression, post_action) {
-        const eval_context = create_eval_context(post_action);
-
-        // Create a "full expression" that is a block containing bindings for
-        // all the values in eval_context.  This allows us to evaluate
-        // expression in a context that contains these bindings but then
-        // remove all the temporary bindings from globalThis and while letting
-        // async code from expression still work after this function exits.
-
-        if (globalThis.hasOwnProperty('eval_context')) {
-            throw new Error('expression_evaluator: globalThis already has a property named "eval_context"');
-        }
-        globalThis.eval_context = eval_context;
-
-        var full_expression = `{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${expression}}`;
-
-        let result;
-        try {
-            // evaluate the expression in the global context by using (0, eval) for the reference to eval
-            result = (0, eval)(full_expression);  // may throw an error
-        } finally {
-            delete globalThis.eval_context;
-        }
-
-        Promise.resolve(result)  // takes care of waiting for result if result is a Promise
-            .then(result_value => {
-                // if expression does not end with ';', include the final result in outputs
-                if (!expression.trim().endsWith(';')) {
-                    post_action(transform_text_result(result_value));  // action: { type: 'text', text, is_tex, inline_tex }
-                }
-            });
-    }
-
     class EvalWorker {
         constructor(output_context, expression) {
             Object.defineProperties(this, {
@@ -174,80 +64,136 @@
         _eval_expression() {
             const self = this;
 
-            const pending_actions = [];
-            let waiting_for_action;  // set when pending_actions is empty; a promise on which the action processor is waiting
+            const eval_context = self._create_eval_context();
 
-            function clear_pending_actions() {
-                pending_actions.splice(0, pending_actions.length);  // make pending_actions empty
-            }
+            // Create a "full expression" that is a block containing bindings for
+            // all the values in eval_context.  This allows us to evaluate
+            // expression in a context that contains these bindings but then
+            // remove all the temporary bindings from globalThis and while letting
+            // async code from expression still work after this function exits.
 
-            function cleanup_after_stopped() {
-                clear_pending_actions();
-                if (waiting_for_action) {
-                    const w = waiting_for_action;
-                    waiting_for_action = undefined;
-                    w.reject(new Error('stopped'));
-                }
+            if (globalThis.hasOwnProperty('eval_context')) {
+                throw new Error('EvalWorker: globalThis already has a property named "eval_context"');
             }
+            globalThis.eval_context = eval_context;
 
-            function consume_pending_actions() {
-                while (pending_actions.length > 0) {
-                    const action = pending_actions.shift();
-                    //!!! calling an async method, but not waiting...
-                    self.output_context.output_handler_update_notebook(action.type, action);
-                }
-            }
-
-            function process_pending_actions() {
-                if (self._stopped) {
-                    cleanup_after_stopped();
-                } else {
-                    if (waiting_for_action) {
-                        const w = waiting_for_action;
-                        waiting_for_action = undefined;
-                        w.resolve();
-                    } else {
-                        consume_pending_actions();
-                        waiting_for_action = new globalThis.core.OpenPromise();
-                        waiting_for_action.then(process_pending_actions, process_error);
-                    }
-                }
-            }
-
-            function process_error(error) {
-                if (self._stopped) {
-                    cleanup_after_stopped();
-                } else {
-                    //!!! calling an async method, but not waiting...
-                    self.output_context.output_handler_update_notebook('error', error);
-                }
-            }
-
-            function post_action(action) {
-                if (self._stopped) {
-                    console.warn('** action received after stopped', action);
-                    cleanup_after_stopped();
-                } else {
-                    pending_actions.push(action);
-                    process_pending_actions();
-                }
-            }
-
-            function post_error(error) {
-                if (self._stopped) {
-                    console.warn('** error received after stopped', error);
-                    cleanup_after_stopped();
-                } else {
-                    process_error(error);
-                }
-            }
+            var full_expression = `{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${self.expression}}`;
 
             // run the evaluation:
+            let result;
             try {
-                expression_evaluator(self.expression, post_action);
+                // evaluate the expression in the global context by using (0, eval) for the reference to eval
+                result = (0, eval)(full_expression);  // may throw an error
             } catch (err) {
-                post_error(err);
+                eval_context.process_error(err);
+            } finally {
+                delete globalThis.eval_context;
             }
+
+            Promise.resolve(result)  // takes care of waiting for result if result is a Promise
+                .then(
+                    result_value => {
+                        // if expression does not end with ';', include the final result in outputs
+                        if (!self.expression.trim().endsWith(';')) {
+                            eval_context.process_action(transform_text_result(result_value));  // action: { type: 'text', text, is_tex, inline_tex }
+                        }
+                    },
+                    eval_context.process_error
+                );
+        }
+
+        _create_eval_context() {
+            const self = this;
+
+            function is_stopped() {
+                return self._stopped;
+            }
+
+            async function process_action(action) {
+                if (self._stopped) {
+                    throw new Error('error received after EvalWorker already stopped');
+                } else {
+                    await self.output_context.output_handler_update_notebook(action.type, action);
+                }
+            }
+
+            async function process_error(error) {
+                if (self._stopped) {
+                    throw new Error('error received after EvalWorker already stopped');
+                } else {
+                    await self.output_context.output_handler_update_notebook('error', error);
+                }
+            }
+
+            function pp(thing, indent=4) {
+                let rest_args = [];
+                if (indent !== null && typeof indent !== 'undefined') {
+                    if (!Number.isInteger(indent)) {
+                        throw new Error('indent must be an integer');
+                    }
+                    rest_args = [null, indent];
+                }
+                return JSON.stringify(thing, ...rest_args);
+            }
+
+            function println(output) {
+                output = (typeof output === 'undefined') ? '' : output;
+                process_action(transform_text_result(output + '\n'));  // action: { type: 'text', text, is_tex, inline_tex }
+            }
+
+            function printf(format, ...args) {
+                format = (typeof format === 'undefined') ? '' : format.toString();
+                process_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
+            }
+
+            function graphics(type, args) {
+                process_action({
+                    type,
+                    args,
+                });
+            }
+
+            function chart(...args) {
+                graphics('chart', args);
+            }
+
+            function dagre(...args) {
+                graphics('dagre', args);
+            }
+
+            function image_data(...args) {
+                graphics('image_data', args);
+            }
+
+            function create_canvas2d(size_config) {
+                return new Canvas2dContext(graphics, size_config);
+            }
+
+            function plotly(...args) {
+                graphics('plotly', args);
+            }
+
+            const eval_context = {
+                output_context: self.output_context,
+                _:        nerdamer,
+                factor:   nerdamer.factor.bind(nerdamer),
+                simplify: nerdamer.simplify.bind(nerdamer),
+                expand:   nerdamer.expand.bind(nerdamer),
+                is_stopped,
+                process_action,
+                process_error,
+                pp,
+                println,
+                printf,
+                graphics,
+                chart,
+                dagre,
+                image_data,
+                create_canvas2d,
+                plotly,
+            };
+
+            return eval_context;
         }
     }
 

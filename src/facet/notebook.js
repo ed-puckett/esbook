@@ -1095,12 +1095,34 @@
                     return [ size_config, config ];
                 },
 
-                create_output_element(size_config=null, child_tag=null, child_element_namespace=null) {
+                /** create a new element in the output section of the ie
+                 *  @param {Object|undefined|null} options: {
+                 *             size_config?: [width: number, height: number],
+                 *             tag?: string,        // tag name for element; default: 'div'
+                 *             element_namespace?: string,
+                 *             child_tag?: string,  // if given, create and return a child element
+                 *             child_element_namespace?: string,
+                 *         }
+                 */
+                create_output_element(options) {
+                    const {
+                        size_config,
+                        tag = 'div',
+                        element_namespace,
+                        child_tag,
+                        child_element_namespace,
+                    } = (options ?? {});
+
                     // Re: Chart.js:
                     // Wrap the canvas element in a div to prevent quirky behavious of Chart.js size handling.
                     // See: https://stackoverflow.com/questions/19847582/chart-js-canvas-resize.
                     // (Note: doing this for all text/graphics types)
-                    const output_element = document.createElement('div');
+                    let output_element;
+                    if (element_namespace) {
+                        output_element = document.createElementNS(element_namespace, tag);
+                    } else {
+                        output_element = document.createElement(tag);
+                    }
                     output_element.id = globalThis.core.generate_object_id();
                     const output_element_collection = ie.querySelector('.output');
                     output_element_collection.appendChild(output_element);
