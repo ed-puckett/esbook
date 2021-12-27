@@ -89,16 +89,16 @@
 
             // evaluate the expression:
             try {
-                await eval_fn.apply(eval_fn_this, eval_fn_args).then(
-                    result => {
-                        if (typeof result !== 'undefined') {
-                            eval_context.process_action(transform_text_result(result));  // action: { type: 'text', text, is_tex, inline_tex }
-                        }
-                    },
-                    eval_context.process_error
-                );
+                const result = await eval_fn.apply(eval_fn_this, eval_fn_args);
+                if (typeof result !== 'undefined') {
+                    await eval_context.process_action(transform_text_result(result));  // action: { type: 'text', text, is_tex, inline_tex }
+                }
             } catch (err) {
-                eval_context.process_error(err);
+                try {
+                    await eval_context.process_error(err);
+                } catch (err2) {
+                    console.error('unexpected: second-level error occurred', err2);
+                }
             }
 
             return self;
@@ -115,7 +115,7 @@
                 if (self._stopped) {
                     throw new Error('error received after EvalWorker already stopped');
                 } else {
-                    await self.output_context.output_handler_update_notebook(action.type, action);
+                    return self.output_context.output_handler_update_notebook(action.type, action);
                 }
             }
 
@@ -123,41 +123,41 @@
                 if (self._stopped) {
                     throw new Error('error received after EvalWorker already stopped');
                 } else {
-                    await self.output_context.output_handler_update_notebook('error', error);
+                    return self.output_context.output_handler_update_notebook('error', error);
                 }
             }
 
-            function println(output) {
+            async function println(output) {
                 output = (typeof output === 'undefined') ? '' : output;
-                process_action(transform_text_result(output + '\n'));  // action: { type: 'text', text, is_tex, inline_tex }
+                return process_action(transform_text_result(output + '\n'));  // action: { type: 'text', text, is_tex, inline_tex }
             }
 
-            function printf(format, ...args) {
+            async function printf(format, ...args) {
                 format = (typeof format === 'undefined') ? '' : format.toString();
-                process_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
+                return process_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
             }
 
-            function graphics(type, args) {
-                process_action({
+            async function graphics(type, args) {
+                return process_action({
                     type,
                     args,
                 });
             }
 
-            function chart(...args) {
-                graphics('chart', args);
+            async function chart(...args) {
+                return graphics('chart', args);
             }
 
-            function dagre(...args) {
-                graphics('dagre', args);
+            async function dagre(...args) {
+                return graphics('dagre', args);
             }
 
-            function image_data(...args) {
-                graphics('image_data', args);
+            async function image_data(...args) {
+                return graphics('image_data', args);
             }
 
-            function plotly(...args) {
-                graphics('plotly', args);
+            async function plotly(...args) {
+                return graphics('plotly', args);
             }
 
             const eval_context = {
@@ -169,7 +169,6 @@
                 is_stopped,
                 process_action,
                 process_error,
-                pp,
                 println,
                 printf,
                 graphics,
