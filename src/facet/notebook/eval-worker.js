@@ -165,10 +165,6 @@
                 graphics('image_data', args);
             }
 
-            function create_canvas2d(size_config) {
-                return new Canvas2dContext(graphics, size_config);
-            }
-
             function plotly(...args) {
                 graphics('plotly', args);
             }
@@ -189,7 +185,6 @@
                 chart,
                 dagre,
                 image_data,
-                create_canvas2d,
                 plotly,
             };
 
