@@ -1,21 +1,24 @@
 {
     "nb_type": "esbook",
     "nb_version": "1.0.0",
-    "auto_hide_inputs": false,
     "elements": [
         {
             "id": "id-e856aeab-cba3-4d2a-ad39-f637634206a7",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, asyncify_iterable, chain_async } = iterable_util;\n\n(async () => {\n\n    const ai = asyncify_iterable(range(10), 100);\n\n    println('flat');\n    const ai2 = asyncify_iterable(range(100, 105), 30);\n    const aix = asyncify_iterable([111, asyncify_iterable(['a', [ 'b', 'cd', ai, 'ef' ], ai2, 'ghi'], 300), 222], 200);\n    for (const depth of range(6)) {\n        print(` depth=${depth}:`);\n        await aix.flat(depth).for_each(x => print(` ${Array.isArray(x) ? `[${x}]` : x}`));\n        println();\n    }\n\n    println();\n    println('chain');\n    await chain_async(ai, 'abc', ai2).for_each(x => print(` ${Array.isArray(x) ? `[${x}]` : x}`));\n    println();\n\n    println();\n    println('tee');\n    const streams = ai.tee(3);\n    for (const i in streams) {\n        await streams[i].for_each(x => print(` ${x}/${i}`));\n        println();\n    }\n\n    println();\n    println('asyncify string');\n    await asyncify_iterable('abcdefg', 100).for_each(x => print(` ${x}`));\n    println();\n\n})();",
+            "input": "(async () => {\n\n    const { range, asyncify_iterable, chain_async } = await core.facet('lib/iterable-util.js');\n\n    const ai = asyncify_iterable(range(10), 100);\n\n    println('flat');\n    const ai2 = asyncify_iterable(range(100, 105), 30);\n    const aix = asyncify_iterable([111, asyncify_iterable(['a', [ 'b', 'cd', ai, 'ef' ], ai2, 'ghi'], 300), 222], 200);\n    for (const depth of range(6)) {\n        printf(` depth=${depth}:`);\n        await aix.flat(depth).for_each(x => printf(` ${Array.isArray(x) ? `[${x}]` : x}`));\n        println();\n    }\n\n    println();\n    println('chain');\n    await chain_async(ai, 'abc', ai2).for_each(x => printf(` ${Array.isArray(x) ? `[${x}]` : x}`));\n    println();\n\n    println();\n    println('tee');\n    const streams = ai.tee(3);\n    for (const i in streams) {\n        await streams[i].for_each(x => printf(` ${x}/${i}`));\n        println();\n    }\n\n    println();\n    println('asyncify string');\n    await asyncify_iterable('abcdefg', 100).for_each(x => printf(` ${x}`));\n    println();\n\n})();",
             "output": [
                 {
                     "type": "text",
-                    "text": "flat\n depth=0: [object Object]\n depth=1: 111 [object async_iterable] 222\n depth=2: 111 a [b,cd,[object async_iterable],ef] [object async_iterable] ghi 222\n depth=3: 111 a b cd [object async_iterable] ef 100 101 102 103 104 g h i 222\n depth=4: 111 a b c d 0 1 2 3 4 5 6 7 8 9 e f 100 101 102 103 104 g h i 222\n depth=5: 111 a b c d 0 1 2 3 4 5 6 7 8 9 e f 100 101 102 103 104 g h i 222\n\nchain\n 0 1 2 3 4 5 6 7 8 9 a b c 100 101 102 103 104\n\ntee\n 0/0 1/0 2/0 3/0 4/0 5/0 6/0 7/0 8/0 9/0\n 0/1 1/1 2/1 3/1 4/1 5/1 6/1 7/1 8/1 9/1\n 0/2 1/2 2/2 3/2 4/2 5/2 6/2 7/2 8/2 9/2\n\nasyncify string\n a b c d e f g\n"
+                    "text": "flat\n"
+                },
+                {
+                    "type": "text",
+                    "text": " depth=0: [object Object]\n depth=1: 111 [object async_iterable] 222\n depth=2: 111 a [b,cd,[object async_iterable],ef] [object async_iterable] ghi 222\n depth=3: 111 a b cd [object async_iterable] ef 100 101 102 103 104 g h i 222\n depth=4: 111 a b c d 0 1 2 3 4 5 6 7 8 9 e f 100 101 102 103 104 g h i 222\n depth=5: 111 a b c d 0 1 2 3 4 5 6 7 8 9 e f 100 101 102 103 104 g h i 222\n\nchain\n 0 1 2 3 4 5 6 7 8 9 a b c 100 101 102 103 104\n\ntee\n 0/0 1/0 2/0 3/0 4/0 5/0 6/0 7/0 8/0 9/0\n 0/1 1/1 2/1 3/1 4/1 5/1 6/1 7/1 8/1 9/1\n 0/2 1/2 2/2 3/2 4/2 5/2 6/2 7/2 8/2 9/2\n\nasyncify string\n a b c d e f g\n"
                 }
             ]
         },
         {
             "id": "id-edc160e3-b09d-4f3d-a1ca-0db873a53d2a",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, asyncify_iterable } = iterable_util;\n\n(async () => {\n    const ai = asyncify_iterable(range(10), 100);\n\n    println('START: map');\n    for await (const i of ai.map(x => x**2)) {\n        print(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println();\n    println('START: map/pluck');\n    for await (const i of ai.map(x => ({ value: ` | x is ${x} |` })).pluck('value')) {\n        print(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println();\n    println('START: for_each');\n    await ai.for_each(x => print(` ${x}`));\n    println();\n    println('DONE');\n\n    println();\n    println('START: cycle');\n    for await (const i of ai.cycle(3)) {\n        print(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println();\n    println('START: nth');\n    println(await ai.nth(7));\n    println('DONE');\n\n    println();\n    println(`some  x <  5: ${await ai.some(x => x < 5)}`);\n    println(`some  x >  8: ${await ai.some(x => x > 8)}`);\n    println(`some  x >  9: ${await ai.some(x => x > 9)}`);\n    println(`every x <  5: ${await ai.every(x => x < 5)}`);\n    println(`every x >= 0: ${await ai.every(x => x >= 0)}`);\n\n    println();\n    println('map/find');\n    printf('%4j\\n', await ai.map((x, i) => ({ square: x**2, x, i })).find(y => y.square > 5));\n\n})();",
+            "input": "(async () => {\n\n    const { range, asyncify_iterable, chain_async } = await core.facet('lib/iterable-util.js');\n\n    const ai = asyncify_iterable(range(10), 100);\n\n    println('START: map');\n    for await (const i of ai.map(x => x**2)) {\n        printf(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println();\n    println('START: map/pluck');\n    for await (const i of ai.map(x => ({ value: ` | x is ${x} |` })).pluck('value')) {\n        printf(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println();\n    println('START: for_each');\n    await ai.for_each(x => printf(` ${x}`));\n    println();\n    println('DONE');\n\n    println();\n    println('START: cycle');\n    for await (const i of ai.cycle(3)) {\n        printf(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println();\n    println('START: nth');\n    println(await ai.nth(7));\n    println('DONE');\n\n    println();\n    println(`some  x <  5: ${await ai.some(x => x < 5)}`);\n    println(`some  x >  8: ${await ai.some(x => x > 8)}`);\n    println(`some  x >  9: ${await ai.some(x => x > 9)}`);\n    println(`every x <  5: ${await ai.every(x => x < 5)}`);\n    println(`every x >= 0: ${await ai.every(x => x >= 0)}`);\n\n    println();\n    println('map/find');\n    printf('%4j\\n', await ai.map((x, i) => ({ square: x**2, x, i })).find(y => y.square > 5));\n\n})();",
             "output": [
                 {
                     "type": "text",
@@ -25,17 +28,21 @@
         },
         {
             "id": "id-f61fb666-61ee-43d6-8637-29ac728908c3",
-            "input": "println('START');\nconst interval = 250;\nlet i = 10;\nfunction make_iter(done) {\n    function iter() {\n        if (i >= 0) {\n            print(` ${i}`);\n            i--;\n            setTimeout(iter, 100);\n        } else {\n            println();\n            println('DONE');\n            done();\n        }\n    };\n    iter()\n}\n\nnew Promise(make_iter);",
+            "input": "println('START');\nconst interval = 250;\nlet i = 10;\nfunction make_iter(done) {\n    function iter() {\n        if (i >= 0) {\n            printf(` ${i}`);\n            i--;\n            setTimeout(iter, 100);\n        } else {\n            println();\n            println('DONE');\n            done();\n        }\n    };\n    iter()\n}\n\nnew Promise(make_iter);",
             "output": [
                 {
                     "type": "text",
-                    "text": "START\n 10 9 8 7 6 5 4 3 2 1 0\nDONE\n"
+                    "text": "START\n"
+                },
+                {
+                    "type": "text",
+                    "text": " 10 9 8 7 6 5 4 3 2 1 0\nDONE\n"
                 }
             ]
         },
         {
             "id": "id-6cb489ac-63e5-4456-9e62-c34129e68176",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, asyncify_iterable } = iterable_util;\n\n(async () => {\n    const ai = asyncify_iterable(range(10, 0, true), 100);\n\n    println('START ASYNC');\n    for await (const i of ai) {\n        print(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println('RESTART ASYNC');\n    for await (const i of ai) {\n        print(` ${i}`);\n    }\n    println();\n    println('DONE');\n})();",
+            "input": "(async () => {\n\n    const { range, asyncify_iterable, chain_async } = await core.facet('lib/iterable-util.js');\n\n    const ai = asyncify_iterable(range(10, 0, true), 100);\n\n    println('START ASYNC');\n    for await (const i of ai) {\n        printf(` ${i}`);\n    }\n    println();\n    println('DONE');\n\n    println('RESTART ASYNC');\n    for await (const i of ai) {\n        printf(` ${i}`);\n    }\n    println();\n    println('DONE');\n})();",
             "output": [
                 {
                     "type": "text",
@@ -45,7 +52,7 @@
         },
         {
             "id": "id-ae9cb5a8-593e-40b4-8466-c5384d064bb1",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, delay_ms, asyncify_event_source, asyncify_iterable } = iterable_util;\n\n(async () => {\n    const ai = asyncify_event_source(async (push) => {\n        for await (const i of asyncify_iterable(range(4), 500)) {\n            println(`pushing ${i}`);\n            push({ value: i });\n        }\n        push({ done: true });\n    });\n\n    println('PASS 1');\n    for await (const i of ai) {\n        println(`==> ${i}`);\n    }\n    println();\n    println('PASS 2');\n    for await (const i of ai) {\n        println(`==> ${i}`);\n    }\n\n    println();\n    println('Allocate iterator and 20 results from it, then wait for them to settle:');\n    println('> allocating...');\n    const results = [];\n    let iterator = ai[Symbol.asyncIterator]();\n    for (const i of range(20)) {\n        results.push(iterator.next());\n    }\n    println('> waiting for all pending results...');\n    await Promise.allSettled(results);\n    println('> output results:');\n    for (const p of results) {\n        await p.then(x => printf(' %j', x));\n    }\n    println();\n\n    println();\n    println('Allocate iterator, then wait 4 seconds, then read the iterator:');\n    println('> allocating iterator...');\n    iterator = ai[Symbol.asyncIterator]();\n    println('> waiting 4 seconds...');\n    await delay_ms(4000);\n    println('> output results from iterator:');\n    for (;;) {\n        const p = iterator.next();\n        const x = await p;\n        printf(' %j', x);\n        if (x.done) {\n            break;\n        }\n    }\n    println();\n\n    println();\n    println('Create event source iterable with max_pending_inputs=3:');\n    let done_resolve, done_promise = new Promise(resolve => done_resolve = resolve);\n    let limited_ai = asyncify_event_source(async (push) => {\n        try {\n            for await (const i of asyncify_iterable(range(4), 500)) {\n                println(`pushing ${i}`);\n                push({ value: i });\n            }\n            push({ done: true });\n        } catch (err) {\n            println('caught error:');\n            println(err);\n        }\n        done_resolve();\n    }, 3);\n    println('> allocting iterator...');\n    limited_ai[Symbol.asyncIterator]();\n    println('> waiting for 4 calls to push()...');\n    await done_promise;\n    await delay_ms(1000);\n\n})();",
+            "input": "(async () => {\n\n    const { range, asyncify_iterable, asyncify_event_source, delay_ms, chain_async } = await core.facet('lib/iterable-util.js');\n\n    const ai = asyncify_event_source(async (push) => {\n        for await (const i of asyncify_iterable(range(4), 500)) {\n            println(`pushing ${i}`);\n            push({ value: i });\n        }\n        push({ done: true });\n    });\n\n    println('PASS 1');\n    for await (const i of ai) {\n        println(`==> ${i}`);\n    }\n    println();\n    println('PASS 2');\n    for await (const i of ai) {\n        println(`==> ${i}`);\n    }\n\n    println();\n    println('Allocate iterator and 20 results from it, then wait for them to settle:');\n    println('> allocating...');\n    const results = [];\n    let iterator = ai[Symbol.asyncIterator]();\n    for (const i of range(20)) {\n        results.push(iterator.next());\n    }\n    println('> waiting for all pending results...');\n    await Promise.allSettled(results);\n    println('> output results:');\n    for (const p of results) {\n        await p.then(x => printf(' %j', x));\n    }\n    println();\n\n    println();\n    println('Allocate iterator, then wait 4 seconds, then read the iterator:');\n    println('> allocating iterator...');\n    iterator = ai[Symbol.asyncIterator]();\n    println('> waiting 4 seconds...');\n    await delay_ms(4000);\n    println('> output results from iterator:');\n    for (;;) {\n        const p = iterator.next();\n        const x = await p;\n        printf(' %j', x);\n        if (x.done) {\n            break;\n        }\n    }\n    println();\n\n    println();\n    println('Create event source iterable with max_pending_inputs=3:');\n    let done_resolve, done_promise = new Promise(resolve => done_resolve = resolve);\n    let limited_ai = asyncify_event_source(async (push) => {\n        try {\n            for await (const i of asyncify_iterable(range(4), 500)) {\n                println(`pushing ${i}`);\n                push({ value: i });\n            }\n            push({ done: true });\n        } catch (err) {\n            println('caught error:');\n            println(err);\n        }\n        done_resolve();\n    }, 3);\n    println('> allocting iterator...');\n    limited_ai[Symbol.asyncIterator]();\n    println('> waiting for 4 calls to push()...');\n    await done_promise;\n    await delay_ms(1000);\n\n})();",
             "output": [
                 {
                     "type": "text",
@@ -55,27 +62,171 @@
         },
         {
             "id": "id-aef0b575-ee20-4c9c-b631-3040a112ea7e",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, delay_ms, asyncify_event_source, asyncify_iterable } = iterable_util;\n\n(async () => {\n\n    println('=== SYNC ===');\n\n    let branches = range(5).map(x => x**2).tee(3);\n\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n    println();\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n    println();\n    println('=== ASYNC ===');\n\n    branches = asyncify_iterable(range(5).map(x => x**2), 1000).tee(3);\n\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for await (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n    println();\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for await (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n})();",
+            "input": "(async () => {\n\n    const { range, asyncify_iterable, chain_async } = await core.facet('lib/iterable-util.js');\n\n    println('=== SYNC ===');\n\n    let branches = range(5).map(x => x**2).tee(3);\n\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n    println();\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n    println();\n    println('=== ASYNC ===');\n\n    branches = asyncify_iterable(range(5).map(x => x**2), 1000).tee(3);\n\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for await (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n    println();\n    for (const i of range(branches.length)) {\n        println(`branch ${i}:`);\n        for await (const element of branches[i].map(x => ({ i, x }))) {\n            printf(' %j', element);\n        }\n        println();\n    }\n\n})();",
             "output": [
                 {
                     "type": "text",
-                    "text": "=== SYNC ===\nbranch 0:\n {\"i\":0,\"x\":0} {\"i\":0,\"x\":1} {\"i\":0,\"x\":4} {\"i\":0,\"x\":9} {\"i\":0,\"x\":16}\nbranch 1:\n {\"i\":1,\"x\":0} {\"i\":1,\"x\":1} {\"i\":1,\"x\":4} {\"i\":1,\"x\":9} {\"i\":1,\"x\":16}\nbranch 2:\n {\"i\":2,\"x\":0} {\"i\":2,\"x\":1} {\"i\":2,\"x\":4} {\"i\":2,\"x\":9} {\"i\":2,\"x\":16}\n\nbranch 0:\n\nbranch 1:\n\nbranch 2:\n\n\n=== ASYNC ===\nbranch 0:\n {\"i\":0,\"x\":0} {\"i\":0,\"x\":1} {\"i\":0,\"x\":4} {\"i\":0,\"x\":9} {\"i\":0,\"x\":16}\nbranch 1:\n {\"i\":1,\"x\":0} {\"i\":1,\"x\":1} {\"i\":1,\"x\":4} {\"i\":1,\"x\":9} {\"i\":1,\"x\":16}\nbranch 2:\n {\"i\":2,\"x\":0} {\"i\":2,\"x\":1} {\"i\":2,\"x\":4} {\"i\":2,\"x\":9} {\"i\":2,\"x\":16}\n\nbranch 0:\n\nbranch 1:\n\nbranch 2:\n\n"
+                    "text": "=== SYNC ===\n"
+                },
+                {
+                    "type": "text",
+                    "text": "branch 0:\n"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":0,\"x\":0}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":0,\"x\":1}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":0,\"x\":4}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":0,\"x\":9}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":0,\"x\":16}"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "branch 1:\n"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":1,\"x\":0}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":1,\"x\":1}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":1,\"x\":4}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":1,\"x\":9}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":1,\"x\":16}"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "branch 2:\n"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":2,\"x\":0}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":2,\"x\":1}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":2,\"x\":4}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":2,\"x\":9}"
+                },
+                {
+                    "type": "text",
+                    "text": " {\"i\":2,\"x\":16}"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "branch 0:\n"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "branch 1:\n"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "branch 2:\n"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "=== ASYNC ===\n"
+                },
+                {
+                    "type": "text",
+                    "text": "branch 0:\n {\"i\":0,\"x\":0} {\"i\":0,\"x\":1} {\"i\":0,\"x\":4} {\"i\":0,\"x\":9} {\"i\":0,\"x\":16}\nbranch 1:\n {\"i\":1,\"x\":0} {\"i\":1,\"x\":1} {\"i\":1,\"x\":4} {\"i\":1,\"x\":9} {\"i\":1,\"x\":16}\nbranch 2:\n {\"i\":2,\"x\":0} {\"i\":2,\"x\":1} {\"i\":2,\"x\":4} {\"i\":2,\"x\":9} {\"i\":2,\"x\":16}\n\nbranch 0:\n\nbranch 1:\n\nbranch 2:\n\n"
                 }
             ]
         },
         {
             "id": "id-83d13ac9-07a7-4d78-8841-5ee59a4e0913",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, delay_ms, asyncify_event_source, asyncify_iterable, combine_async, merge, merge_async } = iterable_util;\n\n(async () => {\n\n    const iterable_configs = [\n        [ 7, 100 ],\n        [ 'abcdefghij', 300 ],\n        [ 'pqrstuvwxyz', 500 ],\n    ];\n\n    println(`Creating ${iterable_configs.length} async iterables:`);\n    for (const [n, delay] of iterable_configs) {\n        println(` ${n} elements with inter-element delay ${delay}`);\n    }\n\n    const iterables = iterable_configs.map(([n, delay]) => asyncify_iterable(range(n), delay));\n\n    println();\n    println('combine_async(...iterables):');\n    for await (const element of combine_async(...iterables)) {\n        printf(' %j', element);\n    }\n    println();\n\n    println();\n    println('merge_async(...iterables):');\n    for await (const element of merge_async(...iterables)) {\n        printf(' %j', element);\n    }\n    println();\n\n    println();\n    println('merge(...sync_iterables):');\n    const sync_iterables = iterable_configs.map(([n]) => range(n));\n    for (const element of merge(...sync_iterables)) {\n        printf(' %j', element);\n    }\n    println();\n\n})();",
+            "input": "(async () => {\n\n    const { range, asyncify_iterable, chain_async, combine_async, merge, merge_async } = await core.facet('lib/iterable-util.js');\n\n    const iterable_configs = [\n        [ 7, 100 ],\n        [ 'abcdefghij', 300 ],\n        [ 'pqrstuvwxyz', 500 ],\n    ];\n\n    println(`Creating ${iterable_configs.length} async iterables:`);\n    for (const [n, delay] of iterable_configs) {\n        println(` ${n} elements with inter-element delay ${delay}`);\n    }\n\n    const iterables = iterable_configs.map(([n, delay]) => asyncify_iterable(range(n), delay));\n\n    println();\n    println('combine_async(...iterables):');\n    for await (const element of combine_async(...iterables)) {\n        printf(' %j', element);\n    }\n    println();\n\n    println();\n    println('merge_async(...iterables):');\n    for await (const element of merge_async(...iterables)) {\n        printf(' %j', element);\n    }\n    println();\n\n    println();\n    println('merge(...sync_iterables):');\n    const sync_iterables = iterable_configs.map(([n]) => range(n));\n    for (const element of merge(...sync_iterables)) {\n        printf(' %j', element);\n    }\n    println();\n\n})();",
             "output": [
                 {
                     "type": "text",
-                    "text": "Creating 3 async iterables:\n 7 elements with inter-element delay 100\n abcdefghij elements with inter-element delay 300\n pqrstuvwxyz elements with inter-element delay 500\n\ncombine_async(...iterables):\n [3,\"a\",\"p\"] [4,\"a\",\"p\"] [4,\"b\",\"p\"] [5,\"b\",\"p\"] [6,\"b\",\"p\"] [6,\"c\",\"p\"] [6,\"c\",\"q\"] [6,\"d\",\"q\"] [6,\"d\",\"r\"] [6,\"e\",\"r\"] [6,\"f\",\"r\"] [6,\"f\",\"s\"] [6,\"g\",\"s\"] [6,\"h\",\"s\"] [6,\"h\",\"t\"] [6,\"i\",\"t\"] [6,\"i\",\"u\"] [6,\"j\",\"u\"] [6,\"j\",\"v\"] [6,\"j\",\"w\"] [6,\"j\",\"x\"] [6,\"j\",\"y\"] [6,\"j\",\"z\"]\n\nmerge_async(...iterables):\n 0 1 \"a\" 2 3 \"p\" 4 \"b\" 5 6 \"c\" \"q\" \"d\" \"r\" \"e\" \"f\" \"s\" \"g\" \"h\" \"t\" \"i\" \"u\" \"j\" \"v\" \"w\" \"x\" \"y\" \"z\"\n\nmerge(...sync_iterables):\n 0 \"a\" \"p\" 1 \"b\" \"q\" 2 \"c\" \"r\" 3 \"d\" \"s\" 4 \"e\" \"t\" 5 \"f\" \"u\" 6 \"g\" \"v\" \"h\" \"w\" \"i\" \"x\" \"j\" \"y\" \"z\"\n"
+                    "text": "Creating 3 async iterables:\n"
+                },
+                {
+                    "type": "text",
+                    "text": " 7 elements with inter-element delay 100\n"
+                },
+                {
+                    "type": "text",
+                    "text": " abcdefghij elements with inter-element delay 300\n"
+                },
+                {
+                    "type": "text",
+                    "text": " pqrstuvwxyz elements with inter-element delay 500\n"
+                },
+                {
+                    "type": "text",
+                    "text": "\n"
+                },
+                {
+                    "type": "text",
+                    "text": "combine_async(...iterables):\n [3,\"a\",\"p\"] [4,\"a\",\"p\"] [4,\"b\",\"p\"] [5,\"b\",\"p\"] [6,\"b\",\"p\"] [6,\"c\",\"p\"] [6,\"c\",\"q\"] [6,\"d\",\"q\"] [6,\"d\",\"r\"] [6,\"e\",\"r\"] [6,\"f\",\"r\"] [6,\"f\",\"s\"] [6,\"g\",\"s\"] [6,\"h\",\"s\"] [6,\"h\",\"t\"] [6,\"i\",\"t\"] [6,\"i\",\"u\"] [6,\"j\",\"u\"] [6,\"j\",\"v\"] [6,\"j\",\"w\"] [6,\"j\",\"x\"] [6,\"j\",\"y\"] [6,\"j\",\"z\"]\n\nmerge_async(...iterables):\n 0 1 \"a\" 2 3 \"p\" 4 \"b\" 5 6 \"c\" \"q\" \"d\" \"r\" \"e\" \"f\" \"s\" \"g\" \"h\" \"t\" \"i\" \"u\" \"j\" \"v\" \"w\" \"x\" \"y\" \"z\"\n\nmerge(...sync_iterables):\n 0 \"a\" \"p\" 1 \"b\" \"q\" 2 \"c\" \"r\" 3 \"d\" \"s\" 4 \"e\" \"t\" 5 \"f\" \"u\" 6 \"g\" \"v\" \"h\" \"w\" \"i\" \"x\" \"j\" \"y\" \"z\"\n"
                 }
             ]
         },
         {
             "id": "id-3014d995-80e5-46d2-b33b-8fc6b9adb212",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, delay_ms, asyncify_event_source, asyncify_iterable, combine_async, merge, merge_async } = iterable_util;\n\n(async () => {\n\n    const aie = asyncify_event_source(async (push, error) => {\n        for await (const i of asyncify_iterable(range(4), 500)) {\n            println(`pushing ${i}`);\n            push({ value: i });\n        }\n        error(new Error());\n        push({ done: true });\n    });\n\n    const branches = aie.tee(3);\n\n    for (const i of range(branches.length)) {\n        try {\n            println(`branch ${i}:`);\n            for await (const element of branches[i].map(x => ({ i, x }))) {\n                println(JSON.stringify(element));\n            }\n            println();\n        } catch (err) {\n            println(`==> caught error`);\n            println(err);\n        }\n    }\n\n})();\n",
+            "input": "(async () => {\n\n    const { range, asyncify_iterable, chain_async, asyncify_event_source } = await core.facet('lib/iterable-util.js');\n\n    const aie = asyncify_event_source(async (push, error) => {\n        for await (const i of asyncify_iterable(range(4), 500)) {\n            println(`pushing ${i}`);\n            push({ value: i });\n        }\n        error(new Error());\n        push({ done: true });\n    });\n\n    const branches = aie.tee(3);\n\n    for (const i of range(branches.length)) {\n        try {\n            println(`branch ${i}:`);\n            for await (const element of branches[i].map(x => ({ i, x }))) {\n                println(JSON.stringify(element));\n            }\n            println();\n        } catch (err) {\n            println(`==> caught error`);\n            println(err);\n        }\n    }\n\n})();\n",
             "output": [
                 {
                     "type": "text",
@@ -85,11 +236,15 @@
         },
         {
             "id": "id-bb05e339-2a8f-4202-a1e4-9a313ba573f5",
-            "input": "importScripts('lib/iterable-util.js');\nconst { range, delay_ms, asyncify_event_source, asyncify_iterable, combine_async, merge, merge_async, extended_iterable_from_generator } = iterable_util;\n\n(async () => {\n\n    await new Promise(async finish => {\n\n        println('=== aie ===');\n\n        const aie = asyncify_event_source(async (push, error) => {\n            for await (const i of asyncify_iterable(range(4), 500)) {\n                println(`pushing ${i}`);\n                push({ value: i });\n            }\n            error();\n            push({ done: true });\n        });\n\n        println('single:');\n        try {\n            for await (const element of aie) {\n                println(element);\n            }\n        } catch (err) {\n            println(`==> caught error`, err);\n        }\n\n        println('tee:');\n        const aie_branches = aie.tee(3);\n        for (const i of range(aie_branches.length)) {\n            try {\n                println(`branch ${i}:`);\n                for await (const element of aie_branches[i].map(x => ({ i, x }))) {\n                    println(JSON.stringify(element));\n                }\n                println();\n            } catch (err) {\n                println(`==> caught error`, err);\n            }\n        }\n\n        println();\n        println('=== ie ===');\n\n        const ie = extended_iterable_from_generator(function* () {\n            yield* [1, 2, 3];\n            throw new Error();\n        });\n\n        println('single:');\n        try {\n            for (const element of ie) {\n                println(element);\n            }\n        } catch (err) {\n            println(`==> caught error`, err);\n        }\n\n        println('tee:');\n        const ie_branches = ie.tee(3);\n        for (const i of range(ie_branches.length)) {\n            try {\n                println(`branch ${i}:`);\n                for (const element of ie_branches[i].map(x => ({ i, x }))) {\n                    println(JSON.stringify(element));\n                }\n                println();\n            } catch (err) {\n                println(`==> caught error`, err);\n            }\n        }\n\n        finish();\n    });\n\n})();",
+            "input": "(async () => {\n\n    const { range, delay_ms, asyncify_event_source, asyncify_iterable, combine_async, merge, merge_async, extended_iterable_from_generator } = await core.facet('lib/iterable-util.js');\n\n    await new Promise(async finish => {\n\n        println('=== aie ===');\n\n        const aie = asyncify_event_source(async (push, error) => {\n            for await (const i of asyncify_iterable(range(4), 500)) {\n                println(`pushing ${i}`);\n                push({ value: i });\n            }\n            error();\n            push({ done: true });\n        });\n\n        println('single:');\n        try {\n            for await (const element of aie) {\n                println(element);\n            }\n        } catch (err) {\n            println(`==> caught error`, err);\n        }\n\n        println('tee:');\n        const aie_branches = aie.tee(3);\n        for (const i of range(aie_branches.length)) {\n            try {\n                println(`branch ${i}:`);\n                for await (const element of aie_branches[i].map(x => ({ i, x }))) {\n                    println(JSON.stringify(element));\n                }\n                println();\n            } catch (err) {\n                println(`==> caught error`, err);\n            }\n        }\n\n        println();\n        println('=== ie ===');\n\n        const ie = extended_iterable_from_generator(function* () {\n            yield* [1, 2, 3];\n            throw new Error();\n        });\n\n        println('single:');\n        try {\n            for (const element of ie) {\n                println(element);\n            }\n        } catch (err) {\n            println(`==> caught error`, err);\n        }\n\n        println('tee:');\n        const ie_branches = ie.tee(3);\n        for (const i of range(ie_branches.length)) {\n            try {\n                println(`branch ${i}:`);\n                for (const element of ie_branches[i].map(x => ({ i, x }))) {\n                    println(JSON.stringify(element));\n                }\n                println();\n            } catch (err) {\n                println(`==> caught error`, err);\n            }\n        }\n\n        finish();\n    });\n\n})();",
             "output": [
                 {
                     "type": "text",
-                    "text": "=== aie ===\nsingle:\npushing 0\n0\npushing 1\n1\npushing 2\n2\npushing 3\n3\n==> caught error\ntee:\nbranch 0:\npushing 0\n{\"i\":0,\"x\":0}\npushing 1\n{\"i\":0,\"x\":1}\npushing 2\n{\"i\":0,\"x\":2}\npushing 3\n{\"i\":0,\"x\":3}\n==> caught error\nbranch 1:\n{\"i\":1,\"x\":0}\n{\"i\":1,\"x\":1}\n{\"i\":1,\"x\":2}\n{\"i\":1,\"x\":3}\n==> caught error\nbranch 2:\n{\"i\":2,\"x\":0}\n{\"i\":2,\"x\":1}\n{\"i\":2,\"x\":2}\n{\"i\":2,\"x\":3}\n==> caught error\n\n=== ie ===\nsingle:\n1\n2\n3\n==> caught error\ntee:\nbranch 0:\n{\"i\":0,\"x\":1}\n{\"i\":0,\"x\":2}\n{\"i\":0,\"x\":3}\n==> caught error\nbranch 1:\n{\"i\":1,\"x\":1}\n{\"i\":1,\"x\":2}\n{\"i\":1,\"x\":3}\n==> caught error\nbranch 2:\n{\"i\":2,\"x\":1}\n{\"i\":2,\"x\":2}\n{\"i\":2,\"x\":3}\n==> caught error\n"
+                    "text": "=== aie ===\n"
+                },
+                {
+                    "type": "text",
+                    "text": "single:\npushing 0\n0\npushing 1\n1\npushing 2\n2\npushing 3\n3\n==> caught error\ntee:\nbranch 0:\npushing 0\n{\"i\":0,\"x\":0}\npushing 1\n{\"i\":0,\"x\":1}\npushing 2\n{\"i\":0,\"x\":2}\npushing 3\n{\"i\":0,\"x\":3}\n==> caught error\nbranch 1:\n{\"i\":1,\"x\":0}\n{\"i\":1,\"x\":1}\n{\"i\":1,\"x\":2}\n{\"i\":1,\"x\":3}\n==> caught error\nbranch 2:\n{\"i\":2,\"x\":0}\n{\"i\":2,\"x\":1}\n{\"i\":2,\"x\":2}\n{\"i\":2,\"x\":3}\n==> caught error\n\n=== ie ===\nsingle:\n1\n2\n3\n==> caught error\ntee:\nbranch 0:\n{\"i\":0,\"x\":1}\n{\"i\":0,\"x\":2}\n{\"i\":0,\"x\":3}\n==> caught error\nbranch 1:\n{\"i\":1,\"x\":1}\n{\"i\":1,\"x\":2}\n{\"i\":1,\"x\":3}\n==> caught error\nbranch 2:\n{\"i\":2,\"x\":1}\n{\"i\":2,\"x\":2}\n{\"i\":2,\"x\":3}\n==> caught error\n"
                 }
             ]
         },
