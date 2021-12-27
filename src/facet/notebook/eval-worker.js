@@ -74,40 +74,32 @@
             const self = this;
 
             const eval_context = self._create_eval_context();
+            const eval_context_entries = Object.entries(eval_context);
 
-            // Create a "full expression" that is a block containing bindings for
-            // all the values in eval_context.  This allows us to evaluate
-            // expression in a context that contains these bindings but then
-            // remove all the temporary bindings from globalThis and while letting
-            // async code from expression still work after this function exits.
+            // create an async function with the expression as its body, and
+            // with parameters being the keys of eval_context.  Then, the
+            // expression will be evaluated by applying the function to the
+            // corresponding values from eval_context.  Note that evaluation
+            // will be performed in the global context.
+            const eval_fn_params = eval_context_entries.map(([k, _]) => k);
+            const eval_fn_args   = eval_context_entries.map(([_, v]) => v);
+            const AsyncFunction = Object.getPrototypeOf(async()=>{}).constructor;
+            const eval_fn = new AsyncFunction(...eval_fn_params, self.expression)
+            const eval_fn_this = globalThis;
 
-            if (globalThis.hasOwnProperty('eval_context')) {
-                throw new Error('EvalWorker: globalThis already has a property named "eval_context"');
-            }
-            globalThis.eval_context = eval_context;
-
-            var full_expression = `(async()=>{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${self.expression}})()`;
-
-            // run the evaluation:
-            let result;
+            // evaluate the expression:
             try {
-                // evaluate the expression in the global context by using (0, eval) for the reference to eval
-                result = (0, eval)(full_expression);  // may throw an error
-            } catch (err) {
-                eval_context.process_error(err);
-            } finally {
-                delete globalThis.eval_context;
-            }
-
-            await Promise.resolve(result)  // takes care of waiting for result if result is a Promise
-                .then(
-                    result_value => {
-                        if (typeof result_value !== 'undefined') {
-                            eval_context.process_action(transform_text_result(result_value));  // action: { type: 'text', text, is_tex, inline_tex }
+                await eval_fn.apply(eval_fn_this, eval_fn_args).then(
+                    result => {
+                        if (typeof result !== 'undefined') {
+                            eval_context.process_action(transform_text_result(result));  // action: { type: 'text', text, is_tex, inline_tex }
                         }
                     },
                     eval_context.process_error
                 );
+            } catch (err) {
+                eval_context.process_error(err);
+            }
 
             return self;
         }
@@ -133,17 +125,6 @@
                 } else {
                     await self.output_context.output_handler_update_notebook('error', error);
                 }
-            }
-
-            function pp(thing, indent=4) {
-                let rest_args = [];
-                if (indent !== null && typeof indent !== 'undefined') {
-                    if (!Number.isInteger(indent)) {
-                        throw new Error('indent must be an integer');
-                    }
-                    rest_args = [null, indent];
-                }
-                return JSON.stringify(thing, ...rest_args);
             }
 
             function println(output) {
