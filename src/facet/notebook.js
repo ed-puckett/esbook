@@ -1264,7 +1264,7 @@
             }
             if (text.length > 0) {
                 if (is_expression) {
-                    return new EvalWorker(output_context, text);
+                    return await EvalWorker.eval(output_context, text);
                 } else {  // markdown
                     await output_handlers.text.update_notebook(output_context, text);
                     return undefined;  // indicate: no EvalWorker instance

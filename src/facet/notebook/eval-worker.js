@@ -35,6 +35,16 @@
     }
 
     class EvalWorker {
+        /** Call this function instead of constructing an instance with new.
+         *  @return {Promise} resolves to the new instance after its _run()
+         *                    method resolves and returns.  Note that the
+         *                    return of the _run method does not necessarily
+         *                    mean that the instance is "done".
+         */
+        static async eval(output_context, expression) {
+            return await new EvalWorker(output_context, expression)._run();
+        }
+
         constructor(output_context, expression) {
             Object.defineProperties(this, {
                 id: {
@@ -54,14 +64,13 @@
                     writable: true,
                 },
             });
-            this._eval_expression();
         }
 
         stop() {
             this._stopped = true;
         }
 
-        _eval_expression() {
+        async _run() {
             const self = this;
 
             const eval_context = self._create_eval_context();
@@ -77,7 +86,7 @@
             }
             globalThis.eval_context = eval_context;
 
-            var full_expression = `{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${self.expression}}`;
+            var full_expression = `(async()=>{const ${Object.entries(eval_context).map(([prop]) => `${prop}=eval_context.${prop}`).join(',')};${self.expression}})()`;
 
             // run the evaluation:
             let result;
@@ -90,16 +99,17 @@
                 delete globalThis.eval_context;
             }
 
-            Promise.resolve(result)  // takes care of waiting for result if result is a Promise
+            await Promise.resolve(result)  // takes care of waiting for result if result is a Promise
                 .then(
                     result_value => {
-                        // if expression does not end with ';', include the final result in outputs
-                        if (!self.expression.trim().endsWith(';')) {
+                        if (typeof result_value !== 'undefined') {
                             eval_context.process_action(transform_text_result(result_value));  // action: { type: 'text', text, is_tex, inline_tex }
                         }
                     },
                     eval_context.process_error
                 );
+
+            return self;
         }
 
         _create_eval_context() {
