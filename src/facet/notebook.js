@@ -981,13 +981,14 @@
         }
 
         // Resets output ui elements and this.nb_state output for ie.
+        // Completely replaces the .output child.
         // Returns the newly-set empty array for this.nb_state.elements[ie.id].output
         // or undefined if ie.id does not exist in this.nb_state.elements.
         reset_output(ie) {
-            const output_element_collection = ie.querySelector('.output');
-            while (output_element_collection.firstChild) {
-                output_element_collection.removeChild(output_element_collection.lastChild);
-            }
+            const old = ie.querySelector('.output');
+            const output_element_collection = document.createElement(old.tagName);
+            output_element_collection.classList = old.classList;
+            old.replaceWith(output_element_collection);
             const nb_state_obj = this.nb_state.elements[ie.id];
             if (!nb_state_obj) {
                 return undefined;
@@ -1056,7 +1057,14 @@
         }
 
         _create_output_context(ie, output_data_collection) {
-            // define instance this way to isolate references to notebook, ie and output_data_collection
+            // Define instance this way to isolate references to notebook,
+            // ie and output_data_collection.
+
+            // Note that the output_data_collection is queried now so that
+            // if it changes, this output context will only affect the original
+            // one.
+            const output_element_collection = ie.querySelector('.output');
+
             return {
                 async output_handler_update_notebook(type, value) {
                     const handler = output_handlers[type];
@@ -1124,7 +1132,6 @@
                         output_element = document.createElement(tag);
                     }
                     output_element.id = globalThis.core.generate_object_id();
-                    const output_element_collection = ie.querySelector('.output');
                     output_element_collection.appendChild(output_element);
                     let child;
                     if (child_tag) {
@@ -1157,8 +1164,6 @@
                 // the previous element was also of type 'text'.
                 // Note: static_element_generator() is assumed to always return an element.
                 async create_text_output_data(type, text, static_element_generator, leave_scroll_position_alone=false) {
-                    const output_element_collection = ie.querySelector('.output');
-
                     // try to merge
                     if (type === 'text') {
                         // may coalesce with previous element if it is also a text type element
