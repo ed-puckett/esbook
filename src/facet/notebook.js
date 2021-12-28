@@ -123,6 +123,7 @@
 
     // === NOTEBOOK CLASS ===
 
+
     class Notebook {
         static nb_type    = NB_TYPE;
         static nb_version = NB_VERSION;
@@ -138,6 +139,8 @@
             'Ctrl-X Ctrl-S': () => notebook.save_notebook(false),
             'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
         };
+
+        static sym_eval_state = Symbol.for('eval_state');
 
         // if present, then the input following is markdown+MathJax
         static _input_mdmj_header_sequence = '%';  // if this sequence occurs on first line after optional whitespace, then md+mj mode
@@ -307,7 +310,18 @@
                 order:    [],  // interaction_element ids, in order of appearance in notebook
                 elements: {},  // the actual interaction_element data, indexed by interaction_element id
             };
-            this.internal_nb_state = {};  // indexed by ie.id
+            // internal_nb_state is internal state for each ie indexed by ie.id
+            // plus one more slot at Symbol.from(
+            this.internal_nb_state = {
+                [this.constructor.sym_eval_state]: {},  // eval_state for notebook
+            };
+        }
+
+        reset_eval_state() {
+            this.internal_nb_state[this.constructor.sym_eval_state] = {};
+        }
+        get_eval_state() {
+            return this.internal_nb_state[this.constructor.sym_eval_state];
         }
 
         // Create a new empty internal state object for ie with id ie_id
@@ -504,6 +518,7 @@
         }
 
         async ie_ops_eval_notebook(ie, only_before_current_element=false) {
+            this.reset_eval_state();
             for (const ie_id of this.nb_state.order) {
                 if (only_before_current_element && ie_id === ie.id) {
                     this.set_current_ie(ie);
@@ -1256,7 +1271,7 @@
         }
 
         // may throw an error
-        // returns an EvalWorker instance or undefined if none
+        // returns the new active EvalWorker instance or undefined if none
         async evaluate_input_text(output_context, input_text) {
             let is_expression, text;
             const mdmj_header_match = input_text.match(this.constructor._input_mdmj_header_re);
@@ -1269,7 +1284,7 @@
             }
             if (text.length > 0) {
                 if (is_expression) {
-                    return await EvalWorker.eval(output_context, text);
+                    return await EvalWorker.eval(this.get_eval_state(), output_context, text);
                 } else {  // markdown
                     await output_handlers.text.update_notebook(output_context, text);
                     return undefined;  // indicate: no EvalWorker instance

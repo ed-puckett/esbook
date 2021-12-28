@@ -36,19 +36,27 @@
 
     class EvalWorker {
         /** Call this function instead of constructing an instance with new.
+         *  @param {Object} eval_state will be present as "this" during evaluation
+         *  @param {OutputContext} output_context object containing output.
+         *                         manipulation methods and state.
+         *  @param {string} expression to be evaluated.
          *  @return {Promise} resolves to the new instance after its _run()
          *                    method resolves and returns.  Note that the
          *                    return of the _run method does not necessarily
          *                    mean that the instance is "done".
          */
-        static async eval(output_context, expression) {
-            return await new EvalWorker(output_context, expression)._run();
+        static async eval(eval_state, output_context, expression) {
+            return await new EvalWorker(eval_state, output_context, expression)._run();
         }
 
-        constructor(output_context, expression) {
+        constructor(eval_state, output_context, expression) {
             Object.defineProperties(this, {
                 id: {
                     value: globalThis.core.generate_uuid(),
+                    enumerable: true,
+                },
+                eval_state: {
+                    value: eval_state,
                     enumerable: true,
                 },
                 output_context: {
@@ -85,7 +93,7 @@
             const eval_fn_args   = eval_context_entries.map(([_, v]) => v);
             const AsyncFunction = Object.getPrototypeOf(async()=>{}).constructor;
             const eval_fn = new AsyncFunction(...eval_fn_params, self.expression)
-            const eval_fn_this = globalThis;
+            const eval_fn_this = this.eval_state;
 
             // evaluate the expression:
             try {
