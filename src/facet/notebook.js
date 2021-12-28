@@ -1121,19 +1121,26 @@
                 /** create a new element in the output section of the ie
                  *  @param {Object|undefined|null} options: {
                  *             size_config?: [width: number, height: number],
-                 *             tag?: string,        // tag name for element; default: 'div'
-                 *             element_namespace?: string,
-                 *             child_tag?: string,  // if given, create and return a child element
-                 *             child_element_namespace?: string,
+                 *             tag?: string,                        // tag name for element; default: 'div'
+                 *             element_namespace?: string,          // namespace for element creation
+                 *             element_attribute_pairs?: string[],  // pairs of strings: attribute_name, value
+                 *             child_tag?: string,                  // if given, create and return a child element
+                 *             child_element_namespace?: string,    // namespace for child element creation
+                 *             child_attribute_pairs?: string[],    // pairs of strings: attribute_name, value
                  *         }
+                 * An randomly-generated id will be assigned to the element (and
+                 * also to the child element, if one is created) unless those
+                 * elements have an id attribute specified (in *_attribute_pairs).
                  */
                 create_output_element(options) {
                     const {
                         size_config,
                         tag = 'div',
                         element_namespace,
+                        element_attribute_pairs,
                         child_tag,
                         child_element_namespace,
+                        child_attribute_pairs,
                     } = (options ?? {});
 
                     // Re: Chart.js:
@@ -1146,7 +1153,20 @@
                     } else {
                         output_element = document.createElement(tag);
                     }
-                    output_element.id = globalThis.core.generate_object_id();
+                    let output_element_id_specified = false;
+                    if (element_attribute_pairs) {
+                        for (let i = 0; i < element_attribute_pairs.length; i+=2) {
+                            const k = element_attribute_pairs[i];
+                            const v = element_attribute_pairs[i+1];
+                            output_element.setAttribute(k, v);
+                            if (k == 'id') {
+                                output_element_id_specified = true;
+                            }
+                        }
+                    }
+                    if (!output_element_id_specified) {
+                        output_element.id = globalThis.core.generate_object_id();
+                    }
                     output_element_collection.appendChild(output_element);
                     let child;
                     if (child_tag) {
@@ -1155,23 +1175,56 @@
                         } else {
                             child = document.createElement(child_tag);
                         }
-                        child.id = globalThis.core.generate_object_id();
+                        let child_id_specified = false;
+                        if (child_attribute_pairs) {
+                            for (let i = 0; i < child_attribute_pairs.length; i+=2) {
+                                const k = child_attribute_pairs[i];
+                                const v = child_attribute_pairs[i+1];
+                                child.setAttribute(k, v);
+                                if (k == 'id') {
+                                    child_id_specified = true;
+                                }
+                            }
+                        }
+                        if (!child_id_specified) {
+                            child.id = globalThis.core.generate_object_id();
+                        }
                     }
                     if (size_config) {
                         const [ width, height ] = size_config;
-                        output_element.width  = width;
-                        output_element.height = height;
-                        output_element.style.width  = `${width}px`;
-                        output_element.style.height = `${height}px`;
+                        if (typeof width === 'number') {
+                            output_element.width = width;
+                            output_element.style.width = `${width}px`;
+                        }
+                        if (typeof height === 'number') {
+                            output_element.height = height;
+                            output_element.style.height = `${height}px`;
+                        }
                         if (child) {
-                            child.width  = width;
-                            child.height = height;
+                            if (typeof width === 'number') {
+                                child.width = width;
+                            }
+                            if (typeof height === 'number') {
+                                child.height = height;
+                            }
                         }
                     }
                     if (child) {
                         output_element.appendChild(child);
                     }
                     return child ? child : output_element;
+                },
+
+                /** create a new canvas element in the output section of the ie
+                 *  @param {number} width
+                 *  @param {number} height
+                 *  @return {HTMLCanvasElement} canvas element with a <div> parent
+                 */
+                create_canvas_output_element(width, height) {
+                    return this.create_output_element({
+                        size_config: [width, height],
+                        child_tag: 'canvas',
+                    });
                 },
 
                 // Also creates the output element (via static_element_generator()).
