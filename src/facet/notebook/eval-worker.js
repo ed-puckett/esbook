@@ -152,7 +152,7 @@
                 return graphics('dagre', args);
             }
 
-            async function image_data(...args) {
+            async function draw_image_data(...args) {
                 return graphics('image_data', args);
             }
 
@@ -174,7 +174,7 @@
                 graphics,
                 chart,
                 dagre,
-                image_data,
+                draw_image_data,
                 plotly,
             };
 
