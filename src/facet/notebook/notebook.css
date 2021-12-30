@@ -102,8 +102,10 @@ body {
     background: var(--color-border);
 }
 
+.interaction_element.autohide:not(.selected) .input,
 .interaction_element.mdmj:not(.selected) .input {
-    /* auto-hide markdown/MathJax inputs when not selected */
+    /* automatically hide autohide inputs when not selected */
+    /* automatically hide markdown/MathJax inputs when not selected */
     display: none;
 }
 

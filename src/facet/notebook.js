@@ -15,7 +15,7 @@
 
     // === EXTERNAL MODULES ===
 
-    const message_controller = await facet('facet/message-controller.js')
+    const message_controller = await facet('facet/message-controller.js');
     const fs_interface       = await facet('facet/fs-interface.js');
 
     const { beep } = await facet('facet/beep.js');
@@ -144,10 +144,20 @@
 
         // if present, then the input following is markdown+MathJax
         static _input_mdmj_header_sequence = '%';  // if this sequence occurs on first line after optional whitespace, then md+mj mode
-        static _input_mdmj_header_re = new RegExp(`^\\s*${this._input_mdmj_header_sequence}.*\$`, 'm');
+        static _input_mdmj_header_re = new RegExp(`^\\s*${this._input_mdmj_header_sequence}.*\$`, 'mi');
 
         // CSS class for ie when in md+mj mode
         static _ie_mdmj_mode_css_class = 'mdmj';
+
+        // CSS class for ie when it should automatically hide
+        static _ie_autohide_mode_css_class = 'autohide';
+
+        // If this keyword appears in a JavaScript comment on the first line
+        // of the first interaction element, and the input is not in md+mj
+        // mode, then that first cell will be automatically evaluated
+        // when loading the notebook.
+        static _input_autoeval_initial_comment_keyword = 'autoeval';
+        static _input_autoeval_initial_comment_re      = new RegExp(`^\\s*//\\s*${this._input_autoeval_initial_comment_keyword}(\\W.*$|$)`, 'i');
 
         // async setup/initialization (to be called immediately after construction)
         async setup() {
@@ -608,6 +618,8 @@
                 Change.update_for_open(this, do_import);
                 if (!do_import) {
                     this.set_notebook_unmodified();
+                    // check if this notebook is "autoeval"
+                    await this._handle_autoeval();
                 }
                 this.send_tab_state_to_parent_processes();
 
@@ -825,6 +837,23 @@
             await this.clear_notebook(true);
             this.set_input_text_for_ie_id(this.current_ie.id, text);
             this.update_nb_state(this.current_ie);  // make sure new text is present in this.nb_state
+        }
+
+        async _handle_autoeval() {
+            const first_ie_id = this.nb_state.order[0];
+            if (first_ie_id) {
+                const cm = this.get_internal_state_for_ie_id(first_ie_id).cm;
+                const first_line_trimmed = cm.getLine(0).trim();
+                const mdmj_mode = first_line_trimmed.startsWith(this.constructor._input_mdmj_header_sequence);
+                if (!mdmj_mode) {
+                    const should_autoeval = first_line_trimmed.match(this.constructor._input_autoeval_initial_comment_re);
+                    if (should_autoeval) {
+                        const first_ie = document.getElementById(first_ie_id);
+                        const stay = true;
+                        await this.ie_ops_eval_element(first_ie, stay);
+                    }
+                }
+            }
         }
 
         focus_to_current_ie() {
