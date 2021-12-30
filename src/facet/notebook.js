@@ -26,8 +26,8 @@
         MathJax,
     } = await facet('facet/md+mj.js');
 
-    const { SettingsUpdatedEvent      } = await facet('facet/notebook/settings.js')
-    const { ThemeSettingsUpdatedEvent } = await facet('facet/notebook/theme-settings.js')
+    const { SettingsUpdatedEvent      } = await facet('facet/notebook/settings.js');
+    const { ThemeSettingsUpdatedEvent } = await facet('facet/notebook/theme-settings.js');
 
     const {
         KeyBindingCommandEvent,
