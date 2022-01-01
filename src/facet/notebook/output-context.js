@@ -2,6 +2,60 @@
 
 (async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
+    const {
+        output_handlers,
+    } = await facet('facet/notebook/output-handlers.js');
+
+    const ie_hide_input_css_class = 'hide-input';
+
+    /** get current "hide input" state for the ie
+     *  @param {HTMLElement} interaction element ie
+     *  @return {boolean}
+     */
+    function ie_get_hide_input_state(ie) {
+        return ie.classList.contains(ie_hide_input_css_class);
+    }
+
+    /** set current "hide input" state for the ie
+     *  @param {HTMLElement} interaction element ie
+     *  @param {boolean} new "hide input" state for the ie
+     */
+    function ie_set_hide_input_state(ie, state) {
+        if (typeof state !== 'boolean') {
+            throw new Error('state must be specified as true or false');
+        }
+        if (state) {
+            ie.classList.add(ie_hide_input_css_class);
+        } else {
+            ie.classList.remove(ie_hide_input_css_class);
+        }
+    }
+
+    const ie_is_dialog_css_class = 'is-dialog';
+
+    /** get current "is dialog" state for the ie
+     *  @param {HTMLElement} interaction element ie
+     *  @return {boolean}
+     */
+    function ie_get_is_dialog_state(ie) {
+        return ie.classList.contains(ie_is_dialog_css_class);
+    }
+
+    /** set current "is dialog" state for the ie
+     *  @param {HTMLElement} interaction element ie
+     *  @param {boolean} new "hide input" state for the ie
+     */
+    function ie_set_is_dialog_state(ie, state) {
+        if (typeof state !== 'boolean') {
+            throw new Error('state must be specified as true or false');
+        }
+        if (state) {
+            ie.classList.add(ie_is_dialog_css_class);
+        } else {
+            ie.classList.remove(ie_is_dialog_css_class);
+        }
+    }
+
     function create_output_context(ie, output_data_collection) {
         // Define instance this way to isolate references to notebook,
         // ie and output_data_collection.
@@ -12,20 +66,30 @@
         const output_element_collection = ie.querySelector('.output');
 
         return {
-            ie_hide_input_class: 'hide-input',
-
+            /** get current "hide input" state for the ie
+             *  @return {boolean}
+             */
             get_hide_input_state() {
-                return ie.classList.contains(this.ie_hide_input_class);
+                return ie_get_hide_input_state(ie);
             },
-            hide_input(state) {
-                if (typeof state !== 'boolean') {
-                    throw new Error('state must be specified as true or false');
-                }
-                if (state) {
-                    ie.classList.add(this.ie_hide_input_class);
-                } else {
-                    ie.classList.remove(this.ie_hide_input_class);
-                }
+            /** set current "hide input" state for the ie
+             *  @param {boolean} new "hide input" state for the ie
+             */
+            set_hide_input_state(state) {
+                ie_set_hide_input_state(ie, state);
+            },
+
+            /** get current "is dialog" state for the ie
+             *  @return {boolean}
+             */
+            get_is_dialog_state() {
+                return ie_get_is_dialog_state(ie);
+            },
+            /** set current "is dialog" state for the ie
+             *  @param {boolean} new "hide input" state for the ie
+             */
+            set_is_dialog_state(state) {
+                ie_set_is_dialog_state(ie, state);
             },
 
             async output_handler_update_notebook(type, value) {
@@ -272,6 +336,12 @@
 
 
     facet_export({
+        ie_hide_input_css_class,
+        ie_get_hide_input_state,
+        ie_set_hide_input_state,
+        ie_is_dialog_css_class,
+        ie_get_is_dialog_state,
+        ie_set_is_dialog_state,
         create_output_context,
     });
 

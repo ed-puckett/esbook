@@ -40,6 +40,12 @@
     } = await facet('facet/notebook/output-handlers.js');
 
     const {
+        ie_hide_input_css_class,
+        ie_get_hide_input_state,
+        ie_set_hide_input_state,
+        ie_is_dialog_css_class,
+        ie_get_is_dialog_state,
+        ie_set_is_dialog_state,
         create_output_context,
     } = await facet('facet/notebook/output-context.js');
 
@@ -292,8 +298,11 @@
             ie.addEventListener('click', this._ie_click_handler.bind(this), true);
         }
         _ie_click_handler(event) {
+            const ie = event.target.closest('.interaction_element');
+            if (ie_get_is_dialog_state(ie)) {
+                return;  // don't handle; causes checkboxes in output areas to fail
+            }
             if (!event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
-                const ie = event.target.closest('.interaction_element');
                 this.set_current_ie(ie, true);
             }
             event.preventDefault();

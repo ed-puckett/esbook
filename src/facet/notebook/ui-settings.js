@@ -23,9 +23,28 @@
             'type', 'text',
         );
         value.addEventListener('change', (event) => {
+            event.preventDefault();
             message_controller.alert(`>>> change: ${event.target.value}`);
         });
-        output_context.hide_input(true);
+
+        core.create_child_element(
+            ui_section, 'label',
+            'for', 'ui-hide-input',
+        ).innerText = 'Hide input';
+        core.create_child_element(
+            ui_section, 'input',
+            'id', 'ui-hide-input',
+            'type', 'checkbox',
+            'checked', 'on',
+        ).addEventListener('change', (event) => {
+            event.preventDefault();
+console.log('>>> hide input:', event.target.checked);//!!!
+            output_context.set_hide_input_state(event.target.checked);
+        }, true);
+
+        output_context.set_is_dialog_state(true);
+        output_context.set_hide_input_state(true);
+
         setTimeout(() => value.focus());
     }
 
