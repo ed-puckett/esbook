@@ -52,92 +52,121 @@
 
     // === ELEMENT CREATION ===
 
-    /** create_element(tag_name, ...attribute_pairs)
+    /** set attributes, taken from an object, on an element
+     *  @param element {Element} element
+     *  @param {Object|undefined|null} attrs
+     *  @return {Element} element
+     *  Attribute values obtained by calling toString() on the values in attrs
+     *  except that values which are undefined are translated to ''.
+     */
+    globalThis.core.set_element_attributes = function set_element_attributes(element, attrs) {
+        if (attrs) {
+            for (const k in attrs) {
+                const v = attrs[k];
+                const tv = (typeof v === 'undefined') ? '' : v.toString();
+                element.setAttribute(k, tv);
+            }
+        }
+        return element;
+    };
+
+    /** create_element(tag_name, attrs)
      *  @param {string} tag_name
-     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @param {Object|undefined|null} attrs
      *  @return {Element} the new element
      */
-    globalThis.core.create_element = function create_element(tag_name, ...attribute_pairs) {
+    globalThis.core.create_element = function create_element(tag_name, attrs) {
         if (typeof tag_name !== 'string' || tag_name.length <= 0) {
             throw new Error('tag_name must be a non-empty string');
         }
         const el = document.createElement(tag_name);
-        for (let i = 0; i < attribute_pairs.length; ) {
-            const name  = attribute_pairs[i++];
-            let   value = attribute_pairs[i++];
-            if (typeof value === 'undefined') {
-                value = '';
-            }
-            el.setAttribute(name, value);
-        }
+        globalThis.core.set_element_attributes(el, attrs);
         return el;
     };
 
-    /** create_child_element(parent, tag_name, ...attribute_pairs)
+    /** create_child_element(parent, tag_name, attrs)
      *  @param {Element} parent
      *  @param {string} tag_name
-     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @param {Object|undefined|null} attrs
      *  @return {Element} the new element
      */
-    globalThis.core.create_child_element = function create_child_element(parent, tag_name, ...attribute_pairs) {
-        if (typeof parent !== 'object' || !(parent instanceof Element)) {
+    globalThis.core.create_child_element = function create_child_element(parent, tag_name, attrs) {
+        if (! (parent instanceof Element)) {
             throw new Error('parent must be an Element');
         }
-        const el = globalThis.core.create_element(tag_name, ...attribute_pairs);
+        const el = globalThis.core.create_element(tag_name, attrs);
         parent.appendChild(el);
         return el;
     };
 
-    /** create_stylesheet(parent, stylesheet_url, ...attribute_pairs)
+    /** create_stylesheet(parent, stylesheet_url, attrs)
      *  @param {Element} parent
      *  @param {string} stylesheet_url
-     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @param {Object|undefined|null} attrs
      *  @return {HTMLStyleElement} the new <style> element
      */
-    globalThis.core.create_stylesheet = function create_stylesheet(parent, stylesheet_url, ...attribute_pairs) {
-        return globalThis.core.create_child_element(
-            parent,
-            'link',
-            'rel', "stylesheet",
-            'href', stylesheet_url,
-            ...attribute_pairs );
+    globalThis.core.create_stylesheet = function create_stylesheet(parent, stylesheet_url, attrs) {
+        attrs = attrs ?? {};
+        if ('rel' in attrs || 'href' in attrs) {
+            throw new Error('attrs must not contain "rel" or "href"');
+        }
+        return globalThis.core.create_child_element(parent, 'link', {
+            rel: "stylesheet",
+            href: stylesheet_url,
+            ...attrs,
+        });
     }
 
-    /** create_inline_stylesheet(parent, stylesheet_text, ...attribute_pairs)
+    /** create_inline_stylesheet(parent, stylesheet_text, attrs)
      *  @param {Element} parent
      *  @param {string} stylesheet_text
-     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @param {Object|undefined|null} attrs
      *  @return {HTMLStyleElement} the new <style> element
      */
-    globalThis.core.create_inline_stylesheet = function create_inline_stylesheet(parent, stylesheet_text, ...attribute_pairs) {
-        const style_el = globalThis.core.create_element('style', ...attribute_pairs);
+    globalThis.core.create_inline_stylesheet = function create_inline_stylesheet(parent, stylesheet_text, attrs) {
+        if (! (parent instanceof Element)) {
+            throw new Error('parent must be an Element');
+        }
+        const style_el = globalThis.core.create_element('style', attrs);
         style_el.appendChild(document.createTextNode(stylesheet_text));
         parent.appendChild(style_el);
         return style_el;
     }
 
-    /** create_script(parent, script_url, ...attribute_pairs)
+    /** create_script(parent, script_url, attrs)
      *  @param {Element} parent
      *  @param {string} script_url
-     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @param {Object|undefined|null} attrs
      *  @return {HTMLStyleElement} the new <style> element
      */
-    globalThis.core.create_script = function create_script(parent, script_url, ...attribute_pairs) {
-        return globalThis.core.create_child_element(
-            parent,
-            'script',
-            'src', script_url,
-            ...attribute_pairs );
+    globalThis.core.create_script = function create_script(parent, script_url, attrs) {
+        if (! (parent instanceof Element)) {
+            throw new Error('parent must be an Element');
+        }
+        attrs = attrs ?? {};
+        if ('src' in attrs) {
+            throw new Error('attrs must not contain "src"');
+        }
+        return globalThis.core.create_child_element(parent, 'script', {
+            src: script_url,
+            ...attrs,
+        });
     }
 
-    /** create_inline_script(parent, script_text, ...attribute_pairs)
+    /** create_inline_script(parent, script_text, attrs)
      *  @param {Element} parent
      *  @param {string} script_text
-     *  @param {string[]} attribute_pairs pairs of strings: attribute_name, value
+     *  @param {Object|undefined|null} attrs
      *  @return {HTMLScriptElement} the new <script> element
      */
-    globalThis.core.create_inline_script = function create_inline_script(parent, script_text, ...attribute_pairs) {
-        const script_el = globalThis.core.create_element('script', ...attribute_pairs);
+    globalThis.core.create_inline_script = function create_inline_script(parent, script_text, attrs) {
+        if (! (parent instanceof Element)) {
+            throw new Error('parent must be an Element');
+        }
+        if (attrs && 'src' in attrs) {
+            throw new Error('attrs must not contain "src"');
+        }
+        const script_el = globalThis.core.create_element('script', attrs);
         script_el.appendChild(document.createTextNode(script_text));
         parent.appendChild(script_el);
         return script_el;
@@ -322,9 +351,9 @@
         const full_facet_url = new URL(facet_url, core_script.src);
         const { promise_data, initial } = establish_facet_promise_data(full_facet_url);
         if (initial) {
-            const script_el = globalThis.core.create_script(document.head, full_facet_url,
-                'defer', undefined,
-            );
+            const script_el = globalThis.core.create_script(document.head, full_facet_url, {
+                defer: undefined,
+            });
             function handle_facet_export_event(event) {
                 const err = event.facet_export_error;
                 if (err) {

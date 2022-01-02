@@ -67,15 +67,15 @@
             // </div>
             // <div id="message_event_blocker" tabindex="0"></div>
 
-            this._control_el = globalThis.core.create_element('div', 'id', this._control_id);
-            this._text_el = globalThis.core.create_child_element(this._control_el, 'div', 'id', this._text_id);
+            this._control_el = globalThis.core.create_element('div', { id: this._control_id });
+            this._text_el = globalThis.core.create_child_element(this._control_el, 'div', { id: this._text_id });
             const button_span = globalThis.core.create_child_element(this._control_el, 'span');
-            this._cancel_el = globalThis.core.create_child_element(button_span, 'button', 'id', this._cancel_id);
+            this._cancel_el = globalThis.core.create_child_element(button_span, 'button', { id: this._cancel_id });
             this._cancel_el.appendChild(document.createTextNode('Cancel'));
-            this._ok_el = globalThis.core.create_child_element(button_span, 'button', 'id', this._ok_id);
+            this._ok_el = globalThis.core.create_child_element(button_span, 'button', { id: this._ok_id });
             this._ok_el.appendChild(document.createTextNode('Ok'));
 
-            this._blocker_el = globalThis.core.create_element('div', 'id', this._blocker_id, 'tabindex', 0);
+            this._blocker_el = globalThis.core.create_element('div', { id: this._blocker_id, tabindex: 0 });
 
             document.body.insertBefore(this._blocker_el, document.body.firstChild);
             document.body.insertBefore(this._control_el, this._blocker_el);

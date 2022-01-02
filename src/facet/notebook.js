@@ -227,8 +227,8 @@
             //         </div>
             //     </div>
 
-            const content_el = globalThis.core.create_child_element(document.body, 'div', 'id', 'content');
-            this.interaction_area = globalThis.core.create_child_element(content_el, 'div', 'id', 'interaction_area');
+            const content_el = globalThis.core.create_child_element(document.body, 'div', { id: 'content' });
+            this.interaction_area = globalThis.core.create_child_element(content_el, 'div', { id: 'interaction_area' });
 
             // add notebook stylesheet:
             const stylesheet_url = new URL('notebook/notebook.css', current_script.src);
@@ -424,7 +424,10 @@
 
         set_input_focus_for_ie_id(ie_id) {
             // set focus on next tick, otherwise it doesn't stick...
-            setTimeout(() => this.get_internal_state_for_ie_id(ie_id).cm.focus());
+            const internal_state = this.get_internal_state_for_ie_id(ie_id);
+            if (internal_state) {
+                setTimeout(() => internal_state.cm.focus());
+            }
         }
 
         handle_command(command) {

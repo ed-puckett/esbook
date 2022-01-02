@@ -323,6 +323,60 @@
                 }, leave_scroll_position_alone);
             },
 
+            /** create a new HTML control as a child of the given parent with an optional label element
+             *  @param {HTMLElement} parent
+             *  @param {string} id for control element
+             *  @param {Object|undefined|null} options: {
+             *             tag?:         string,   // tag name for element; default: 'input'
+             *             type?:        string,   // type name for element; default: 'text'
+             *             label?:       string,   // if !!label, then create a label element
+             *             label_after?: boolean,  // if !!label_after, the add label after element, otherwise before
+             *             attrs?:       object,   // attributes to set on the new control element
+             *         }
+             *  @return {Element} the new control element
+             */
+            create_control_element(parent, id, options) {
+                if (typeof id !== 'string' || id === '') {
+                    throw new Error('id must be a non-empty string');
+                }
+                const {
+                    tag   = 'input',
+                    type  = 'text',
+                    label,
+                    label_after,
+                    attrs = {},
+                } = (options ?? {});
+
+                if ('id' in attrs || 'type' in attrs) {
+                    throw new Error('attrs must not contain "id" or "type"');
+                }
+                const control = core.create_element('input', {
+                    id:   id,
+                    type: type,
+                    ...attrs,
+                });
+
+                let control_label;
+                if (label) {
+                    control_label = core.create_element('label', {
+                        for: id,
+                    });
+                    control_label.innerText = label;
+                }
+
+                if (label_after) {
+                    parent.appendChild(control);
+                    parent.appendChild(control_label);
+                } else {
+                    parent.appendChild(control_label);
+                    parent.appendChild(control);
+                }
+
+                return control;
+            },
+
+            /** scroll output section of ie into view
+             */
             scroll_output_into_view() {
                 const interaction_area = document.getElementById('interaction_area');
                 const ia_rect = interaction_area.getBoundingClientRect();
