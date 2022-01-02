@@ -35,7 +35,7 @@
 
     // add theme-settings/theme-colors.css stylesheet
     const theme_colors_stylesheet_url = new URL('theme-settings/theme-colors.css', current_script.src);
-    globalThis.core.create_stylesheet(document.head, theme_colors_stylesheet_url);
+    globalThis.core.create_stylesheet_link(document.head, theme_colors_stylesheet_url);
 
     const dark_mode_class = 'dark';
 

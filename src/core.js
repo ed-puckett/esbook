@@ -99,18 +99,31 @@
         return el;
     };
 
-    /** create_stylesheet(parent, stylesheet_url, attrs)
+    /** create_stylesheet_link(parent, stylesheet_url, attrs)
      *  @param {Element} parent
      *  @param {string} stylesheet_url
      *  @param {Object|undefined|null} attrs
-     *  @return {HTMLStyleElement} the new <style> element
+     *  @param {boolean} permit_duplication if true then do not recreate element if already present
+     *  @return {HTMLElement} the new <link> element
      */
-    globalThis.core.create_stylesheet = function create_stylesheet(parent, stylesheet_url, attrs) {
+    globalThis.core.create_stylesheet_link = function create_stylesheet_link(parent, stylesheet_url, attrs, permit_duplication=false) {
+        if (! (parent instanceof Element)) {
+            throw new Error('parent must be an Element');
+        }
         attrs = attrs ?? {};
         if ('rel' in attrs || 'href' in attrs) {
             throw new Error('attrs must not contain "rel" or "href"');
         }
-        return globalThis.core.create_child_element(parent, 'link', {
+        let link_element;
+        if (!permit_duplication) {
+            // note that the duplication does not take into account attrs
+            link_element = parent.querySelector(`link[rel="stylesheet"][href="${stylesheet_url.toString().replaceAll('"', '\\"')}"]`);
+            // make sure link_element that was found is a direct child of parent
+            if (link_element?.parentElement !== parent) {
+                link_element = undefined;
+            }
+        }
+        return link_element ?? globalThis.core.create_child_element(parent, 'link', {
             rel: "stylesheet",
             href: stylesheet_url,
             ...attrs,
@@ -137,9 +150,10 @@
      *  @param {Element} parent
      *  @param {string} script_url
      *  @param {Object|undefined|null} attrs
+     *  @param {boolean} permit_duplication if true then do not recreate element if already present
      *  @return {HTMLStyleElement} the new <style> element
      */
-    globalThis.core.create_script = function create_script(parent, script_url, attrs) {
+    globalThis.core.create_script = function create_script(parent, script_url, attrs, permit_duplication=false) {
         if (! (parent instanceof Element)) {
             throw new Error('parent must be an Element');
         }
@@ -147,7 +161,16 @@
         if ('src' in attrs) {
             throw new Error('attrs must not contain "src"');
         }
-        return globalThis.core.create_child_element(parent, 'script', {
+        let script_element;
+        if (!permit_duplication) {
+            // note that the duplication does not take into account attrs
+            script_element = parent.querySelector(`script[src="${script_url.toString().replaceAll('"', '\\"')}"]`);
+            // make sure script_element that was found is a direct child of parent
+            if (script_element?.parentElement !== parent) {
+                script_element = undefined;
+            }
+        }
+        return script_element ?? globalThis.core.create_child_element(parent, 'script', {
             src: script_url,
             ...attrs,
         });
@@ -173,7 +196,7 @@
     }
 
 
-    // === SCRIPTS ===
+    // === SCRIPT LOADING ===
 
     const script_promise_data = {};  // map: url -> { promise?: Promise, resolve?: any=>void, reject?: any=>void }
 
@@ -297,7 +320,7 @@
     }
 
 
-    // === FACETS ===
+    // === FACET LOADING ===
 
     class FacetExportEvent extends Event {
         static event_name = 'facet_export';

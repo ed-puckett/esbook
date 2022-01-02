@@ -232,7 +232,7 @@
 
             // add notebook stylesheet:
             const stylesheet_url = new URL('notebook/notebook.css', current_script.src);
-            globalThis.core.create_stylesheet(document.head, stylesheet_url);
+            globalThis.core.create_stylesheet_link(document.head, stylesheet_url);
 
             // load CodeMirror scripts:
             for (const script_path of [
@@ -260,7 +260,7 @@
                 '../../node_modules/codemirror/addon/dialog/dialog.css',
             ]) {
                 const stylesheet_url = new URL(stylesheet_path, current_script.src);
-                globalThis.core.create_stylesheet(document.head, stylesheet_url);
+                globalThis.core.create_stylesheet_link(document.head, stylesheet_url);
             }
         }
 

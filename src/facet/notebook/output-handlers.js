@@ -13,7 +13,7 @@
     );
 
     const dagreD3_stylesheet_url = new URL('output-handlers/dagre-d3.css', current_script.src);
-    globalThis.core.create_stylesheet(document.head, dagreD3_stylesheet_url);
+    globalThis.core.create_stylesheet_link(document.head, dagreD3_stylesheet_url);
 
 
     // === CONSTANTS ===
