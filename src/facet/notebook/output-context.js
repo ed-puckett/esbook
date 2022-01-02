@@ -375,6 +375,47 @@
                 return control;
             },
 
+            /** create a new HTML <select> and associated <option> elements
+             *  as a child of the given parent with an optional label element
+             *  @param {HTMLElement} parent
+             *  @param {string} id for control element
+             *  @param {Object|undefined|null} opts: {
+             *             tag?:         string,   // tag name for element; default: 'input'
+             *             type?:        string,   // type name for element; default: 'text'
+             *             label?:       string,   // if !!label, then create a label element
+             *             label_after?: boolean,  // if !!label_after, the add label after element, otherwise before
+             *             attrs?:       object,   // attributes to set on the new <select> element
+             *             options?:     object,   // keys are the text of an <option> element and
+             *                                     // values are the option attributes.  If no "value"
+             *                                     // attribute is specified then the key is used.
+             *         }
+             * Note: we are assuming that opts.options is specified with an key-order-preserving object.
+             *  @return {Element} the new <select> element
+             */
+            create_select_element(parent, id, opts) {
+                opts = opts ?? {};
+                const option_elements = [];
+                if (opts.options) {
+                    for (const text in opts.options) {
+                        let option_attrs = opts.options[text];
+                        if (! ('value' in option_attrs)) {
+                            option_attrs = {
+                                value: text,
+                                ...option_attrs,
+                            };
+                        }
+                    }
+                    const option_element = globalThis.core.create_element('option', option_attrs);
+                    option_element.innerText = text;
+                    option_elements.push(option_element);
+                }
+                const select_element = this.create_control_element(parent, id, opts);
+                for (const option_element of option_elements) {
+                    select_element.appendChild(option_element);
+                }
+                return select_element;
+            },
+
             /** scroll output section of ie into view
              */
             scroll_output_into_view() {
