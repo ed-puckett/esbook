@@ -328,7 +328,7 @@
              *  @param {string} id for control element
              *  @param {Object|undefined|null} options: {
              *             tag?:         string,   // tag name for element; default: 'input'
-             *             type?:        string,   // type name for element; default: 'text'
+             *             type?:        string,   // type name for element; default: 'text' (only used if tag === 'input')
              *             label?:       string,   // if !!label, then create a label element
              *             label_after?: boolean,  // if !!label_after, the add label after element, otherwise before
              *             attrs?:       object,   // attributes to set on the new control element
@@ -340,8 +340,8 @@
                     throw new Error('id must be a non-empty string');
                 }
                 const {
-                    tag   = 'input',
-                    type  = 'text',
+                    tag  = 'input',
+                    type = 'text',
                     label,
                     label_after,
                     attrs = {},
@@ -350,12 +350,14 @@
                 if ('id' in attrs || 'type' in attrs) {
                     throw new Error('attrs must not contain "id" or "type"');
                 }
-                const control = core.create_element('input', {
-                    id:   id,
-                    type: type,
+                const control_opts = {
+                    id,
                     ...attrs,
-                });
-
+                };
+                if (tag === 'input') {
+                    control_opts.type = type;
+                }
+                const control = core.create_element(tag, control_opts);
                 let control_label;
                 if (label) {
                     control_label = core.create_element('label', {
@@ -380,36 +382,36 @@
              *  @param {HTMLElement} parent
              *  @param {string} id for control element
              *  @param {Object|undefined|null} opts: {
-             *             tag?:         string,   // tag name for element; default: 'input'
-             *             type?:        string,   // type name for element; default: 'text'
-             *             label?:       string,   // if !!label, then create a label element
-             *             label_after?: boolean,  // if !!label_after, the add label after element, otherwise before
-             *             attrs?:       object,   // attributes to set on the new <select> element
-             *             options?:     object,   // keys are the text of an <option> element and
-             *                                     // values are the option attributes.  If no "value"
-             *                                     // attribute is specified then the key is used.
+             *             tag?:         string,    // tag name for element; default: 'input'
+             *             label?:       string,    // if !!label, then create a label element
+             *             label_after?: boolean,   // if !!label_after, the add label after element, otherwise before
+             *             attrs?:       object,    // attributes to set on the new <select> element
+             *             options?:     object[],  // array of objects, each of which contain "value" and "label" keys (value defaults to label)
+             *                                      // values are the option attributes.  If no "value"
+             *                                      // attribute is specified then the key is used.
              *         }
              * Note: we are assuming that opts.options is specified with an key-order-preserving object.
              *  @return {Element} the new <select> element
              */
             create_select_element(parent, id, opts) {
                 opts = opts ?? {};
+                if ('tag' in opts || 'type' in opts) {
+                    throw new Error('opts must not contain "tag" or "type"');
+                }
                 const option_elements = [];
                 if (opts.options) {
-                    for (const text in opts.options) {
-                        let option_attrs = opts.options[text];
-                        if (! ('value' in option_attrs)) {
-                            option_attrs = {
-                                value: text,
-                                ...option_attrs,
-                            };
-                        }
+                    for (const { value, label } of opts.options) {
+                        const option_attrs = { value: (value ?? label) };
+                        const option_element = globalThis.core.create_element('option', option_attrs);
+                        option_element.innerText = label;
+                        option_elements.push(option_element);
                     }
-                    const option_element = globalThis.core.create_element('option', option_attrs);
-                    option_element.innerText = text;
-                    option_elements.push(option_element);
                 }
-                const select_element = this.create_control_element(parent, id, opts);
+                const select_opts = {
+                    ...opts,
+                    tag: 'select',
+                };
+                const select_element = this.create_control_element(parent, id, select_opts);
                 for (const option_element of option_elements) {
                     select_element.appendChild(option_element);
                 }
