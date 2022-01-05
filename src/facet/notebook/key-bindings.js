@@ -19,7 +19,7 @@
         'undo':                 [ 'CmdOrCtrl+Z' ],
         'redo':                 [ 'CmdOrCtrl+Shift+Z' ],
         'clear_notebook':       [ 'CmdOrCtrl+Shift+C' ],
-        'open_notebook':        [ 'CmdOrCtrl+O', 'Ctrl-X Ctrl-F' ],
+        'open_notebook':        [ 'CmdOrCtrl+O' ],
         'import_notebook':      [ 'CmdOrCtrl+Shift+O' ],
         'reopen_notebook':      [ 'CmdOrCtrl+R' ],
         'save_notebook':        [ 'CmdOrCtrl+S' ],
@@ -36,7 +36,7 @@
         'add_after_element':    [ 'CmdOrCtrl+Alt+Down' ],
         'delete_element':       [ 'CmdOrCtrl+Alt+Backspace' ],
 
-        'open_last_recent':     [ 'Ctrl-X Ctrl-R' ],//!!!
+        'open_last_recent':     [ 'Ctrl-Alt-Shift-R' ],//!!!
     };
 
     function _freeze_command_bindings(cb) {

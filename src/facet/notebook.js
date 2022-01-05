@@ -143,13 +143,6 @@
         static cm_dark_mode_theme  = CM_DARK_MODE_THEME;
         static cm_light_mode_theme = CM_LIGHT_MODE_THEME;
 
-        static emacs_special_key_bindings = {
-            'Ctrl-X Ctrl-R': () => notebook.handle_command('open_last_recent'),//!!!
-            'Ctrl-X Ctrl-F': () => notebook.open_notebook(false),
-            'Ctrl-X Ctrl-S': () => notebook.save_notebook(false),
-            'Ctrl-X Ctrl-W': () => notebook.save_notebook(true),
-        };
-
         static sym_eval_state = Symbol.for('eval_state');
 
         // if present, then the input following is markdown+MathJax
@@ -949,7 +942,7 @@
                 if (changes.some(c => (c.from.line === 0 || c.to.line === 0))) {
                     // change affected first line; check if mode changed
                     const mdmj_mode = cm.getLine(0).trim().startsWith(this.constructor._input_mdmj_header_sequence);
-                    if (!!internal_state.mdmj_mode != !!mdmj_mode) {
+                    if (!!internal_state.mdmj_mode !== !!mdmj_mode) {
                         internal_state.mdmj_mode = mdmj_mode;
                         if (mdmj_mode) {
                             ie.classList.add(this.constructor._ie_mdmj_mode_css_class);
@@ -970,24 +963,6 @@
                     if (typeof value !== 'undefined') {
                         cm.setOption(option, value);
                     }
-                }
-                if (settings.editor_options.keyMap === 'emacs') {
-                    // Guess what? CodeMirror.normalizeKeyMap modifies the given keymap!!  So send a copy....
-                    const key_bindings_copy = { ...this.constructor.emacs_special_key_bindings };
-                    const normalized_keymap = CodeMirror.normalizeKeyMap(key_bindings_copy);
-                    cm.setOption('extraKeys', normalized_keymap);
-
-                    bind_key_handler(ie, this.constructor.emacs_special_key_bindings, {
-                        skip_key_event: (event) => {
-                            // skip keydown event if it is intended for the editor instance
-                            if (document.activeElement.closest('.interaction_element .input')) {
-                                return true;  // within element with "input" class
-                            }
-                            return false;
-                        },
-                    });
-                } else {
-                    remove_current_key_handler(ie);
                 }
             }
 
