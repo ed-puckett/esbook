@@ -64,30 +64,78 @@
         },
     }];
 
-    function run(output_context) {
-        const ui_section = output_context.create_output_element();
+    function get_obj_path(obj, path) {
+        for (const segment of path) {
+            obj = (obj ?? {})[segment];
+        }
+        return obj;
+    }
 
+    function set_obj_path(obj, path, value) {
+        if (path.length < 1) {
+            throw new Error('path must contain at least one segment');
+        }
+        for (const segment of path.slice(0, -1)) {
+            if (typeof obj[segment] === 'undefined') {
+                obj[segment] = {};
+            }
+            obj = obj[segment];
+        }
+        obj[path.slice(-1)[0]] = value;
+    }
+
+    function run(output_context) {
+        const current_settings = get_settings();
+
+        const ui_section = output_context.create_output_element();
         for (const { section, warnings } of sections) {
             const { name, settings } = section;
             const section_div = globalThis.core.create_child_element(ui_section, 'div');
             section_div.classList.add = 'section';
+
             const named_section_div = globalThis.core.create_child_element(section_div, 'div', { 'data-section': name });
             for (const setting of settings) {
                 const { id, label, type, settings_path, options } = setting;
                 const setting_div = globalThis.core.create_child_element(named_section_div, 'div', { 'data-setting': undefined });
+                let control;
                 if (type === 'select') {
-                    output_context.create_select_element(setting_div, id, {
+                    control = output_context.create_select_element(setting_div, id, {
                         label,
                         options,
                     });
                 } else {
-                    output_context.create_control_element(setting_div, id, {
+                    control = output_context.create_control_element(setting_div, id, {
                         label,
                         type,
                     });
                 }
-                //!!! set initial value
-                //!!! set handler
+
+                if (type === 'checkbox') {
+                    control.checked = get_obj_path(current_settings, settings_path);
+                } else {
+                    control.value = get_obj_path(current_settings, settings_path);
+                }
+
+                control.addEventListener('change', (event) => {
+                    const current_settings = get_settings();
+                    if (type === 'checkbox') {
+                        set_obj_path(current_settings, settings_path, control.checked);
+                    } else {
+                        set_obj_path(current_settings, settings_path, control.value);
+                    }
+                    update_settings(current_settings);
+                });
+            }
+
+            if (warnings) {
+                for (const warning_class in warnings) {
+                    const warning_div = globalThis.core.create_child_element(section_div, 'div');
+                    warning_div.classList.add('warning');
+                    warning_div.classList.add(warning_class);
+                    for (const warning_text of warnings[warning_class]) {
+                        globalThis.core.create_child_element(warning_div, 'p').innerText = warning_text;
+                    }
+                }
             }
         }
 
