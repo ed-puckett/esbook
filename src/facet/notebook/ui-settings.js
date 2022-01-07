@@ -8,7 +8,7 @@
         update_settings,
     } = await facet('facet/notebook/settings.js');
 
-    const message_controller = await facet('facet/message-controller.js');
+    const dialog_controller = await facet('facet/dialog-controller.js');
 
     const sections = [{
         section: {

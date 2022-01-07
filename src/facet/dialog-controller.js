@@ -2,15 +2,15 @@
 
 (async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
-    const MESSAGE_CONTROL_ID = `message-${globalThis.core.uuidv4()}`;
+    const DIALOG_CONTROL_ID = `dialog-${globalThis.core.uuidv4()}`;
 
     const CSS_CLASS_ACTIVE = 'active';
 
     const CSS_CLASS_ALERT   = 'alert';
     const CSS_CLASS_CONFIRM = 'confirm';
 
-    class MessageController {
-        constructor(control_id=MESSAGE_CONTROL_ID) {
+    class DialogController {
+        constructor(control_id=DIALOG_CONTROL_ID) {
             this._setup_html(control_id);
             // add event handlers
             this._control_el.addEventListener('keydown', this._keydown_handler.bind(this), true);
@@ -45,7 +45,7 @@
             this._clear_current_pending_promise();
         }
 
-        get current_message_id (){ return this._current_message_id; }
+        get current_dialog_id (){ return this._current_dialog_id; }
 
         // === INTERNAL METHODS ===
 
@@ -58,14 +58,14 @@
 
             // create HTML:
             //
-            // <div id="message" class="">
-            //     <div id="message_text"></div>
+            // <div id="dialog" class="">
+            //     <div id="dialog_text"></div>
             //     <span>
-            //         <button id="message_cancel">Cancel</button>
-            //         <button id="message_ok">Ok</button>
+            //         <button id="dialog_cancel">Cancel</button>
+            //         <button id="dialog_ok">Ok</button>
             //     </span>
             // </div>
-            // <div id="message_event_blocker" tabindex="0"></div>
+            // <div id="dialog_event_blocker" tabindex="0"></div>
 
             this._control_el = globalThis.core.create_element('div', { id: this._control_id });
             this._text_el = globalThis.core.create_child_element(this._control_el, 'div', { id: this._text_id });
@@ -89,7 +89,7 @@
             this._resolve_op = undefined;
             this._reject_op  = undefined;
             this._current_pending_promise = undefined;
-            this._current_message_id = undefined;
+            this._current_dialog_id = undefined;
         }
 
         _clear_current_pending_promise() {
@@ -99,8 +99,8 @@
         }
 
         _create_pending_promise() {
-            this._clear_current_pending_promise();  // clear previous message, if any
-            this._current_message_id = globalThis.core.uuidv4();  // for identification of this message
+            this._clear_current_pending_promise();  // clear previous dialog, if any
+            this._current_dialog_id = globalThis.core.uuidv4();  // for identification of this dialog
             this._current_pending_promise = new Promise((resolve, reject) => {
                 this._resolve_op = (message) => {
                     this._reset();
@@ -191,51 +191,51 @@
  * according to the prefers-color-scheme media query.
  */
 
-#message {
+#dialog {
     display: none;
     padding: 0.5rem 0 0.5rem 0.75rem;
     border: 7px double darkorange;
     background-color: cornsilk;
 }
 
-#message.active {
+#dialog.active {
     display: block;
 }
 
-#message button {
+#dialog button {
     margin: 0.5rem 0.5rem 0.5rem 0;
 }
 
-#message_text {
+#dialog_text {
     margin: 0.5rem 0.5rem 0.5rem 0;
 }
 
-#message_cancel {
+#dialog_cancel {
     display: none;
 }
-#message.confirm #message_cancel {
+#dialog.confirm #dialog_cancel {
     display: inline;
 }
 
-#message_ok {
+#dialog_ok {
 }
 
-#message_event_blocker {
+#dialog_event_blocker {
     display: none;
     position: absolute;
     background-color: #80808080;
 }
-#message_event_blocker.active {
+#dialog_event_blocker.active {
     display: block;
 }
 `;
     // add style sheet
-    globalThis.core.create_inline_stylesheet(document.head, stylesheet_text.replaceAll('#message', `#${MESSAGE_CONTROL_ID}`));
+    globalThis.core.create_inline_stylesheet(document.head, stylesheet_text.replaceAll('#dialog', `#${DIALOG_CONTROL_ID}`));
 
 
     // === EXPORT ===
 
-    // export message controller instance
-    facet_export(new MessageController());
+    // export dialog controller instance
+    facet_export(new DialogController());
 
 } catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end
