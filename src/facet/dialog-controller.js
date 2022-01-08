@@ -187,10 +187,6 @@
 
 
     const stylesheet_text = `
-/* See ../theme-settings/theme-colors.css for the general colors that are set
- * according to the prefers-color-scheme media query.
- */
-
 #dialog {
     display: none;
     padding: 0.5rem 0 0.5rem 0.75rem;
