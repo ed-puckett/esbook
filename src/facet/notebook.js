@@ -15,8 +15,12 @@
 
     // === EXTERNAL MODULES ===
 
-    const dialog_controller = await facet('facet/dialog-controller.js');
-    const fs_interface      = await facet('facet/fs-interface.js');
+    const fs_interface = await facet('facet/fs-interface.js');
+
+    const {
+        AlertDialog,
+        ConfirmDialog,
+    } = await facet('facet/dialog.js');
 
     const { beep } = await facet('facet/beep.js');
 
@@ -582,7 +586,7 @@
         // create a new empty notebook with a single interaction_element element
         async clear_notebook(force=false) {
             if (!force && this.notebook_modified()) {
-                if (! await dialog_controller.confirm('Warning: changes not saved, clear document anyway?')) {
+                if (! await new ConfirmDialog().run('Warning: changes not saved, clear document anyway?')) {
                     return;
                 }
             }
@@ -610,7 +614,7 @@
         async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
             try {
                 if (!force && this.notebook_modified()) {
-                    if (! await dialog_controller.confirm('Warning: changes not saved, load new document anyway?')) {
+                    if (! await new ConfirmDialog().run('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
@@ -635,7 +639,7 @@
             } catch (err) {
                 console.error('open failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
-                await dialog_controller.alert(`open failed: ${err.message}\n(initializing empty document)`);
+                await new AlertDialog().run(`open failed: ${err.message}\n(initializing empty document)`);
                 await this.clear_notebook(true);  // initialize empty notebook
             }
         }
@@ -643,7 +647,7 @@
         async open_notebook(do_import=false) {
             try {
                 if (this.notebook_modified()) {
-                    if (! await dialog_controller.confirm('Warning: changes not saved, load new document anyway?')) {
+                    if (! await new ConfirmDialog().run('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
@@ -668,7 +672,7 @@
             } catch (err) {
                 console.error('open failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
-                await dialog_controller.alert(`open failed: ${err.message}\n(initializing empty document)`);
+                await new AlertDialog().run(`open failed: ${err.message}\n(initializing empty document)`);
                 await this.clear_notebook(true);  // initialize empty notebook
             }
         }
@@ -689,7 +693,7 @@
             }
             try {
                 if (timestamp_mismatch) {
-                    if (! await dialog_controller.confirm('Warning: notebook file modified by another process, save anyway?')) {
+                    if (! await new ConfirmDialog().run('Warning: notebook file modified by another process, save anyway?')) {
                         return;
                     }
                 }
@@ -723,7 +727,7 @@ console.log('>>> SAVED');//!!!
             } catch (err) {
                 console.error('save failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
-                await dialog_controller.alert(`save failed: ${err.message}`);
+                await new AlertDialog().run(`save failed: ${err.message}`);
             }
         }
 

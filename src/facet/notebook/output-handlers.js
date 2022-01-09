@@ -279,8 +279,10 @@
                 size_config,
                 child_tag: 'svg',
                 child_element_namespace: svg_namespace,
+                child_attrs: {
+                    class: 'dagre',
+                },
             });
-            svg.classList.add('dagre');
             svg.appendChild(document.createElementNS(svg_namespace, 'g'));  // required by dagreD3
             svg.addEventListener('wheel', function (event) {
                 if (!event.shiftKey) {

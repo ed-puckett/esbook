@@ -8,8 +8,6 @@
         update_settings,
     } = await facet('facet/notebook/settings.js');
 
-    const dialog_controller = await facet('facet/dialog-controller.js');
-
     const sections = [{
         section: {
             name: 'Editor',
@@ -90,8 +88,7 @@
         const ui_section = output_context.create_output_element();
         for (const { section, warnings } of sections) {
             const { name, settings } = section;
-            const section_div = globalThis.core.create_child_element(ui_section, 'div');
-            section_div.classList.add = 'section';
+            const section_div = globalThis.core.create_child_element(ui_section, 'div', { class: 'section' });
 
             const named_section_div = globalThis.core.create_child_element(section_div, 'div', { 'data-section': name });
             for (const setting of settings) {
@@ -129,9 +126,7 @@
 
             if (warnings) {
                 for (const warning_class in warnings) {
-                    const warning_div = globalThis.core.create_child_element(section_div, 'div');
-                    warning_div.classList.add('warning');
-                    warning_div.classList.add(warning_class);
+                    const warning_div = globalThis.core.create_child_element(section_div, 'div', { class: `warning ${warning_class}` });
                     for (const warning_text of warnings[warning_class]) {
                         globalThis.core.create_child_element(warning_div, 'p').innerText = warning_text;
                     }

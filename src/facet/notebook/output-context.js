@@ -132,26 +132,26 @@
             /** create a new element in the output section of the ie
              *  @param {Object|undefined|null} options: {
              *             size_config?: [width: number, height: number],
-             *             tag?: string,                        // tag name for element; default: 'div'
-             *             element_namespace?: string,          // namespace for element creation
-             *             element_attribute_pairs?: string[],  // pairs of strings: attribute_name, value
-             *             child_tag?: string,                  // if given, create and return a child element
-             *             child_element_namespace?: string,    // namespace for child element creation
-             *             child_attribute_pairs?: string[],    // pairs of strings: attribute_name, value
+             *             tag?: string,                      // tag name for element; default: 'div'
+             *             element_namespace?: string,        // namespace for element creation
+             *             attrs?: object,                    // attributes to set on element
+             *             child_tag?: string,                // if given, create and return a child element
+             *             child_element_namespace?: string,  // namespace for child element creation
+             *             child_attrs?: object,              // attributes to set on child element
              *         }
              * An randomly-generated id will be assigned to the element (and
              * also to the child element, if one is created) unless those
-             * elements have an id attribute specified (in *_attribute_pairs).
+             * elements have an id attribute specified (in *_attrs).
              */
             create_output_element(options) {
                 const {
                     size_config,
                     tag = 'div',
                     element_namespace,
-                    element_attribute_pairs,
+                    attrs,
                     child_tag,
                     child_element_namespace,
-                    child_attribute_pairs,
+                    child_attrs,
                 } = (options ?? {});
 
                 // Re: Chart.js:
@@ -165,10 +165,9 @@
                     output_element = document.createElement(tag);
                 }
                 let output_element_id_specified = false;
-                if (element_attribute_pairs) {
-                    for (let i = 0; i < element_attribute_pairs.length; i+=2) {
-                        const k = element_attribute_pairs[i];
-                        const v = element_attribute_pairs[i+1];
+                if (attrs) {
+                    for (const k in attrs) {
+                        const v = attrs[k];
                         output_element.setAttribute(k, v);
                         if (k == 'id') {
                             output_element_id_specified = true;
@@ -187,10 +186,9 @@
                         child = document.createElement(child_tag);
                     }
                     let child_id_specified = false;
-                    if (child_attribute_pairs) {
-                        for (let i = 0; i < child_attribute_pairs.length; i+=2) {
-                            const k = child_attribute_pairs[i];
-                            const v = child_attribute_pairs[i+1];
+                    if (child_attrs) {
+                        for (const k in child_attrs) {
+                            const v = child_attrs[k];
                             child.setAttribute(k, v);
                             if (k == 'id') {
                                 child_id_specified = true;

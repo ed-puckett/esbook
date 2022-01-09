@@ -84,18 +84,23 @@
         return el;
     };
 
-    /** create_child_element(parent, tag_name, attrs)
+    /** create_child_element(parent, tag_name, attrs, prepend=false)
      *  @param {Element} parent
      *  @param {string} tag_name
      *  @param {Object|undefined|null} attrs
+     *  @param {boolean|undefined} prepend instead of append
      *  @return {Element} the new element
      */
-    globalThis.core.create_child_element = function create_child_element(parent, tag_name, attrs) {
+    globalThis.core.create_child_element = function create_child_element(parent, tag_name, attrs, prepend=false) {
         if (! (parent instanceof Element)) {
             throw new Error('parent must be an Element');
         }
         const el = globalThis.core.create_element(tag_name, attrs);
-        parent.appendChild(el);
+        if (prepend) {
+            parent.insertBefore(el, parent.firstChild);
+        } else {
+            parent.appendChild(el);
+        }
         return el;
     };
 
