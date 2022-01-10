@@ -34,6 +34,10 @@
     const { ThemeSettingsUpdatedEvent } = await facet('facet/notebook/theme-settings.js');
 
     const {
+        SettingsDialog,
+    } = await facet('facet/notebook/settings-dialog.js');
+
+    const {
         KeyBindingCommandEvent,
     } = await facet('facet/notebook/key-bindings.js');
 
@@ -515,6 +519,10 @@
             }
             case 'delete_element': {
                 perform_delete_ie_change(this, this.current_ie);
+                break;
+            }
+            case 'settings': {
+                new SettingsDialog().run();
                 break;
             }
             case 'open_last_recent': {//!!!

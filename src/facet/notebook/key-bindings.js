@@ -35,6 +35,7 @@
         'add_before_element':   [ 'CmdOrCtrl+Alt+Up' ],
         'add_after_element':    [ 'CmdOrCtrl+Alt+Down' ],
         'delete_element':       [ 'CmdOrCtrl+Alt+Backspace' ],
+        'settings':             [ 'CmdOrCtrl+,' ],
 
         'open_last_recent':     [ 'Ctrl-Alt-Shift-R' ],//!!!
     };

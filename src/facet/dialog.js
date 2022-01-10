@@ -2,6 +2,13 @@
 
 (async ({ current_script, facet, facet_export, facet_load_error }) => { try {  // facet begin
 
+    // === STYLESHEET ===
+
+    globalThis.core.create_stylesheet_link(document.head, new URL('dialog/dialog.css', current_script.src));
+
+
+    // === DIALOG BASE CLASS ===
+
     /* GENERAL DIALOG LAYOUT
      *
      * <div id="content">
@@ -56,6 +63,7 @@
         }
 
         get promise (){ return this._promise.promise; }
+
 
         // === INTERNAL METHODS ===
 
@@ -197,9 +205,122 @@
     }
 
 
-    // === STYLESHEET ===
+    // === UTILITY FUNCTIONS ===
 
-    globalThis.core.create_stylesheet_link(document.head, new URL('dialog/dialog.css', current_script.src));
+    /** create a new HTML control as a child of the given parent with an optional label element
+     *  @param {HTMLElement} parent
+     *  @param {string} id for control element
+     *  @param {Object|undefined|null} options: {
+     *             tag?:         string,   // tag name for element; default: 'input'
+     *             type?:        string,   // type name for element; default: 'text' (only used if tag === 'input')
+     *             label?:       string,   // if !!label, then create a label element
+     *             label_after?: boolean,  // if !!label_after, the add label after element, otherwise before
+     *             attrs?:       object,   // attributes to set on the new control element
+     *         }
+     *  @return {Element} the new control element
+     */
+    function create_control_element(parent, id, options) {
+        if (typeof id !== 'string' || id === '') {
+            throw new Error('id must be a non-empty string');
+        }
+        const {
+            tag  = 'input',
+            type = 'text',
+            label,
+            label_after,
+            attrs = {},
+        } = (options ?? {});
+
+        if ('id' in attrs || 'type' in attrs) {
+            throw new Error('attrs must not contain "id" or "type"');
+        }
+        const control_opts = {
+            id,
+            ...attrs,
+        };
+        if (tag === 'input') {
+            control_opts.type = type;
+        }
+        const control = core.create_element(tag, control_opts);
+        let control_label;
+        if (label) {
+            control_label = core.create_element('label', {
+                for: id,
+            });
+            control_label.innerText = label;
+        }
+
+        if (label_after) {
+            parent.appendChild(control);
+            parent.appendChild(control_label);
+        } else {
+            parent.appendChild(control_label);
+            parent.appendChild(control);
+        }
+
+        return control;
+    }
+
+    /** create a new HTML <select> and associated <option> elements
+     *  as a child of the given parent with an optional label element
+     *  @param {HTMLElement} parent
+     *  @param {string} id for control element
+     *  @param {Object|undefined|null} opts: {
+     *             tag?:         string,    // tag name for element; default: 'input'
+     *             label?:       string,    // if !!label, then create a label element
+     *             label_after?: boolean,   // if !!label_after, the add label after element, otherwise before
+     *             attrs?:       object,    // attributes to set on the new <select> element
+     *             options?:     object[],  // array of objects, each of which contain "value" and "label" keys (value defaults to label)
+     *                                      // values are the option attributes.  If no "value"
+     *                                      // attribute is specified then the key is used.
+     *         }
+     * Note: we are assuming that opts.options is specified with an key-order-preserving object.
+     *  @return {Element} the new <select> element
+     */
+    function create_select_element(parent, id, opts) {
+        opts = opts ?? {};
+        if ('tag' in opts || 'type' in opts) {
+            throw new Error('opts must not contain "tag" or "type"');
+        }
+        const option_elements = [];
+        if (opts.options) {
+            for (const { value, label } of opts.options) {
+                const option_attrs = { value: (value ?? label) };
+                const option_element = globalThis.core.create_element('option', option_attrs);
+                option_element.innerText = label;
+                option_elements.push(option_element);
+            }
+        }
+        const select_opts = {
+            ...opts,
+            tag: 'select',
+        };
+        const select_element = create_control_element(parent, id, select_opts);
+        for (const option_element of option_elements) {
+            select_element.appendChild(option_element);
+        }
+        return select_element;
+    }
+
+    function get_obj_path(obj, path) {
+        for (const segment of path) {
+            obj = (obj ?? {})[segment];
+        }
+        return obj;
+    }
+
+    function set_obj_path(obj, path, value) {
+        if (path.length < 1) {
+            throw new Error('path must contain at least one segment');
+        }
+        for (const segment of path.slice(0, -1)) {
+            if (typeof obj[segment] === 'undefined') {
+                obj[segment] = {};
+            }
+            obj = obj[segment];
+        }
+        obj[path.slice(-1)[0]] = value;
+    }
 
 
     // === EXPORT ===
@@ -208,6 +329,10 @@
         Dialog,
         AlertDialog,
         ConfirmDialog,
+        create_control_element,
+        create_select_element,
+        get_obj_path,
+        set_obj_path,
     });
 
 } catch (err) { facet_load_error(err, current_script); } })(globalThis.core.facet_init());  // facet end
