@@ -1,5 +1,66 @@
+emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
+update facet mechanism to use ES6 modules
 make facet scripts inline-able without having been loaded via facet() [need to have one single export handler that listens for any facet export or error event]
 call cleanup on change objects that are deleted
+settings update broadcast / polling
 deleting element with an eval worker running something like setInterval(): old eval worker keeps running even though "stopped"
+provide on_stopped event to allow cleanup of background "processes"
+need to check graphics output
+dagre: edges not rendered in image_uri
+canvas2d image_uri not being rendered for persistent state
+implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
+keep "autoeval"?
+provide "toast" messages + dialog to display past messages
+implement settings dialog
 
+
+=== THINK ABOUT ===
+use "contenteditable" element instead of CodeMirror stuff?
+figure out what to do with nb_state
+figure out how to reload / re-initialize eval state
+figure out codemirror + emacs clipboard support
+menus
+
+
+=== UNREPEATED BUGS ====
+pythagorean-triples.esbook: first cell lines are concatenated (saw once, but not again...)
+have witnessed stray text in buffers after copying/pasting/evaluating
+
+
+=== DONE ===
+* notebook.js: update_cm_from_settings(cm, ie): not defined: bind_key_handler, remove_current_key_handler
+* too many questions when saving
+* message_controller: provide better handling of scrolling and focus
+* keyboard handling / key bindings
+* notebook / notebook state
+* integrate key-handler.js into key-bindings.js
+* set up html for notebook during initialization
+* set up css for notebook during initialization
+* load codemirror
+* implement esbook mode for codemirror
+* reimplement stuff that uses ipcRenderer
+* implement eval
+* support opening/saving notebooks
+* open: prompts for saving (!)
+* implement interface to IndexedDB
+* provide settings persistence (through IndexedDB)
+* set up "recents" (through IndexedDB)
+* confirm close
+* switch codemirror mode based on input type (md+mj or javascript)
+* update ie class according to text/code mode (watch 'change' events that affect line 1)
+* move to different ie with keyboard does not set focus correctly
+* implement auto-hide for non-expression inputs
+* implement message_controller.confirm_sync (eliminated the need for _sync variant...)
+* update output-handlers.js
+* update class OutputContext in notebook.js
+* update eval-worker.js
+* save failed: get_fs_stats_for_file_handle is not defined
+* eval: graphics element is not sized correctly (see examples/dagre-demo.esbook)
+* streamline operation of output handlers
+* provide interface in eval for creating output elements, etc
+* eval: provide access to output_context
+* make eval_fn "this" be a persistent context for the notebook
+* reset the persistent context for the notebook when resetting evaluation
+* add an api for creating CanvasRendering2DContext/Element
+* definable notebook init script (to be run when notebook is loaded) (autoeval)
 * don't load scripts more that once: load_script(), load_script_and_wait_for_condition()
