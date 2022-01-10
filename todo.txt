@@ -11,7 +11,6 @@ canvas2d image_uri not being rendered for persistent state
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 keep "autoeval"?
 provide "toast" messages + dialog to display past messages
-settings dialog is partially hidden by event blocker element (first time only?)
 first ie is initially too tall
 
 
@@ -29,6 +28,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating
 
 
 === DONE ===
+* settings dialog is partially hidden by event blocker element (first time only?)
 * Ctrl-, can bring up multiple settings dialogs (if a settings dialog is already showing)
 * implement settings dialog
 * notebook.js: update_cm_from_settings(cm, ie): not defined: bind_key_handler, remove_current_key_handler

@@ -77,7 +77,10 @@
         run(...args) {
             try {
                 this._populate_dialog_element(...args);
-                this._adjust_event_blocker();
+                // call this._adjust_event_blocker() on the next tick
+                // because otherwise the size calculation is wrong
+                // the first time....
+                setTimeout(() => this._adjust_event_blocker());
             } catch (error) {
                 this._cancel(error);
             }
