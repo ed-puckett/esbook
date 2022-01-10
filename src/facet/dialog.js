@@ -31,15 +31,27 @@
      * </div>
      */
 
+    const _dialog_element_to_instance_map = new WeakMap();
+
     class Dialog {
         static blocker_element_id = 'dialog_event_blocker';
+        static dialog_css_class   = 'dialog';
 
-        /** run a new instance of the dialog
+        /** run a new instance of this dialog class
          *  @param {string} message to be passed to instance run() method
          *  @param {Object|undefined|null} options to be passed to instance run() method
          *  @return {Promise}
          */
         static run(message, options) { return new this().run(message, options); }
+
+        /** Return the dialog instance associated with an element, if any.
+         *  @param {Element} element an HTML element in the DOM
+         *  @return {Element|null} null if element is not a dialog or a child
+         *          of a dialog, otherwise the associated Dialog instance.
+         */
+        static instance_from_element(element) {
+            return _dialog_element_to_instance_map[element.closest(`.${this.dialog_css_class}`)];
+        }
 
         constructor() {
             this._promise = new globalThis.core.OpenPromise();
@@ -54,10 +66,13 @@
             try {
                 this._dialog_element_id = `dialog-${globalThis.core.uuidv4()}`;
                 this._create_dialog_element();
+                _dialog_element_to_instance_map[this._dialog_element] = this;
             } catch (error) {
                 this._cancel(error);
             }
         }
+
+        get promise (){ return this._promise.promise; }
 
         run(...args) {
             try {
@@ -68,8 +83,6 @@
             }
             return this.promise;
         }
-
-        get promise (){ return this._promise.promise; }
 
 
         // === INTERNAL METHODS ===
@@ -119,7 +132,7 @@
             }
             const dialog_element = globalThis.core.create_element('div', {
                 id:    this._dialog_element_id,
-                class: 'dialog',
+                class: this.constructor.dialog_css_class,
             });
             // dialog elements must occur before blocker_element
             ui_element.insertBefore(dialog_element, blocker_element);
@@ -127,7 +140,10 @@
         }
 
         _destroy_dialog_element() {
-            this._dialog_element?.remove();
+            if (this._dialog_element) {
+                _dialog_element_to_instance_map.delete(this._dialog_element);
+                this._dialog_element.remove();
+            }
             this._dialog_element = undefined;
         }
 

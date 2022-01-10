@@ -520,7 +520,7 @@
                 break;
             }
             case 'settings': {
-                new SettingsDialog().run();
+                SettingsDialog.run();
                 break;
             }
             case 'open_last_recent': {//!!!

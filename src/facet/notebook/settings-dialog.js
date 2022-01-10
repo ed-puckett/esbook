@@ -71,8 +71,35 @@
     }];
 
     class SettingsDialog extends Dialog {
+        static settings_dialog_css_class = 'settings-dialog';
+
+        /** focus a pre-existing instance of the settings dialog or run
+         *  a new instance of the dialog if one does not currently exist.
+         *  @return {Promise}
+         */
+        static run(message, options) {
+            const pre_existing_element = document.querySelector(`#content #ui .${this.settings_dialog_css_class}`);
+            if (pre_existing_element) {
+                // set focus if necessary
+                if (document.activeElement.closest(`.${this.settings_dialog_css_class}`) !== pre_existing_element) {
+                    setTimeout(() => pre_existing_element.querySelector('.dialog_accept').focus());
+                }
+                const pre_existing_instance = Dialog.instance_from_element(pre_existing_element);
+                if (!pre_existing_instance) {
+                    throw new Error(`unexpected: Dialog.instance_from_element() returned null for element with class ${this.settings_dialog_css_class}`);
+                }
+                return pre_existing_instance.promise;
+            } else {
+                return new this().run();
+            }
+        }
+
         _populate_dialog_element() {
             const current_settings = get_settings();
+
+            // make this dialog identifiable so that the static method run()
+            // can find it if it already exists.
+            this._dialog_element.classList.add(this.constructor.settings_dialog_css_class);
 
             for (const { section, warnings } of sections) {
                 const { name, settings } = section;
