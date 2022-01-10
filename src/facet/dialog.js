@@ -34,6 +34,13 @@
     class Dialog {
         static blocker_element_id = 'dialog_event_blocker';
 
+        /** run a new instance of the dialog
+         *  @param {string} message to be passed to instance run() method
+         *  @param {Object|undefined|null} options to be passed to instance run() method
+         *  @return {Promise}
+         */
+        static run(message, options) { return new this().run(message, options); }
+
         constructor() {
             this._promise = new globalThis.core.OpenPromise();
             this._promise.promise.finally(() => {

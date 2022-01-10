@@ -51,9 +51,7 @@
         ie_hide_input_css_class,
         ie_get_hide_input_state,
         ie_set_hide_input_state,
-        ie_is_dialog_css_class,
         ie_get_is_dialog_state,
-        ie_set_is_dialog_state,
         create_output_context,
     } = await facet('facet/notebook/output-context.js');
 
@@ -594,7 +592,7 @@
         // create a new empty notebook with a single interaction_element element
         async clear_notebook(force=false) {
             if (!force && this.notebook_modified()) {
-                if (! await new ConfirmDialog().run('Warning: changes not saved, clear document anyway?')) {
+                if (! await ConfirmDialog.run('Warning: changes not saved, clear document anyway?')) {
                     return;
                 }
             }
@@ -622,7 +620,7 @@
         async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
             try {
                 if (!force && this.notebook_modified()) {
-                    if (! await new ConfirmDialog().run('Warning: changes not saved, load new document anyway?')) {
+                    if (! await ConfirmDialog.run('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
@@ -647,7 +645,7 @@
             } catch (err) {
                 console.error('open failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
-                await new AlertDialog().run(`open failed: ${err.message}\n(initializing empty document)`);
+                await AlertDialog.run(`open failed: ${err.message}\n(initializing empty document)`);
                 await this.clear_notebook(true);  // initialize empty notebook
             }
         }
@@ -655,7 +653,7 @@
         async open_notebook(do_import=false) {
             try {
                 if (this.notebook_modified()) {
-                    if (! await new ConfirmDialog().run('Warning: changes not saved, load new document anyway?')) {
+                    if (! await ConfirmDialog.run('Warning: changes not saved, load new document anyway?')) {
                         return;
                     }
                 }
@@ -680,7 +678,7 @@
             } catch (err) {
                 console.error('open failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
-                await new AlertDialog().run(`open failed: ${err.message}\n(initializing empty document)`);
+                await AlertDialog.run(`open failed: ${err.message}\n(initializing empty document)`);
                 await this.clear_notebook(true);  // initialize empty notebook
             }
         }
@@ -701,7 +699,7 @@
             }
             try {
                 if (timestamp_mismatch) {
-                    if (! await new ConfirmDialog().run('Warning: notebook file modified by another process, save anyway?')) {
+                    if (! await ConfirmDialog.run('Warning: notebook file modified by another process, save anyway?')) {
                         return;
                     }
                 }
@@ -735,7 +733,7 @@ console.log('>>> SAVED');//!!!
             } catch (err) {
                 console.error('save failed', err.stack);
                 this.set_notebook_source(undefined);  // reset potentially problematic source info
-                await new AlertDialog().run(`save failed: ${err.message}`);
+                await AlertDialog.run(`save failed: ${err.message}`);
             }
         }
 

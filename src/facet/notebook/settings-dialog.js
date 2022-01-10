@@ -150,7 +150,7 @@
 
             setTimeout(() => accept_button.focus());
 
-            //!!! disable default key bindings
+            //!!! need to disable default key bindings?
 
             // add the stylesheet
             const stylesheet_url = new URL('settings-dialog.css', current_script.src);
