@@ -139,7 +139,6 @@
 
     // === NOTEBOOK CLASS ===
 
-
     class Notebook {
         static nb_type    = NB_TYPE;
         static nb_version = NB_VERSION;
