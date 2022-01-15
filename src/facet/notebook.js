@@ -132,7 +132,7 @@
         }
         notebook = new Notebook();
         await notebook.setup();
-        notebook.update_from_settings();  // in case setting update already received
+        notebook.update_from_settings();  // in case settings update already received
 
     });
 
