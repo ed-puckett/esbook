@@ -15,6 +15,7 @@ first ie is initially too tall
 
 
 === THINK ABOUT ===
+https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
 use "contenteditable" element instead of CodeMirror stuff?
 figure out what to do with nb_state
 figure out how to reload / re-initialize eval state
