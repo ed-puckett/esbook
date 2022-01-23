@@ -12,6 +12,8 @@ implement auto-hide for autoeval ie and dynamically change when its input elemen
 keep "autoeval"?
 provide "toast" messages + dialog to display past messages
 first ie is initially too tall
+markdown processing: html tags in markdown trip up the display of the element
+markdown processing: code blocks have extraneous stuff at beginning: <span class="MathJax_Preview" ...
 
 
 === THINK ABOUT ===
