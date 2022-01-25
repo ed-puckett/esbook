@@ -37,6 +37,14 @@ build: ./node_modules
 lint: ./node_modules
 	./node_modules/.bin/eslint src
 
+.PHONY: server
+server: build
+	npx httpserver -d -n --host 127.0.0.1 --port 4300
+
+.PHONY: dev-server
+dev-server:
+	npx nodemon -w src -e js,mjs,html,css,ico,svg -x "bash -c 'make server' || exit 1"
+
 .PHONY: start
 start: build
-	chromium ./src/index.html
+	chromium http://127.0.0.1:4300/src/index.html
