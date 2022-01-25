@@ -1,6 +1,4 @@
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
-update facet mechanism to use ES6 modules
-make facet scripts inline-able without having been loaded via facet() [need to have one single export handler that listens for any facet export or error event]
 call cleanup on change objects that are deleted
 settings update broadcast / polling
 deleting element with an eval worker running something like setInterval(): old eval worker keeps running even though "stopped"
@@ -13,8 +11,6 @@ keep "autoeval"?
 provide "toast" messages + dialog to display past messages
 first ie is initially too tall
 markdown processing: html tags in markdown trip up the display of the element
-markdown processing: code blocks have extraneous stuff at beginning: <span class="MathJax_Preview" ...
-
 
 === THINK ABOUT ===
 https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
@@ -31,6 +27,9 @@ have witnessed stray text in buffers after copying/pasting/evaluating
 
 
 === DONE ===
+* markdown processing: code blocks have extraneous stuff at beginning: <span class="MathJax_Preview" ... (see: https://stackoverflow.com/questions/62111699/mathjax-strangely-render-back-tick-in-code-blocks )
+* [no longer relevant] make facet scripts inline-able without having been loaded via facet() [need to have one single export handler that listens for any facet export or error event]
+* update facet mechanism to use ES6 modules
 * settings dialog is partially hidden by event blocker element (first time only?)
 * Ctrl-, can bring up multiple settings dialogs (if a settings dialog is already showing)
 * implement settings dialog

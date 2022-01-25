@@ -8,7 +8,7 @@ const mathjax_static_config_js = `
 // See: https://docs.mathjax.org/en/v2.7-latest/config-files.html#the-tex-mml-am-chtml-configuration-file
 globalThis.MathJax = {
 jax: ["input/TeX","input/MathML","input/AsciiMath","output/CommonHTML"],
-extensions: ["tex2jax.js","mml2jax.js","asciimath2jax.js","MathMenu.js","MathZoom.js"/*,"AssistiveMML.js"*/, "a11y/accessibility-menu.js"],
+extensions: ["tex2jax.js","mml2jax.js","MathMenu.js","MathZoom.js"/*,"AssistiveMML.js"*/, "a11y/accessibility-menu.js"],
 TeX: {
     extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
 },
