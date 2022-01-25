@@ -5,7 +5,7 @@ const {
     vec_distance_squared_between,
     vec_get_stats,
     vec_stats_equal_within_epsilon,
-} = await import('lib/cmjs/tree-data.js');
+} = await import('./tree-data.js');
 
 export const default_value_variance = 0;
 

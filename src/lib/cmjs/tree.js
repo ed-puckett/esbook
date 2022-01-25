@@ -6,7 +6,7 @@ export const max_format_overall_width    = 10000;
 const {
     number_comparator,
     get_stats,
-} = await import('lib/cmjs/tree-data.js');
+} = await import('./tree-data.js');
 
 
 // === TOP-LEVEL SUPPORT FUNCTIONS ===

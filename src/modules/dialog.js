@@ -1,6 +1,5 @@
 // === STYLESHEET ===
 
-console.log(location);//!!!
 globalThis.core.create_stylesheet_link(document.head, new URL('dialog/dialog.css', import.meta.url));
 
 
