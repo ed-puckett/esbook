@@ -2,6 +2,8 @@ const {
     output_handlers,
 } = await import('./output-handlers.js');
 
+const svg_image_util = await import('./svg-image-util.js');
+
 export const ie_hide_input_css_class = 'hide-input';
 
 /** get current "hide input" state for the ie

@@ -13,29 +13,21 @@ const CM_LIGHT_MODE_THEME = 'default';
 
 const fs_interface = await import('./fs-interface.js');
 
-const {
-    AlertDialog,
-    ConfirmDialog,
-} = await import('./dialog.js');
-
 const { beep } = await import('./beep.js');
+
+const { AlertDialog, ConfirmDialog } = await import('./dialog.js');
+
+const { SettingsDialog } = await import('./notebook/settings-dialog.js');
+
+const { SettingsUpdatedEvent      } = await import('./notebook/settings.js');
+const { ThemeSettingsUpdatedEvent } = await import('./notebook/theme-settings.js');
+const { KeyBindingCommandEvent    } = await import('./notebook/key-bindings.js');
 
 const {
     marked,
     MathJax,
     is_MathJax_v2,
 } = await import('./md+mj.js');
-
-const { SettingsUpdatedEvent      } = await import('./notebook/settings.js');
-const { ThemeSettingsUpdatedEvent } = await import('./notebook/theme-settings.js');
-
-const {
-    SettingsDialog,
-} = await import('./notebook/settings-dialog.js');
-
-const {
-    KeyBindingCommandEvent,
-} = await import('./notebook/key-bindings.js');
 
 const {
     TEXT_ELEMENT_CLASS,
@@ -44,14 +36,9 @@ const {
 } = await import('./notebook/output-handlers.js');
 
 const {
-    ie_hide_input_css_class,
-    ie_get_hide_input_state,
-    ie_set_hide_input_state,
     ie_get_is_dialog_state,
     create_output_context,
 } = await import('./notebook/output-context.js');
-
-const svg_image_util = await import('./notebook/svg-image-util.js');
 
 const {
     Change,
