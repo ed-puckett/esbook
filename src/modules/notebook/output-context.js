@@ -94,7 +94,7 @@ export function create_output_context(ie, output_data_collection) {
                 throw new Error(`unknown output type: ${type}`);
             } else {
                 await handler.update_notebook(this, value);
-            }                    
+            }
         },
 
         validate_size_config(size_config) {
