@@ -1,4 +1,3 @@
-console.log('NOTEBOOK');//!!!
 // === CONSTANTS ===
 
 const NB_TYPE    = 'esbook';

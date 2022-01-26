@@ -29,7 +29,7 @@ await globalThis.core.load_script_and_wait_for_condition(document.head, new URL(
         return !globalThis.MathJax[mathjax_static_config_identifying_property];
     });
 
-export const marked  = globalThis.marked;
+export const marked  = globalThis.marked.marked;
 export const MathJax = globalThis.MathJax;
 
 // We are currently using MathJax v2.7.x instead of v3.x.x because

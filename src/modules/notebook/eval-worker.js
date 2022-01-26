@@ -1,6 +1,8 @@
 const nerdamer_script_url = new URL('../../../node_modules/nerdamer/all.min.js', import.meta.url);
 await globalThis.core.load_script(document.head, nerdamer_script_url);
 
+//!!! const { ExpressionParser, Polynomial, Expression } = await import('../../../node_modules/@yaffle/expression/index.js');
+
 export class TextuallyLocatedError extends Error {
     constructor(message, line_col) {
         super(message);
@@ -170,6 +172,9 @@ export class EvalWorker {
             factor:   nerdamer.factor.bind(nerdamer),
             simplify: nerdamer.simplify.bind(nerdamer),
             expand:   nerdamer.expand.bind(nerdamer),
+//!!!            ExpressionParser,  // @yaffle/expression
+//!!!            Polynomial,        // @yaffle/expression
+//!!!            Expression,        // @yaffle/expression
             is_stopped,
             process_action,
             process_error,
