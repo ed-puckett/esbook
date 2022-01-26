@@ -1,7 +1,10 @@
 const nerdamer_script_url = new URL('../../../node_modules/nerdamer/all.min.js', import.meta.url);
 await globalThis.core.load_script(document.head, nerdamer_script_url);
 
-const { ExpressionParser, Polynomial, Expression } = await import('../../../node_modules/@yaffle/expression/index.js');
+const { nthRoot, primeFactor, Matrix, Polynomial, ExpressionParser, Expression } = await import('../../../node_modules/@yaffle/expression/index.js');
+// workaround for some modules of @yaffle/expression not being able to find Expression and Polynomial:
+globalThis.Expression = Expression;//!!!
+globalThis.Polynomial = Polynomial;//!!!
 
 export class TextuallyLocatedError extends Error {
     constructor(message, line_col) {
@@ -172,8 +175,11 @@ export class EvalWorker {
             factor:   nerdamer.factor.bind(nerdamer),
             simplify: nerdamer.simplify.bind(nerdamer),
             expand:   nerdamer.expand.bind(nerdamer),
-            ExpressionParser,  // @yaffle/expression
+            nthRoot,           // @yaffle/expression
+            primeFactor,       // @yaffle/expression
+            Matrix,            // @yaffle/expression
             Polynomial,        // @yaffle/expression
+            ExpressionParser,  // @yaffle/expression
             Expression,        // @yaffle/expression
             is_stopped,
             process_action,

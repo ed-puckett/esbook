@@ -24,7 +24,8 @@ full-clean: clean
 	@-rm -fr ./node_modules >/dev/null 2>&1 || true
 
 ./node_modules: ./package.json
-	npm install
+	npm install && \
+	( if [[ ! -e "./node_modules/@yaffle/expression/node_modules" ]]; then cd ./node_modules/@yaffle/expression/ && ln -s ../../../node_modules .; fi )
 
 .PHONY: build
 build: ./node_modules
