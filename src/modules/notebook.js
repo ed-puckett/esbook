@@ -5,6 +5,8 @@ const NB_VERSION = '1.0.0';
 
 const DEFAULT_SAVE_PATH = 'new-notebook.esbook';
 
+const DEFAULT_TITLE = 'Untitled';
+
 const CM_DARK_MODE_THEME  = 'blackboard';
 const CM_LIGHT_MODE_THEME = 'default';
 
@@ -180,18 +182,9 @@ class Notebook {
             // initialize empty notebook
             await this.clear_notebook(true);
 
-        } catch (err) {
-
-            console.error('initialization failed', err.stack);
-            document.body.innerHTML = '';  // completely reset body
-            document.body.classList.add('error');
-            const err_h1 = document.createElement('h1');
-            err_h1.textContent = 'Initialization Failed';
-            const err_pre = document.createElement('pre');
-            err_pre.textContent = clean_for_html(err.stack);
-            document.body.appendChild(err_h1);
-            document.body.appendChild(err_pre);
-            throw err;
+        } catch (error) {
+            globalThis.core.show_initialization_failed(error);
+            throw error;
         }
     }
 
@@ -299,7 +292,7 @@ class Notebook {
             add_to_recents(file_handle);  //!!! not waiting for this async function...
         }
 
-        let title = 'Untitled';
+        let title = DEFAULT_TITLE;
         if (stats) {
             title = stats.name;
         }

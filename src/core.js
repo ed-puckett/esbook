@@ -325,6 +325,21 @@
     }
 
 
+    // === INITIALIZATION FAILED DISPLAY ===
+
+    globalThis.core.show_initialization_failed = function show_initialization_failed(error) {
+        console.error('initialization failed', error.stack);
+        document.body.innerHTML = '';  // completely reset body
+        document.body.classList.add('error');
+        const error_h1 = document.createElement('h1');
+        error_h1.textContent = 'Initialization Failed';
+        const error_pre = document.createElement('pre');
+        error_pre.textContent = error.stack.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        document.body.appendChild(error_h1);
+        document.body.appendChild(error_pre);
+    }
+
+
     // === LOAD CSP, CORE PACKAGE BUNDLE AND CORE MODULES ===
 
     const csp_url = new URL('./content-security-policy.js', document.currentScript.src);
@@ -335,7 +350,12 @@
         .then(() => globalThis.core.load_script(document.head, cpb_url))
         .then(() => import(nb_url))
         .then(_resolve_esbook_ready)
-        .catch(err => _reject_esbook_ready(err))
+        .catch(
+            error => {
+                globalThis.core.show_initialization_failed(error);
+                _reject_esbook_ready(error);
+            }
+        )
         .finally(
             () => {
                 _resolve_esbook_ready = undefined;
