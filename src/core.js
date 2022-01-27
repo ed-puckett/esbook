@@ -38,7 +38,7 @@
         }
 
         async await() { return await this.promise; }
-    }
+    };
 
     /** esbook_ready
      *  A promise that will resolve when initial moduless have been loaded
@@ -48,6 +48,15 @@
         _resolve_esbook_ready = resolve;
         _reject_esbook_ready  = reject;
     });
+
+    /** escape_for_html(s)
+     *  convert all '<' and '>' to their corresponding HTML entities
+     *  @param {string} string to be converted
+     *  @return {string} converted string
+     */
+    globalThis.core.escape_for_html = function escape_for_html(s) {
+        return s.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    };
 
 
     // === ELEMENT CREATION ===
@@ -133,7 +142,7 @@
             href: stylesheet_url,
             ...attrs,
         });
-    }
+    };
 
     /** create_inline_stylesheet(parent, stylesheet_text, attrs)
      *  @param {Element} parent
@@ -149,7 +158,7 @@
         style_el.appendChild(document.createTextNode(stylesheet_text));
         parent.appendChild(style_el);
         return style_el;
-    }
+    };
 
     /** create_script(parent, script_url, attrs)
      *  @param {Element} parent
@@ -179,7 +188,7 @@
             src: script_url,
             ...attrs,
         });
-    }
+    };
 
     /** create_inline_script(parent, script_text, attrs)
      *  @param {Element} parent
@@ -198,7 +207,7 @@
         script_el.appendChild(document.createTextNode(script_text));
         parent.appendChild(script_el);
         return script_el;
-    }
+    };
 
 
     // === SCRIPT LOADING ===
@@ -267,7 +276,7 @@
             }
         }
         return promise_data.promise;
-    }
+    };
 
     /** async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn)
      *  @param {Node} parent the parent element for script
@@ -322,7 +331,7 @@
             }
         }
         return promise_data.promise;
-    }
+    };
 
 
     // === INITIALIZATION FAILED DISPLAY ===
@@ -334,10 +343,10 @@
         const error_h1 = document.createElement('h1');
         error_h1.textContent = 'Initialization Failed';
         const error_pre = document.createElement('pre');
-        error_pre.textContent = error.stack.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+        error_pre.textContent = globalThis.core.escape_for_html(error.stack);
         document.body.appendChild(error_h1);
         document.body.appendChild(error_pre);
-    }
+    };
 
 
     // === LOAD CSP, CORE PACKAGE BUNDLE AND CORE MODULES ===

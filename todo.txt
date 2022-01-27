@@ -7,8 +7,10 @@ canvas2d image_uri not being rendered for persistent state
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 keep "autoeval"?
 provide "toast" messages + dialog to display past messages
+sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 first ie is initially too tall
-markdown processing: html tags in markdown trip up the display of the element
+create a localhost server that restricts access to only what is needed, and accepts "commands" to restart or quit
+
 
 === THINK ABOUT ===
 https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
@@ -23,10 +25,11 @@ provide on_stopped event to allow cleanup of background "processes"
 
 === UNREPEATED BUGS ====
 pythagorean-triples.esbook: first cell lines are concatenated (saw once, but not again...)
-have witnessed stray text in buffers after copying/pasting/evaluating
+have witnessed stray text in buffers after copying/pasting/evaluating (accidental scroll wheel paste?)
 
 
 === DONE ===
+* markdown processing: html tags in markdown trip up the display of the element
 * markdown processing: code blocks have extraneous stuff at beginning: <span class="MathJax_Preview" ... (see: https://stackoverflow.com/questions/62111699/mathjax-strangely-render-back-tick-in-code-blocks )
 * [no longer relevant] make facet scripts inline-able without having been loaded via facet() [need to have one single export handler that listens for any facet export or error event]
 * update facet mechanism to use ES6 modules

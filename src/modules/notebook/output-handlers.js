@@ -19,18 +19,14 @@ export const TEXT_ELEMENT_CLASS = 'text-content';
 
 // === UTILITY FUNCTIONS ===
 
-function escape_for_html(s) {
-    return s.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-}
-
 // This function is more aggressive that DOMPurify.sanitize() because,
-// via escape_for_html(), it converts all '<' and '>' to their corresponding
-// HTML entities.  DOMPurify.sanitize() protects from XSS injections, but
-// does not do anything with other HTML injection (e.g., a form element)
-// which can lead to unexpected behavior is the user interacts with the
-// injected HTML.
+// via globalThis.core.escape_for_html(), it converts all '<' and '>' to
+// their corresponding HTML entities.  DOMPurify.sanitize() protects from
+// XSS injections, but does not do anything with other HTML injection
+// (e.g., a form element) which can lead to unexpected behavior is the
+// user interacts with the injected HTML.
 export function clean_for_html(s) {
-    return escape_for_html(DOMPurify.sanitize(s));
+    return globalThis.core.escape_for_html(DOMPurify.sanitize(s));
 }
 
 export function escape_unescaped_$(s) {

@@ -14,7 +14,6 @@ const CM_LIGHT_MODE_THEME = 'default';
 // === EXTERNAL MODULES ===
 
 const { fs_interface } = await import('./fs-interface.js');
-console.log(fs_interface);//!!!
 
 const { beep } = await import('./beep.js');
 
@@ -1085,7 +1084,7 @@ console.log('>>> SAVED');//!!!
         const mdmj_header_match = input_text.match(this.constructor._input_mdmj_header_re);
         if (mdmj_header_match) {
             is_expression = false;
-            text = input_text.substring(mdmj_header_match[0].length + 1);
+            text = globalThis.core.escape_for_html(input_text.substring(mdmj_header_match[0].length + 1));
         } else {
             is_expression = true;
             text = input_text;
