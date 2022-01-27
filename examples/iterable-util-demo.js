@@ -1,6 +1,6 @@
 // range() examples
 
-core.facet('lib/iterable-util.js').then(iterable_util => {
+importlib('iterable-util.js').then(iterable_util => {
     const {
         range,
         flatten_iterable,

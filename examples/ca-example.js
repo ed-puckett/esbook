@@ -1,9 +1,10 @@
-importScripts('lib/cmjs.js');
 var {
-    CellularAutomaton,
-    ECA,
-    CellularAutomatonRenderer,
-} = cellular_automaton;
+    cellular_automaton: {
+        CellularAutomaton,
+        ECA,
+        CellularAutomatonRenderer,
+    },
+} = await importlib('cmjs.js');
 
 const cell_value_count = 8;
 const input_radius     = 2;
@@ -77,10 +78,17 @@ function display_ca() {
     const initial_row = ca.create_row(2*row_radius + 1);
     initial_row[Math.trunc(initial_row.length/2)] = 1;
 
-    const ctx = create_canvas2d([initial_row.length*cell_width + 2*margin_x, row_radius*cell_height + 2*margin_y]);
+    const size_config = [
+        initial_row.length*cell_width + 2*margin_x,
+        row_radius*cell_height + 2*margin_y
+    ];
+    const canvas = output_context.create_output_element({
+        size_config,
+        child_tag: 'canvas',
+    });
+    const ctx = canvas.getContext('2d');
     const [x, y] = output_transitions(ctx, 'black', margin_x, margin_y, transitions);
     renderer.render(ctx, initial_row, x, y, row_radius);
-    ctx.render();
 }
 
 for (let i = 0; i < 3; i++) {

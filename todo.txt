@@ -9,7 +9,9 @@ keep "autoeval"?
 provide "toast" messages + dialog to display past messages
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 first ie is initially too tall
-fix loading of old facet code in examples
+investigate: seems like files are being reloaded a lot as elements are evaluated
+examples/cmjs-demo.esbook: output of count tree and of node graph are clipped and not positioned well
+need a way to easily define variables that are visible in subsequent interaction elements
 
 
 === THINK ABOUT ===
@@ -29,6 +31,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* fix loading of old facet code in examples
 * markdown processing: html tags in markdown trip up the display of the element
 * markdown processing: code blocks have extraneous stuff at beginning: <span class="MathJax_Preview" ... (see: https://stackoverflow.com/questions/62111699/mathjax-strangely-render-back-tick-in-code-blocks )
 * [no longer relevant] make facet scripts inline-able without having been loaded via facet() [need to have one single export handler that listens for any facet export or error event]

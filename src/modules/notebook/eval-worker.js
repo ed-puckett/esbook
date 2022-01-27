@@ -1,3 +1,5 @@
+const script_url = import.meta.url;
+
 const nerdamer_script_url = new URL('../../../node_modules/nerdamer/all.min.js', import.meta.url);
 await globalThis.core.load_script(document.head, nerdamer_script_url);
 
@@ -116,6 +118,11 @@ export class EvalWorker {
     _create_eval_context() {
         const self = this;
 
+        const lib_dir_url = new URL('../../lib/', script_url);
+        function importlib(lib_path) {
+            return import(new URL(lib_path, lib_dir_url));
+        }
+
         function is_stopped() {
             return self._stopped;
         }
@@ -181,6 +188,7 @@ export class EvalWorker {
             Polynomial,        // @yaffle/expression
             ExpressionParser,  // @yaffle/expression
             Expression,        // @yaffle/expression
+            importlib,
             is_stopped,
             process_action,
             process_error,

@@ -41,7 +41,7 @@ lint: ./node_modules
 
 .PHONY: server
 server: build-dir
-	( cd "$(BUILDDIR)" && npx httpserver -d -n --host 127.0.0.1 --port 4300 )
+	( cd "$(BUILDDIR)" && npx http-server -d -n -c-1 --host 127.0.0.1 --port 4300 )
 
 .PHONY: dev-server
 dev-server:
