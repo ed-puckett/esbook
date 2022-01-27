@@ -1,4 +1,4 @@
-export class FsInterface {
+class FsInterface {
     /** Verify permission to access the given FileSystemHandle, prompting the user if necessary
      *  @param {FileSystemHandle} file_handle
      *  @param {boolean} for_writing
@@ -125,3 +125,5 @@ export class FsInterface {
         }
     }
 }
+
+export const fs_interface = new FsInterface();

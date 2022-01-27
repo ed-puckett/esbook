@@ -1,8 +1,6 @@
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
 call cleanup on change objects that are deleted
 settings update broadcast / polling
-deleting element with an eval worker running something like setInterval(): old eval worker keeps running even though "stopped"
-provide on_stopped event to allow cleanup of background "processes"
 need to check graphics output
 dagre: edges not rendered in image_uri
 canvas2d image_uri not being rendered for persistent state
@@ -19,6 +17,8 @@ figure out what to do with nb_state
 figure out how to reload / re-initialize eval state
 figure out codemirror + emacs clipboard support
 menus
+deleting element with an eval worker running something like setInterval(): old eval worker keeps running even though "stopped" (maybe on_stopped event could help)
+provide on_stopped event to allow cleanup of background "processes"
 
 
 === UNREPEATED BUGS ====

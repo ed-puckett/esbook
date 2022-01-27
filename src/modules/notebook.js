@@ -13,7 +13,8 @@ const CM_LIGHT_MODE_THEME = 'default';
 
 // === EXTERNAL MODULES ===
 
-const fs_interface = await import('./fs-interface.js');
+const { fs_interface } = await import('./fs-interface.js');
+console.log(fs_interface);//!!!
 
 const { beep } = await import('./beep.js');
 

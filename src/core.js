@@ -329,7 +329,7 @@
 
     globalThis.core.show_initialization_failed = function show_initialization_failed(error) {
         console.error('initialization failed', error.stack);
-        document.body.innerHTML = '';  // completely reset body
+        document.body.innerText = '';  // completely reset body
         document.body.classList.add('error');
         const error_h1 = document.createElement('h1');
         error_h1.textContent = 'Initialization Failed';

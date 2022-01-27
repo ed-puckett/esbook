@@ -68,7 +68,7 @@ export function getSVGString( svgNode, cssStyleText ) {
     function appendCSS( cssText, element ) {
         var styleElement = document.createElement("style");
         styleElement.setAttribute("type","text/css");
-        styleElement.innerHTML = cssText;
+        styleElement.innerText = cssText;
         var refNode = element.hasChildNodes() ? element.children[0] : null;
         element.insertBefore( styleElement, refNode );
     }
