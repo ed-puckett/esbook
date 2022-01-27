@@ -9,7 +9,7 @@ keep "autoeval"?
 provide "toast" messages + dialog to display past messages
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 first ie is initially too tall
-create a localhost server that restricts access to only what is needed, and accepts "commands" to restart or quit
+fix loading of old facet code in examples
 
 
 === THINK ABOUT ===

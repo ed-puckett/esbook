@@ -27,25 +27,26 @@ full-clean: clean
 	npm install && \
 	( if [[ ! -e "./node_modules/@yaffle/expression/node_modules" ]]; then cd ./node_modules/@yaffle/expression/ && ln -s ../../../node_modules .; fi )
 
-.PHONY: build
-build: ./node_modules
-	@( \
-	    $(foreach d,$(wildcard ./src/*/Makefile ./src/facet/*/Makefile),( echo make $(dir $d) && cd "$(dir $d)" && make ) && ) \
-	    true \
-	)
+$(BUILDDIR):
+	mkdir -p "$(BUILDDIR)" && \
+	if [[ ! -e "$(BUILDDIR)/src" ]]; then ( cd "$(BUILDDIR)" && ln -s ../src . ); fi && \
+	if [[ ! -e "$(BUILDDIR)/node_modules" ]]; then ( cd "$(BUILDDIR)" && ln -s ../node_modules . ); fi
+
+.PHONY: build-dir
+build-dir: ./node_modules $(BUILDDIR)
 
 .PHONY: lint
 lint: ./node_modules
 	./node_modules/.bin/eslint src
 
 .PHONY: server
-server: build
-	npx httpserver -d -n --host 127.0.0.1 --port 4300
+server: build-dir
+	( cd "$(BUILDDIR)" && npx httpserver -d -n --host 127.0.0.1 --port 4300 )
 
 .PHONY: dev-server
 dev-server:
 	npx nodemon -w src -e js,mjs,html,css,ico,svg -x "bash -c 'make server' || exit 1"
 
 .PHONY: start
-start: build
+start: build-dir
 	chromium http://127.0.0.1:4300/src/index.html
