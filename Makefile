@@ -27,13 +27,12 @@ full-clean: clean
 	npm install && \
 	( if [[ ! -e "./node_modules/@yaffle/expression/node_modules" ]]; then cd ./node_modules/@yaffle/expression/ && ln -s ../../../node_modules .; fi )
 
-$(BUILDDIR):
+.PHONY: build-dir
+build-dir: ./node_modules
 	mkdir -p "$(BUILDDIR)" && \
 	if [[ ! -e "$(BUILDDIR)/src" ]]; then ( cd "$(BUILDDIR)" && ln -s ../src . ); fi && \
-	if [[ ! -e "$(BUILDDIR)/node_modules" ]]; then ( cd "$(BUILDDIR)" && ln -s ../node_modules . ); fi
-
-.PHONY: build-dir
-build-dir: ./node_modules $(BUILDDIR)
+	if [[ ! -e "$(BUILDDIR)/node_modules" ]]; then ( cd "$(BUILDDIR)" && ln -s ../node_modules . ); fi && \
+	cp src/favicon.ico "$(BUILDDIR)/"
 
 .PHONY: lint
 lint: ./node_modules
