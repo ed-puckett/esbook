@@ -398,49 +398,6 @@ class ImageDataOutputHandler extends _GraphicsOutputHandlerBase {
     }
 }
 
-class Canvas2dOutputHandler extends _GraphicsOutputHandlerBase {
-    constructor() { super('canvas2d'); }
-
-    // Format of config object: (method_spec|setter_spec)[]
-    // Where:
-    //
-    // method_spec: {
-    //     method: string,
-    //     args:   any[],
-    // }
-    //
-    // setter_spec: {
-    //     setter: true,
-    //     field:  string,
-    //     value:  any,
-    // }
-
-    // may throw an error
-    // output_data: { type: 'canvas2d', image_format: string, image_format_quality: number, image_uri: string }
-    async update_notebook(output_context, value) {
-        const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: canvas2d([size_config], config)');
-        const canvas = output_context.create_output_element({
-            size_config,
-            child_tag: 'canvas',
-        });
-        const ctx = canvas.getContext('2d');
-        for (const spec of config) {
-            try {
-                if (spec.setter) {
-                    const { field, value } = spec;
-                    ctx[field] = value;
-                } else {
-                    const { method, args } = spec;
-                    ctx[method].apply(ctx, args);
-                }
-            } catch (err) {
-                throw new Error(`illegal Canvas2d ${spec.setter ? `setter instruction: field: ${spec.field}` : `method instruction: method: ${spec.method}`}`);
-            }
-        }
-        await output_context.create_canvas_output_data(this.type, canvas);
-    }
-}
-
 class PlotlyOutputHandler extends _GraphicsOutputHandlerBase {
     constructor() { super('plotly'); }
 
@@ -487,7 +444,6 @@ export const output_handler_id_to_handler =  // handler_id->handler
             ChartOutputHandler,
             DagreOutputHandler,
             ImageDataOutputHandler,
-            Canvas2dOutputHandler,
             PlotlyOutputHandler,
 
         ].map( handler_class => {
