@@ -38,7 +38,7 @@ for (let i = 0; i < input_width; i++) {
     initial_window.push(0);
 }
 
-function display_ca() {
+async function display_ca() {
     const transitions = [];
     const k = 0.5;
     const m = 2**(k*cell_value_count);
@@ -78,19 +78,17 @@ function display_ca() {
     const initial_row = ca.create_row(2*row_radius + 1);
     initial_row[Math.trunc(initial_row.length/2)] = 1;
 
-    const size_config = [
-        initial_row.length*cell_width + 2*margin_x,
-        row_radius*cell_height + 2*margin_y
-    ];
-    const canvas = output_context.create_output_element({
-        size_config,
-        child_tag: 'canvas',
-    });
-    const ctx = canvas.getContext('2d');
+    const width  = initial_row.length*cell_width + 2*margin_x;
+    const height = row_radius*cell_height + 2*margin_y;
+    const canvas = output_context.create_canvas_output_element(width, height);
+    const ctx    = canvas.getContext('2d');
+
     const [x, y] = output_transitions(ctx, 'black', margin_x, margin_y, transitions);
     renderer.render(ctx, initial_row, x, y, row_radius);
+
+    await output_context.create_canvas_output_data('canvas2d', canvas);
 }
 
 for (let i = 0; i < 3; i++) {
-    display_ca();
+    await display_ca();
 }
