@@ -11,10 +11,12 @@ sometimes input cell does not respond to keyboard shortcuts after focus is reset
 first ie is initially too tall
 investigate: seems like files are being reloaded a lot as elements are evaluated
 examples/cmjs-demo.esbook: output of count tree and of node graph are clipped and not positioned well
-need a way to easily define variables that are visible in subsequent interaction elements
+provide feedback when saving and provide visible modified indicator
+make whether opening or importing more apparent (in file open dialog)
 
 
 === THINK ABOUT ===
+make global_export not modify globalThis
 https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
 use "contenteditable" element instead of CodeMirror stuff?
 figure out what to do with nb_state
@@ -31,6 +33,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* need a way to easily define variables that are visible in subsequent interaction elements
 * fix loading of old facet code in examples
 * markdown processing: html tags in markdown trip up the display of the element
 * markdown processing: code blocks have extraneous stuff at beginning: <span class="MathJax_Preview" ... (see: https://stackoverflow.com/questions/62111699/mathjax-strangely-render-back-tick-in-code-blocks )

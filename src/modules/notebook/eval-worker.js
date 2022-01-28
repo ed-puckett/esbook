@@ -119,8 +119,12 @@ export class EvalWorker {
         const self = this;
 
         const lib_dir_url = new URL('../../lib/', script_url);
-        function importlib(lib_path) {
+        function import_lib(lib_path) {
             return import(new URL(lib_path, lib_dir_url));
+        }
+
+        function global_export(...objects) {
+            return Object.assign(globalThis, ...objects);
         }
 
         function is_stopped() {
@@ -188,7 +192,8 @@ export class EvalWorker {
             Polynomial,        // @yaffle/expression
             ExpressionParser,  // @yaffle/expression
             Expression,        // @yaffle/expression
-            importlib,
+            import_lib,
+            global_export,
             is_stopped,
             process_action,
             process_error,
