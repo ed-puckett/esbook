@@ -86,7 +86,7 @@ async function display_ca() {
     const [x, y] = output_transitions(ctx, 'black', margin_x, margin_y, transitions);
     renderer.render(ctx, initial_row, x, y, row_radius);
 
-    await output_context.create_canvas_output_data('canvas2d', canvas);
+    await output_context.create_canvas_output_data(canvas);
 }
 
 for (let i = 0; i < 3; i++) {

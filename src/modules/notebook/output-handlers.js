@@ -208,6 +208,10 @@ class _GraphicsOutputHandlerBase extends OutputHandler {
     }
 }
 
+class GenericImageOutputHandler extends _GraphicsOutputHandlerBase {
+    constructor() { super('generic'); }
+}
+
 class ChartOutputHandler extends _GraphicsOutputHandlerBase {
     constructor() { super('chart'); }
 
@@ -441,6 +445,7 @@ export const output_handler_id_to_handler =  // handler_id->handler
         [
             TextOutputHandler,
             ErrorOutputHandler,
+            GenericImageOutputHandler,
             ChartOutputHandler,
             DagreOutputHandler,
             ImageDataOutputHandler,

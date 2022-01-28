@@ -285,7 +285,12 @@ export function create_output_context(ie, output_data_collection) {
             return output_data;
         },
 
-        async create_canvas_output_data(type, canvas, leave_scroll_position_alone=false) {
+        // async create_canvas_output_data([ type='generic', ] canvas, leave_scroll_position_alone=false)
+        async create_canvas_output_data(...args) {
+            const [ type, canvas, leave_scroll_position_alone=false ] =
+                  (args[0] instanceof HTMLCanvasElement)
+                  ? [ 'generic', ...args ]
+                  : args;
             // Save an image of the rendered canvas.  This will be used if this
             // notebook is saved and then loaded again later.
             // Note: using image/png because image/jpeg fails on Firefox (as of writing)
