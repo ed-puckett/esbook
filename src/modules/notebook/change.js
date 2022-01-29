@@ -319,7 +319,7 @@ export class DeleteIEChange extends Change {
 }
 
 export class StateChange extends Change {
-    constructor(notebook, old_state, new_state) {  // e.g., state: { auto_hide_inputs }
+    constructor(notebook, old_state, new_state) {  // e.g., state: { auto_hide_inputs }  // note: auto_hide_inputs is defunct
         super(notebook);
         this.old_state = old_state;
         this.new_state = new_state;

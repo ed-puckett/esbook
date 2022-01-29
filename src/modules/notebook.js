@@ -150,9 +150,6 @@ class Notebook {
     // CSS class for ie when in md+mj mode
     static _ie_mdmj_mode_css_class = 'mdmj';
 
-    // CSS class for ie when it should automatically hide
-    static _ie_autohide_mode_css_class = 'autohide';
-
     // If this keyword appears in a JavaScript comment on the first line
     // of the first interaction element, and the input is not in md+mj
     // mode, then that first cell will be automatically evaluated
