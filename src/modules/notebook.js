@@ -21,9 +21,17 @@ const { AlertDialog, ConfirmDialog } = await import('./dialog.js');
 
 const { SettingsDialog } = await import('./notebook/settings-dialog.js');
 
-const { SettingsUpdatedEvent      } = await import('./notebook/settings.js');
-const { ThemeSettingsUpdatedEvent } = await import('./notebook/theme-settings.js');
-const { KeyBindingCommandEvent    } = await import('./notebook/key-bindings.js');
+const {
+    get_settings,
+    SettingsUpdatedEvent,
+} = await import('./notebook/settings.js');
+
+const {
+    get_theme_settings,
+    ThemeSettingsUpdatedEvent,
+} = await import('./notebook/theme-settings.js');
+
+const { KeyBindingCommandEvent } = await import('./notebook/key-bindings.js');
 
 const {
     marked,
@@ -73,8 +81,8 @@ let notebook;  // initialized by document_ready then clause below
 
 // === SETTINGS ===
 
-let settings;        // initialized and updated by settings_state event
-let theme_settings;  // initialized and updated by settings_state event
+let settings        = get_settings();        // updated by SettingsUpdatedEvent event
+let theme_settings  = get_theme_settings();  // updated by ThemeSettingsUpdatedEvent event
 
 SettingsUpdatedEvent.subscribe((event) => {
     settings = event.get_settings();
