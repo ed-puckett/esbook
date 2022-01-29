@@ -9,6 +9,8 @@ MAKEFLAGS += --no-print-directory
 
 BUILDDIR = ./build
 
+SERVER_PORT = 4300
+
 
 ######################################################################
 # build rules
@@ -38,9 +40,15 @@ build-dir: ./node_modules
 lint: ./node_modules
 	./node_modules/.bin/eslint src
 
+# kill the server by performing a GET on /QUIT
+# uses Linux commands: lsof, grep, cut
 .PHONY: server
 server: build-dir
-	( cd "$(BUILDDIR)" && npx http-server -d -n -c-1 -a 127.0.0.1 --port 4300 )
+	( cd "$(BUILDDIR)" && npx http-server -d -n -c-1 -a 127.0.0.1 --port $(SERVER_PORT) | tee >(grep -q -m1 '"GET /QUIT"'; echo QUITTING; kill $$(lsof -itcp:$(SERVER_PORT) -Fp | grep ^p | cut -c2-)) )
+
+.PHONY: kill-server
+kill-server:
+	curl http://127.0.0.1:$(SERVER_PORT)/QUIT
 
 .PHONY: dev-server
 dev-server:
@@ -48,4 +56,4 @@ dev-server:
 
 .PHONY: start
 start: build-dir
-	chromium http://127.0.0.1:4300/src/index.html
+	chromium http://127.0.0.1:$(SERVER_PORT)/src/index.html

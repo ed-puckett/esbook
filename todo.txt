@@ -13,6 +13,7 @@ investigate: seems like files are being reloaded a lot as elements are evaluated
 examples/cmjs-demo.esbook: output of count tree and of node graph are clipped and not positioned well
 provide feedback when saving and provide visible modified indicator
 make whether opening or importing more apparent (in file open dialog)
+use Shift-ENTER for eval and Ctrl-ENTER for eval-and-stay
 
 
 === THINK ABOUT ===
