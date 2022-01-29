@@ -48,7 +48,7 @@ server: build-dir
 
 .PHONY: kill-server
 kill-server:
-	curl http://127.0.0.1:$(SERVER_PORT)/QUIT
+	@if lsof -itcp:$(SERVER_PORT); then curl http://127.0.0.1:$(SERVER_PORT)/QUIT; fi
 
 .PHONY: dev-server
 dev-server:
@@ -56,4 +56,4 @@ dev-server:
 
 .PHONY: start
 start: build-dir
-	chromium http://127.0.0.1:$(SERVER_PORT)/src/index.html
+	if ! lsof -itcp:$(SERVER_PORT); then make server <&- & sleep 1; fi; chromium http://127.0.0.1:$(SERVER_PORT)/src/index.html
