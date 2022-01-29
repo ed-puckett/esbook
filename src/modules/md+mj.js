@@ -6,20 +6,25 @@ const mathjax_static_config_js = `
 // MathJax static configuration.
 // This must be called before the MathJax code is loaded.
 // See: https://docs.mathjax.org/en/v2.7-latest/config-files.html#the-tex-mml-am-chtml-configuration-file
+// See: Davide Cervone comment in https://groups.google.com/g/mathjax-users/c/5h-NNba8pN4?pli=1 re: "matchFontHeight: false" setting
+//      (this is to eliminate the "font-size: 121%" css setting on MathJax blocks).
 globalThis.MathJax = {
-jax: ["input/TeX","input/MathML","input/AsciiMath","output/CommonHTML"],
-extensions: ["tex2jax.js","mml2jax.js","MathMenu.js","MathZoom.js"/*,"AssistiveMML.js"*/, "a11y/accessibility-menu.js"],
-TeX: {
-    extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
-},
-tex2jax: {
-    inlineMath: [ ['$','$'] ],
-    processEscapes: true,
-},
-displayAlign: 'left',
-displayIndent: '0',
-skipStartupTypeset: true,  // typeset must be performed explicitly
-${mathjax_static_config_identifying_property}: true,  // used to detect when MathJax has replaced this initialization object with itself
+    jax: [ "input/TeX", "input/MathML", "input/AsciiMath", "output/CommonHTML" ],
+    extensions: [ "tex2jax.js", "mml2jax.js", "MathMenu.js", "MathZoom.js", /*"AssistiveMML.js",*/ "a11y/accessibility-menu.js" ],
+    "HTML-CSS": { scale: 100, matchFontHeight: false },
+    CommonHTML: { matchFontHeight: false },
+    SVG: { matchFontHeight: false },
+    TeX: {
+        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+    },
+    tex2jax: {
+        inlineMath: [ ['$','$'] ],
+        processEscapes: true,
+    },
+    displayAlign: 'left',
+    displayIndent: '0',
+    skipStartupTypeset: true,  // typeset must be performed explicitly
+    ${mathjax_static_config_identifying_property}: true,  // used to detect when MathJax has replaced this initialization object with itself
 };
 `;
 globalThis.core.create_inline_script(document.head, mathjax_static_config_js);
