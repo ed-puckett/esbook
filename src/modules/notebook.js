@@ -214,23 +214,26 @@ class Notebook {
         globalThis.core.create_stylesheet_link(document.head, stylesheet_url);
 
         // load CodeMirror scripts:
-        for (const script_path of [
-            '../../node_modules/codemirror/lib/codemirror.js',
-            '../../node_modules/codemirror/mode/markdown/markdown.js',
-            '../../node_modules/codemirror/mode/stex/stex.js',
-            '../../node_modules/codemirror/mode/javascript/javascript.js',
-            '../../node_modules/codemirror/keymap/sublime.js',
-            '../../node_modules/codemirror/keymap/vim.js',
-            '../../node_modules/codemirror/addon/dialog/dialog.js',
-            '../../node_modules/codemirror/addon/search/search.js',
-            '../../node_modules/codemirror/addon/search/searchcursor.js',
-            '../../node_modules/codemirror/addon/search/jump-to-line.js',
-            '../../node_modules/codemirror/addon/edit/matchbrackets.js',
-            'notebook/codemirror-md+mj-mode.js',
-        ]) {
+        async function load_cm_script(script_path) {
             const script_url = new URL(script_path, import.meta.url);
-            await globalThis.core.load_script(document.head, script_url);
+            return globalThis.core.load_script(document.head, script_url);
         }
+        await load_cm_script('../../node_modules/codemirror/lib/codemirror.js');
+        await Promise.all(
+            [
+                '../../node_modules/codemirror/mode/markdown/markdown.js',
+                '../../node_modules/codemirror/mode/stex/stex.js',
+                '../../node_modules/codemirror/mode/javascript/javascript.js',
+                '../../node_modules/codemirror/keymap/sublime.js',
+                '../../node_modules/codemirror/keymap/vim.js',
+                '../../node_modules/codemirror/addon/dialog/dialog.js',
+                '../../node_modules/codemirror/addon/search/search.js',
+                '../../node_modules/codemirror/addon/search/searchcursor.js',
+                '../../node_modules/codemirror/addon/search/jump-to-line.js',
+                '../../node_modules/codemirror/addon/edit/matchbrackets.js',
+            ].map(load_cm_script)
+        );
+        await load_cm_script('notebook/codemirror-md+mj-mode.js');
 
         // load CodeMirror stylesheets:
         for (const stylesheet_path of [

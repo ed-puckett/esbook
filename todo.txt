@@ -3,7 +3,6 @@ call cleanup on change objects that are deleted
 settings update broadcast / polling
 need to check graphics output
 dagre: edges not rendered in image_uri
-canvas2d image_uri not being rendered for persistent state
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 keep "autoeval"?
 provide "toast" messages + dialog to display past messages
@@ -14,18 +13,18 @@ examples/cmjs-demo.esbook: output of count tree and of node graph are clipped an
 provide feedback when saving and provide visible modified indicator
 make whether opening or importing more apparent (in file open dialog)
 use Shift-ENTER for eval and Ctrl-ENTER for eval-and-stay
+review Content-Security-Policy
+make global_export not modify globalThis
 
 
 === THINK ABOUT ===
-make global_export not modify globalThis
-https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
 use "contenteditable" element instead of CodeMirror stuff?
 figure out what to do with nb_state
 figure out how to reload / re-initialize eval state
 figure out codemirror + emacs clipboard support
 menus
 deleting element with an eval worker running something like setInterval(): old eval worker keeps running even though "stopped" (maybe on_stopped event could help)
-provide on_stopped event to allow cleanup of background "processes"
+provide on_stopped event to allow cleanup of background "processes" (e.g., setInterval)
 
 
 === UNREPEATED BUGS ====
@@ -34,6 +33,8 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
+* canvas2d image_uri not being rendered for persistent state
 * need a way to easily define variables that are visible in subsequent interaction elements
 * fix loading of old facet code in examples
 * markdown processing: html tags in markdown trip up the display of the element
