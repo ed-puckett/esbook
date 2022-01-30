@@ -130,7 +130,7 @@ export class EvalWorker {
     _create_ephemeral_eval_context() {
         const self = this;
 
-        const lib_dir_url = new URL('../../lib/', script_url);
+        const lib_dir_url = new URL('../../../lib/', script_url);
         function import_lib(lib_path) {
             return import(new URL(lib_path, lib_dir_url));
         }

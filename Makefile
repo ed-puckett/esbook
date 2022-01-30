@@ -18,7 +18,7 @@ SERVER_PORT = 4300
 .DEFAULT: all
 
 .PHONY: clean
-clean:
+clean: kill-server
 	@-rm -fr $(BUILDDIR) >/dev/null 2>&1 || true
 
 .PHONY: full-clean
@@ -33,6 +33,7 @@ full-clean: clean
 build-dir: ./node_modules
 	mkdir -p "$(BUILDDIR)" && \
 	if [[ ! -e "$(BUILDDIR)/src" ]]; then ( cd "$(BUILDDIR)" && ln -s ../src . ); fi && \
+	if [[ ! -e "$(BUILDDIR)/lib" ]]; then ( cd "$(BUILDDIR)" && ln -s ../lib . ); fi && \
 	if [[ ! -e "$(BUILDDIR)/node_modules" ]]; then ( cd "$(BUILDDIR)" && ln -s ../node_modules . ); fi && \
 	cp src/favicon.ico "$(BUILDDIR)/"
 
