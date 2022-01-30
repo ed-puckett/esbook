@@ -15,6 +15,8 @@ export class TextuallyLocatedError extends Error {
     }
 }
 
+const AsyncFunction = Object.getPrototypeOf(async()=>{}).constructor;
+
 // may throw an error
 // returns: { type: 'text', text: string, is_tex: boolean, inline_tex: boolean }
 function transform_text_result(result) {
@@ -75,6 +77,16 @@ export class EvalWorker {
                 writable: true,
             },
         });
+
+        // establish this.eval_state.eval_context if not already present
+        if (!this.eval_state.eval_context) {
+            Object.defineProperties(this.eval_state, {
+                eval_context: {
+                    value: {},
+                    enumerable: false,
+                },
+            });
+        }
     }
 
     stop() {
@@ -84,29 +96,29 @@ export class EvalWorker {
     async _run() {
         const self = this;
 
-        const eval_context = self._create_eval_context();
-        const eval_context_entries = Object.entries(eval_context);
+        const ephemeral_eval_context = self._create_ephemeral_eval_context();
+        const ephemeral_eval_context_entries = Object.entries(ephemeral_eval_context);
 
-        // create an async function with the expression as its body, and
-        // with parameters being the keys of eval_context.  Then, the
-        // expression will be evaluated by applying the function to the
-        // corresponding values from eval_context.  Note that evaluation
-        // will be performed in the global context.
-        const eval_fn_params = eval_context_entries.map(([k, _]) => k);
-        const eval_fn_args   = eval_context_entries.map(([_, v]) => v);
-        const AsyncFunction = Object.getPrototypeOf(async()=>{}).constructor;
-        const eval_fn = new AsyncFunction(...eval_fn_params, self.expression)
-        const eval_fn_this = this.eval_state;
+        // create an async function with the expression as the heart of its
+        // body, and with parameters being the keys of ephemeral_eval_context.
+        // Then, the expression will be evaluated by applying the function to
+        // the corresponding values from ephemeral_eval_context.  Note that
+        // evaluation will be performed in the global context.
+        const eval_fn_params = ephemeral_eval_context_entries.map(([k, _]) => k);
+        const eval_fn_args   = ephemeral_eval_context_entries.map(([_, v]) => v);
 
         // evaluate the expression:
+        const eval_fn_this = self.eval_state;
+        const eval_fn_body = `with (this.eval_context) { ${self.expression} }`;  // note: "this" will be self.eval_state
+        const eval_fn = new AsyncFunction(...eval_fn_params, eval_fn_body);
         try {
             const result = await eval_fn.apply(eval_fn_this, eval_fn_args);
             if (typeof result !== 'undefined') {
-                await eval_context.process_action(transform_text_result(result));  // action: { type: 'text', text, is_tex, inline_tex }
+                await ephemeral_eval_context.process_action(transform_text_result(result));  // action: { type: 'text', text, is_tex, inline_tex }
             }
         } catch (err) {
             try {
-                await eval_context.process_error(err);
+                await ephemeral_eval_context.process_error(err);
             } catch (err2) {
                 console.error('unexpected: second-level error occurred', err2);
             }
@@ -115,7 +127,7 @@ export class EvalWorker {
         return self;
     }
 
-    _create_eval_context() {
+    _create_ephemeral_eval_context() {
         const self = this;
 
         const lib_dir_url = new URL('../../lib/', script_url);
@@ -124,7 +136,7 @@ export class EvalWorker {
         }
 
         function global_export(...objects) {
-            return Object.assign(globalThis, ...objects);
+            return Object.assign(self.eval_state.eval_context, ...objects);
         }
 
         function is_stopped() {
@@ -180,7 +192,7 @@ export class EvalWorker {
             return graphics('plotly', args);
         }
 
-        const eval_context = {
+        const ephemeral_eval_context = {
             output_context: self.output_context,
             _:        nerdamer,
             factor:   nerdamer.factor.bind(nerdamer),
@@ -206,6 +218,6 @@ export class EvalWorker {
             plotly,
         };
 
-        return eval_context;
+        return ephemeral_eval_context;
     }
 }

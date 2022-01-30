@@ -8,6 +8,10 @@ const {
     get_stats,
 } = await import('./tree-data.js');
 
+const {
+    Partition,
+} = await import('./k-means-partition.js');
+
 
 // === TOP-LEVEL SUPPORT FUNCTIONS ===
 
@@ -1014,6 +1018,7 @@ export class MultiSampleTree extends Tree {
         //         leaf_count: number,    // number of leaf nodes
         //     },
         // }
+        const alphabet = this.get_alphabet();
         const subtree_info = {};  // gsn->info mapping
         this.walk({
             alphabet,

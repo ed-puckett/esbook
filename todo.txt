@@ -14,7 +14,6 @@ provide feedback when saving and provide visible modified indicator
 make whether opening or importing more apparent (in file open dialog)
 use Shift-ENTER for eval and Ctrl-ENTER for eval-and-stay
 review Content-Security-Policy
-make global_export not modify globalThis
 
 
 === THINK ABOUT ===
@@ -33,6 +32,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* make global_export not modify globalThis
 * https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
 * canvas2d image_uri not being rendered for persistent state
 * need a way to easily define variables that are visible in subsequent interaction elements

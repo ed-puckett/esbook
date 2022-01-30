@@ -433,7 +433,7 @@ class PlotlyOutputHandler extends _GraphicsOutputHandlerBase {
                   image_format_quality,
                   image_uri,
               }));
-        await output_context.create_generic_graphics_output_data(type, output_data_props);
+        await output_context.create_generic_graphics_output_data(this.type, output_data_props);
     }
 }
 
