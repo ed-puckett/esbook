@@ -28,7 +28,8 @@
 // Ephemeral eval_context
 // ----------------------
 // During evaluation, a number of other values are available "globally",
-// though these values do no persist after the particular evaluation.
+// though these values do not persist after the particular evaluation
+// (except for references from async code started during the evaluation).
 // These values include output_context (which provides utilities for
 // manipulation of the output of the interaction element), various
 // mathematics interfaces, and various graphics functions and other
