@@ -14,6 +14,7 @@ provide feedback when saving and provide visible modified indicator
 make whether opening or importing more apparent (in file open dialog)
 use Shift-ENTER for eval and Ctrl-ENTER for eval-and-stay
 review Content-Security-Policy
+images in saved notebooks should cause a line break before next element (set examples/many-ecas.esbook)
 
 
 === THINK ABOUT ===
