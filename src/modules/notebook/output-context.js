@@ -275,19 +275,18 @@ export function create_output_context(ie, output_data_collection) {
                 type,
                 ...props,
             };
+            const handler = output_handlers[type];
+            if (!handler) {
+                throw new Error(`unknown output type: ${type}`);
+            }
+            if (!handler.validate_output_data(output_data)) {
+                throw new Error('invalid output_data');
+            }
             output_data_collection.push(output_data);
             if (!leave_scroll_position_alone) {
                 this.scroll_output_into_view();
             }
             return output_data;
-        },
-
-        async create_generic_graphics_output_data(type, props, leave_scroll_position_alone=false) {
-            props = props ?? {};
-            if (typeof props.image_uri !== 'string') {
-                throw new Error('output_data must have an image_uri property which is a string');
-            }
-            return this.create_generic_output_data(type, props, leave_scroll_position_alone);
         },
 
         // async create_canvas_output_data([ type='generic', ] canvas, leave_scroll_position_alone=false)
@@ -302,7 +301,7 @@ export function create_output_context(ie, output_data_collection) {
             const image_format = 'image/png';
             const image_format_quality = 1.0;
             const image_uri = canvas.toDataURL(image_format, image_format_quality);
-            return this.create_generic_graphics_output_data(type, {
+            return this.create_generic_output_data(type, {
                 image_format,
                 image_format_quality,
                 image_uri,
@@ -321,7 +320,7 @@ export function create_output_context(ie, output_data_collection) {
             // The width and height are necessary because when we load this later (using the svg data uri)
             // the image width and height will not be set (as opposed to a png data uri which encodes
             // the width and height in its content).
-            return this.create_generic_graphics_output_data(type, {
+            return this.create_generic_output_data(type, {
                 width,
                 height,
                 image_format,
