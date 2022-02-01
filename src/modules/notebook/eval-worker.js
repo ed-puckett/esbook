@@ -215,6 +215,16 @@ export class EvalWorker {
             return process_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
         }
 
+        async function html(tag, attrs, innerHTML) {
+            const action = {
+                type: 'html',
+                tag,
+                attrs,
+                innerHTML,
+            };
+            return process_action(action);
+        }
+
         async function graphics(type, args) {
             return process_action({
                 type,
@@ -257,6 +267,7 @@ export class EvalWorker {
             process_error,
             println,
             printf,
+            html,
             graphics,
             chart,
             dagre,

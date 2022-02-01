@@ -108,7 +108,7 @@ class TextOutputHandler extends OutputHandler {
         }
         const tex_delimiter = value.inline_tex ? '$' : '$$';
         const text = (value.is_tex ? `${tex_delimiter}${escape_unescaped_$(value.text)}${tex_delimiter}` : value.text);
-        await output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
+        return output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
     }
 
     validate_output_data(output_data) {
@@ -141,7 +141,7 @@ class ErrorOutputHandler extends OutputHandler {
             text_segments.push(error_object.message || 'error');
         }
         const text = clean_for_html(text_segments.join('\n'));
-        await output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
+        return output_context.create_text_output_data(this.type, text, this.generate_static_element.bind(this));
     }
 
     validate_output_data(output_data) {
@@ -156,6 +156,53 @@ class ErrorOutputHandler extends OutputHandler {
         const element = document.createElement('pre');
         element.classList.add('error');
         element.textContent = output_data.text;
+        return element;
+    }
+}
+
+class HTMLOutputHandler extends OutputHandler {
+    constructor() { super('html'); }
+
+    // output_data: { type: 'html', tag:string, attrs?:json_object, innerHTML?: string }
+    async update_notebook(output_context, output_data) {
+        const output_element = output_context.create_output_element({ tag: 'div' });
+        const output_child = await this.generate_static_element(output_data)
+        output_element.appendChild(output_child);
+        return output_context.create_generic_output_data(this.type, output_data);
+    }
+
+    validate_output_data(output_data) {
+        if (typeof output_data !== 'object') {
+            return false;
+        }
+        if (output_data.attrs) {
+            if (typeof output_data.attrs !== 'object') {
+                return false;
+            }
+            try {
+                JSON.stringify(output_data.attrs);
+            } catch (_) {
+                return false;
+            }
+        }
+        return ( super.validate_output_data(output_data) &&
+                 typeof output_data.tag === 'string' &&
+                 ['undefined', 'string'].includes(typeof output_data.innerHTML) );
+    }
+
+    async generate_static_element(output_data) {
+        if (output_data.type !== this.type) {
+            throw new Error(`output_data type does not match (${this.type})`);
+        }
+        const element = document.createElement(output_data.tag);
+        if (output_data.attrs) {
+            for (const prop in attrs) {
+                element.setAttribute(prop, output_data.attrs[prop])
+            }
+        }
+        if (output_data.innerHTML) {
+            element.innerHTML = output_data.innerHTML;
+        }
         return element;
     }
 }
@@ -229,7 +276,7 @@ class ChartOutputHandler extends _GraphicsOutputHandlerBase {
         // eliminate animation so that the canvas.toDataURL() call below will have something to render:
         Chart.defaults.global.animation.duration = 0;
         const chart_object = new Chart(ctx, config);
-        await output_context.create_canvas_output_data(this.type, canvas);
+        return output_context.create_canvas_output_data(this.type, canvas);
     }
 }
 
@@ -371,7 +418,7 @@ console.log('>>>', d3.event);//!!!
         svg_d3.call(zoom.transform, d3.zoomIdentity.translate(left_margin, height_margin/2).scale(initial_scale));
         svg_d3.attr('height', (g_height*initial_scale + height_margin));
         // finally, render the data uri
-        await output_context.create_svg_output_data(this.type, svg);
+        return output_context.create_svg_output_data(this.type, svg);
     }
 }
 
@@ -398,7 +445,7 @@ class ImageDataOutputHandler extends _GraphicsOutputHandlerBase {
         for (const { x = 0, y = 0, image_data } of iter_config) {
             ctx.putImageData(image_data, x, y);
         }
-        await output_context.create_canvas_output_data(this.type, canvas);
+        return output_context.create_canvas_output_data(this.type, canvas);
     }
 }
 
@@ -433,7 +480,7 @@ class PlotlyOutputHandler extends _GraphicsOutputHandlerBase {
                   image_format_quality,
                   image_uri,
               }));
-        await output_context.create_generic_graphics_output_data(this.type, output_data_props);
+        return output_context.create_generic_graphics_output_data(this.type, output_data_props);
     }
 }
 
@@ -445,6 +492,7 @@ export const output_handler_id_to_handler =  // handler_id->handler
         [
             TextOutputHandler,
             ErrorOutputHandler,
+            HTMLOutputHandler,
             GenericImageOutputHandler,
             ChartOutputHandler,
             DagreOutputHandler,
