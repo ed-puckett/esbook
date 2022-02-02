@@ -196,7 +196,7 @@ class HTMLOutputHandler extends OutputHandler {
         }
         const element = document.createElement(output_data.tag);
         if (output_data.attrs) {
-            for (const prop in attrs) {
+            for (const prop in output_data.attrs) {
                 element.setAttribute(prop, output_data.attrs[prop])
             }
         }
