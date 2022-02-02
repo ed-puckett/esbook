@@ -382,7 +382,7 @@
         // === LOAD CSP AND CORE MODULES ===
 
         const csp_url = new URL('./content-security-policy.js', current_script.src);
-        const nb_url  = new URL('./modules/notebook.js',        current_script.src);
+        const nb_url  = new URL('./notebook.js',                current_script.src);
 
         await globalThis.core.load_script(document.head, csp_url);
         await import(nb_url);

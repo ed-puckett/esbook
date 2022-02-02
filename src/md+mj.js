@@ -29,8 +29,8 @@ globalThis.MathJax = {
 `;
 globalThis.core.create_inline_script(document.head, mathjax_static_config_js);
 
-await globalThis.core.load_script(document.head, new URL('../../node_modules/marked/marked.min.js', import.meta.url));
-await globalThis.core.load_script_and_wait_for_condition(document.head, new URL('../../node_modules/mathjax/latest.js', import.meta.url), () => {
+await globalThis.core.load_script(document.head, new URL('../node_modules/marked/marked.min.js', import.meta.url));
+await globalThis.core.load_script_and_wait_for_condition(document.head, new URL('../node_modules/mathjax/latest.js', import.meta.url), () => {
         return !globalThis.MathJax[mathjax_static_config_identifying_property];
     });
 

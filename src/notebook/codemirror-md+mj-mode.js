@@ -1,10 +1,10 @@
 (function (mod) {
     const require_paths = [
         // CodeMirror:
-        '../../node_modules/codemirror/lib/codemirror.js',
+        '../node_modules/codemirror/lib/codemirror.js',
         // dependencies:
-        '../../node_modules/codemirror/mode/markdown/markdown.js',
-        '../../node_modules/codemirror/mode/stex/stex.js',
+        '../node_modules/codemirror/mode/markdown/markdown.js',
+        '../node_modules/codemirror/mode/stex/stex.js',
     ];
     if (typeof exports === 'object' && typeof module === 'object') {  // CommonJS
         mod(...require_paths.map(path => require(path)));

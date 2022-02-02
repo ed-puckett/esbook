@@ -46,10 +46,10 @@
 
 const script_url = import.meta.url;
 
-const nerdamer_script_url = new URL('../../../node_modules/nerdamer/all.min.js', import.meta.url);
+const nerdamer_script_url = new URL('../../node_modules/nerdamer/all.min.js', import.meta.url);
 await globalThis.core.load_script(document.head, nerdamer_script_url);
 
-const { nthRoot, primeFactor, Matrix, Polynomial, ExpressionParser, Expression } = await import('../../../node_modules/@yaffle/expression/index.js');
+const { nthRoot, primeFactor, Matrix, Polynomial, ExpressionParser, Expression } = await import('../../node_modules/@yaffle/expression/index.js');
 // workaround for some modules of @yaffle/expression not being able to find Expression and Polynomial:
 globalThis.Expression = Expression;//!!!
 globalThis.Polynomial = Polynomial;//!!!
@@ -176,7 +176,7 @@ export class EvalWorker {
     _create_ephemeral_eval_context() {
         const self = this;
 
-        const lib_dir_url = new URL('../../../lib/', script_url);
+        const lib_dir_url = new URL('../../lib/', script_url);
         function import_lib(lib_path) {
             return import(new URL(lib_path, lib_dir_url));
         }
