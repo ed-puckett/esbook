@@ -1,8 +1,12 @@
+const {
+    uuidv4,
+} = await import('./uuid.js');
+
 export function define_subscribable(base_name) {
     const _name_prefix = base_name ? `${base_name}-` : '';
 
     const _event_target = new EventTarget();
-    const _event_type   = `${_name_prefix}${globalThis.core.uuidv4()}`;
+    const _event_type   = `${_name_prefix}${uuidv4()}`;
 
     const _event_handler_functions = {};
 
@@ -15,7 +19,7 @@ export function define_subscribable(base_name) {
             if (typeof handler_function !== 'function') {
                 throw new Error('handler_function must be a function');
             }
-            const subscription_key = `${_name_prefix}subscription-${globalThis.core.uuidv4()}`;
+            const subscription_key = `${_name_prefix}subscription-${uuidv4()}`;
             _event_handler_functions[subscription_key] = handler_function;
             _event_target.addEventListener(_event_type, handler_function);
             return subscription_key;

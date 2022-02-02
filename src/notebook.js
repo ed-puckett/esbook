@@ -13,6 +13,22 @@ const CM_LIGHT_MODE_THEME = 'default';
 
 // === EXTERNAL MODULES ===
 
+const {
+    show_initialization_failed,
+    escape_for_html,
+    load_script,
+    create_child_element,
+    create_stylesheet_link,
+} = await import('./dom-util.js');
+
+const {
+    generate_object_id,
+} = await import('./uuid.js');
+
+const {
+    sha256,
+} = await import('./sha.js');
+
 const { fs_interface } = await import('./fs-interface.js');
 
 const { beep } = await import('./beep.js');
@@ -188,7 +204,7 @@ class Notebook {
             await this.clear_notebook(true);
 
         } catch (error) {
-            globalThis.core.show_initialization_failed(error);
+            show_initialization_failed(error);
             throw error;
         }
     }
@@ -206,17 +222,17 @@ class Notebook {
         //         </div>
         //     </div>
 
-        const content_el = globalThis.core.create_child_element(document.body, 'div', { id: 'content' });
-        this.interaction_area = globalThis.core.create_child_element(content_el, 'div', { id: 'interaction_area' });
+        const content_el = create_child_element(document.body, 'div', { id: 'content' });
+        this.interaction_area = create_child_element(content_el, 'div', { id: 'interaction_area' });
 
         // add notebook stylesheet:
         const stylesheet_url = new URL('notebook/notebook.css', import.meta.url);
-        globalThis.core.create_stylesheet_link(document.head, stylesheet_url);
+        create_stylesheet_link(document.head, stylesheet_url);
 
         // load CodeMirror scripts:
         async function load_cm_script(script_path) {
             const script_url = new URL(script_path, import.meta.url);
-            return globalThis.core.load_script(document.head, script_url);
+            return load_script(document.head, script_url);
         }
         await load_cm_script('../node_modules/codemirror/lib/codemirror.js');
         await Promise.all(
@@ -242,12 +258,12 @@ class Notebook {
             '../node_modules/codemirror/addon/dialog/dialog.css',
         ]) {
             const stylesheet_url = new URL(stylesheet_path, import.meta.url);
-            globalThis.core.create_stylesheet_link(document.head, stylesheet_url);
+            create_stylesheet_link(document.head, stylesheet_url);
         }
     }
 
     _object_hasher(obj) {
-        return globalThis.core.sha256(JSON.stringify(obj));
+        return sha256(JSON.stringify(obj));
     }
 
     update_from_settings() {
@@ -884,7 +900,7 @@ console.log('>>> SAVED');//!!!
         } else {
             ie = document.createElement('div');
             ie.classList.add('interaction_element');
-            ie.id = new_ie_id ?? globalThis.core.generate_object_id();
+            ie.id = new_ie_id ?? generate_object_id();
             ie.setAttribute('tabindex', 0);
             const selected_indicator = document.createElement('div');
             selected_indicator.classList.add('selected_indicator');
@@ -1092,7 +1108,7 @@ console.log('>>> SAVED');//!!!
         const mdmj_header_match = input_text.match(this.constructor._input_mdmj_header_re);
         if (mdmj_header_match) {
             is_expression = false;
-            text = globalThis.core.escape_for_html(input_text.substring(mdmj_header_match[0].length + 1));
+            text = escape_for_html(input_text.substring(mdmj_header_match[0].length + 1));
         } else {
             is_expression = true;
             text = input_text;

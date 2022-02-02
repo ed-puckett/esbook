@@ -1,3 +1,13 @@
+const {
+    escape_for_html,
+    load_script,
+    create_stylesheet_link,
+} = await import('../dom-util.js');
+
+const {
+    generate_object_id,
+} = await import('../uuid.js');
+
 await Promise.all(
     [
         '../../node_modules/dompurify/dist/purify.min.js',       // defines globalThis.DOMPurify
@@ -5,11 +15,11 @@ await Promise.all(
         '../../node_modules/d3/dist/d3.min.js',                  // defines globalThis.d3
         '../../node_modules/dagre-d3/dist/dagre-d3.min.js',      // defines globalThis.dagreD3
         '../../node_modules/plotly.js-dist/plotly.js',           // defines globalThis.Plotly
-    ].map(p => globalThis.core.load_script(document.head, new URL(p, import.meta.url)))
+    ].map(p => load_script(document.head, new URL(p, import.meta.url)))
 );
 
 const dagreD3_stylesheet_url = new URL('output-handlers/dagre-d3.css', import.meta.url);
-globalThis.core.create_stylesheet_link(document.head, dagreD3_stylesheet_url);
+create_stylesheet_link(document.head, dagreD3_stylesheet_url);
 
 
 // === CONSTANTS ===
@@ -20,13 +30,12 @@ export const TEXT_ELEMENT_CLASS = 'text-content';
 // === UTILITY FUNCTIONS ===
 
 // This function is more aggressive that DOMPurify.sanitize() because,
-// via globalThis.core.escape_for_html(), it converts all '<' and '>' to
-// their corresponding HTML entities.  DOMPurify.sanitize() protects from
-// XSS injections, but does not do anything with other HTML injection
-// (e.g., a form element) which can lead to unexpected behavior is the
-// user interacts with the injected HTML.
+// via escape_for_html(), it converts all '<' and '>' to their corresponding
+// HTML entities.  DOMPurify.sanitize() protects from XSS injections, but does
+// not do anything with other HTML injection (e.g., a form element) which can
+// lead to unexpected behavior is the user interacts with the injected HTML.
 export function clean_for_html(s) {
-    return globalThis.core.escape_for_html(DOMPurify.sanitize(s));
+    return escape_for_html(DOMPurify.sanitize(s));
 }
 
 export function escape_unescaped_$(s) {
@@ -66,7 +75,7 @@ export function escape_unescaped_$(s) {
 class OutputHandler {
     constructor(type) {
         this._type = type;
-        this._id   = globalThis.core.generate_object_id();
+        this._id   = generate_object_id();
     }
 
     get type (){ return this._type; }

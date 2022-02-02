@@ -46,8 +46,17 @@
 
 const script_url = import.meta.url;
 
+const {
+    load_script,
+} = await import('../dom-util.js');
+
+const {
+    generate_uuid,
+} = await import('../uuid.js');
+
+
 const nerdamer_script_url = new URL('../../node_modules/nerdamer/all.min.js', import.meta.url);
-await globalThis.core.load_script(document.head, nerdamer_script_url);
+await load_script(document.head, nerdamer_script_url);
 
 const { nthRoot, primeFactor, Matrix, Polynomial, ExpressionParser, Expression } = await import('../../node_modules/@yaffle/expression/index.js');
 // workaround for some modules of @yaffle/expression not being able to find Expression and Polynomial:
@@ -103,7 +112,7 @@ export class EvalWorker {
     constructor(eval_state, output_context, expression) {
         Object.defineProperties(this, {
             id: {
-                value: globalThis.core.generate_uuid(),
+                value: generate_uuid(),
                 enumerable: true,
             },
             eval_state: {

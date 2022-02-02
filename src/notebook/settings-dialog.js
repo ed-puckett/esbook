@@ -1,4 +1,9 @@
 const {
+    create_child_element,
+    create_stylesheet_link,
+} = await import('../dom-util.js');
+
+const {
     Dialog,
     create_control_element,
     create_select_element,
@@ -99,12 +104,12 @@ export class SettingsDialog extends Dialog {
 
         for (const { section, warnings } of sections) {
             const { name, settings } = section;
-            const section_div = globalThis.core.create_child_element(this._dialog_element, 'div', { class: 'section' });
+            const section_div = create_child_element(this._dialog_element, 'div', { class: 'section' });
 
-            const named_section_div = globalThis.core.create_child_element(section_div, 'div', { 'data-section': name });
+            const named_section_div = create_child_element(section_div, 'div', { 'data-section': name });
             for (const setting of settings) {
                 const { id, label, type, settings_path, options } = setting;
-                const setting_div = globalThis.core.create_child_element(named_section_div, 'div', { 'data-setting': undefined });
+                const setting_div = create_child_element(named_section_div, 'div', { 'data-setting': undefined });
                 let control;
                 if (type === 'select') {
                     control = create_select_element(setting_div, id, {
@@ -137,16 +142,16 @@ export class SettingsDialog extends Dialog {
 
             if (warnings) {
                 for (const warning_class in warnings) {
-                    const warning_div = globalThis.core.create_child_element(section_div, 'div', { class: `warning ${warning_class}` });
+                    const warning_div = create_child_element(section_div, 'div', { class: `warning ${warning_class}` });
                     for (const warning_text of warnings[warning_class]) {
-                        globalThis.core.create_child_element(warning_div, 'p').innerText = warning_text;
+                        create_child_element(warning_div, 'p').innerText = warning_text;
                     }
                 }
             }
         }
 
-        const button_container = globalThis.core.create_child_element(this._dialog_element, 'span');
-        const accept_button = globalThis.core.create_child_element(button_container, 'button', {
+        const button_container = create_child_element(this._dialog_element, 'span');
+        const accept_button = create_child_element(button_container, 'button', {
             class: 'dialog_accept',
         });
         accept_button.innerText = 'Done';
@@ -177,6 +182,6 @@ export class SettingsDialog extends Dialog {
 
         // add the stylesheet
         const stylesheet_url = new URL('settings-dialog.css', import.meta.url);
-        globalThis.core.create_stylesheet_link(document.head, stylesheet_url);
+        create_stylesheet_link(document.head, stylesheet_url);
     }
 }

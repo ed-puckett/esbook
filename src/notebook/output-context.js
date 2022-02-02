@@ -1,4 +1,8 @@
 const {
+    generate_object_id,
+} = await import('../uuid.js');
+
+const {
     output_handlers,
 } = await import('./output-handlers.js');
 
@@ -173,7 +177,7 @@ export function create_output_context(ie, output_data_collection) {
                 }
             }
             if (!output_element_id_specified) {
-                output_element.id = globalThis.core.generate_object_id();
+                output_element.id = generate_object_id();
             }
             output_element_collection.appendChild(output_element);
             let child;
@@ -194,7 +198,7 @@ export function create_output_context(ie, output_data_collection) {
                     }
                 }
                 if (!child_id_specified) {
-                    child.id = globalThis.core.generate_object_id();
+                    child.id = generate_object_id();
                 }
             }
             if (size_config) {

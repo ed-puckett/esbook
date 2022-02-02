@@ -1,4 +1,10 @@
-const { define_subscribable } = await import('../subscribable.js');
+const {
+    create_stylesheet_link,
+} = await import('../dom-util.js');
+
+const {
+    define_subscribable,
+} = await import('../subscribable.js');
 
 
 // === THEME SETTINGS INTERFACE ===
@@ -31,7 +37,7 @@ export class ThemeSettingsUpdatedEvent extends define_subscribable('theme-settin
 
 // add theme-settings/theme-colors.css stylesheet
 const theme_colors_stylesheet_url = new URL('theme-settings/theme-colors.css', import.meta.url);
-globalThis.core.create_stylesheet_link(document.head, theme_colors_stylesheet_url);
+create_stylesheet_link(document.head, theme_colors_stylesheet_url);
 
 const dark_mode_class = 'dark';
 

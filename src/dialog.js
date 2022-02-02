@@ -1,6 +1,21 @@
+const {
+    create_element,
+    create_child_element,
+    create_stylesheet_link,
+} = await import('./dom-util.js');
+
+const {
+    uuidv4,
+} = await import('./uuid.js');
+
+const {
+    OpenPromise,
+} = await import('./open-promise.js');
+
+
 // === STYLESHEET ===
 
-globalThis.core.create_stylesheet_link(document.head, new URL('dialog/dialog.css', import.meta.url));
+create_stylesheet_link(document.head, new URL('dialog/dialog.css', import.meta.url));
 
 
 // === DIALOG BASE CLASS ===
@@ -50,7 +65,7 @@ export class Dialog {
     }
 
     constructor() {
-        this._promise = new globalThis.core.OpenPromise();
+        this._promise = new OpenPromise();
         this._promise.promise.finally(() => {
             try {
                 this._destroy_dialog_element();
@@ -60,7 +75,7 @@ export class Dialog {
             }
         });
         try {
-            this._dialog_element_id = `dialog-${globalThis.core.uuidv4()}`;
+            this._dialog_element_id = `dialog-${uuidv4()}`;
             this._create_dialog_element();
             _dialog_element_to_instance_map[this._dialog_element] = this;
         } catch (error) {
@@ -111,25 +126,25 @@ export class Dialog {
             throw new Error('this._dialog_element must be undefined when calling this method');
         }
         const content_element = document.getElementById('content') ??
-              globalThis.core.create_child_element(document.body, 'div', { id: 'content' });
+              create_child_element(document.body, 'div', { id: 'content' });
         if (content_element.tagName !== 'DIV' || content_element.parentElement !== document.body) {
             throw new Error('pre-existing #content element is not a <div> that is a direct child of document.body');
         }
         const ui_element = document.getElementById('ui') ??
-              globalThis.core.create_child_element(content_element, 'div', { id: 'ui' }, true);
+              create_child_element(content_element, 'div', { id: 'ui' }, true);
         if (ui_element.tagName !== 'DIV' || ui_element.parentElement !== content_element) {
             throw new Error('pre-existing #ui element is not a <div> that is a direct child of the #content element');
         }
         const pre_existing_blocker_element = document.getElementById(this.constructor.blocker_element_id);
         const blocker_element = pre_existing_blocker_element ??
-              globalThis.core.create_child_element(ui_element, 'div', { id: this.constructor.blocker_element_id });
+              create_child_element(ui_element, 'div', { id: this.constructor.blocker_element_id });
         if (blocker_element.tagName !== 'DIV' || blocker_element.parentElement !== ui_element) {
             throw new Error(`pre-existing #${this.constructor.blocker_element_id} element is not a <div> that is a direct child of the #ui element`);
         }
         if (document.getElementById(this._dialog_element_id)) {
             throw new Error(`unexpected: dialog with id ${this._dialog_element_id} already exists`);
         }
-        const dialog_element = globalThis.core.create_element('div', {
+        const dialog_element = create_element('div', {
             id:    this._dialog_element_id,
             class: this.constructor.dialog_css_class,
         });
@@ -163,11 +178,11 @@ export class AlertDialog extends Dialog {
         const {
             accept_button_label = 'Ok',
         } = (options ?? {});
-        globalThis.core.create_child_element(this._dialog_element, 'div', {
+        create_child_element(this._dialog_element, 'div', {
             class: 'dialog_text',
         }).innerText = message;
-        const button_container = globalThis.core.create_child_element(this._dialog_element, 'span');
-        const accept_button = globalThis.core.create_child_element(button_container, 'button', {
+        const button_container = create_child_element(this._dialog_element, 'span');
+        const accept_button = create_child_element(button_container, 'button', {
             class: 'dialog_accept',
         });
         accept_button.innerText = accept_button_label;
@@ -195,16 +210,16 @@ export class ConfirmDialog extends Dialog {
             decline_button_label = 'No',
             accept_button_label  = 'Yes',
         } = (options ?? {});
-        globalThis.core.create_child_element(this._dialog_element, 'div', {
+        create_child_element(this._dialog_element, 'div', {
             class: 'dialog_text',
         }).innerText = message;
-        const button_container = globalThis.core.create_child_element(this._dialog_element, 'span');
-        const decline_button = globalThis.core.create_child_element(button_container, 'button', {
+        const button_container = create_child_element(this._dialog_element, 'span');
+        const decline_button = create_child_element(button_container, 'button', {
             class: 'dialog_decline',
         });
         decline_button.innerText = decline_button_label;
         decline_button.onclick = (event) => this._complete(false);
-        const accept_button = globalThis.core.create_child_element(button_container, 'button', {
+        const accept_button = create_child_element(button_container, 'button', {
             class: 'dialog_accept',
         });
         accept_button.innerText = accept_button_label;
@@ -263,10 +278,10 @@ export function create_control_element(parent, id, options) {
     if (tag === 'input') {
         control_opts.type = type;
     }
-    const control = core.create_element(tag, control_opts);
+    const control = create_element(tag, control_opts);
     let control_label;
     if (label) {
-        control_label = core.create_element('label', {
+        control_label = create_element('label', {
             for: id,
         });
         control_label.innerText = label;
@@ -308,7 +323,7 @@ export function create_select_element(parent, id, opts) {
     if (opts.options) {
         for (const { value, label } of opts.options) {
             const option_attrs = { value: (value ?? label) };
-            const option_element = globalThis.core.create_element('option', option_attrs);
+            const option_element = create_element('option', option_attrs);
             option_element.innerText = label;
             option_elements.push(option_element);
         }

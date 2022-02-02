@@ -1,3 +1,7 @@
+const {
+    generate_object_id,
+} = await import('../uuid.js');
+
 export class Change {
     // STATIC
 
@@ -259,7 +263,7 @@ export class AddNewIEChange extends Change {
     constructor(notebook, position) {
         super(notebook);
         this.position = position;
-        this.ie_id    = globalThis.core.generate_object_id();
+        this.ie_id    = generate_object_id();
         this.ie       = undefined;  // will be set in redo_change() aka do_change()
     }
 

@@ -1,3 +1,9 @@
+const {
+    create_inline_script,
+    load_script,
+    load_script_and_wait_for_condition,
+} = await import('./dom-util.js');
+
 const mathjax_static_config_identifying_property = 'this_is_initial_static_data';
 
 const mathjax_static_config_js = `
@@ -27,10 +33,10 @@ globalThis.MathJax = {
     ${mathjax_static_config_identifying_property}: true,  // used to detect when MathJax has replaced this initialization object with itself
 };
 `;
-globalThis.core.create_inline_script(document.head, mathjax_static_config_js);
+create_inline_script(document.head, mathjax_static_config_js);
 
-await globalThis.core.load_script(document.head, new URL('../node_modules/marked/marked.min.js', import.meta.url));
-await globalThis.core.load_script_and_wait_for_condition(document.head, new URL('../node_modules/mathjax/latest.js', import.meta.url), () => {
+await load_script(document.head, new URL('../node_modules/marked/marked.min.js', import.meta.url));
+await load_script_and_wait_for_condition(document.head, new URL('../node_modules/mathjax/latest.js', import.meta.url), () => {
         return !globalThis.MathJax[mathjax_static_config_identifying_property];
     });
 
