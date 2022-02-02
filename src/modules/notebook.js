@@ -1099,7 +1099,7 @@ console.log('>>> SAVED');//!!!
         }
         if (text.length > 0) {
             if (is_expression) {
-                return await EvalWorker.eval(this.get_eval_state(), output_context, text);
+                return EvalWorker.eval(this.get_eval_state(), output_context, text);
             } else {  // markdown
                 await output_handlers.text.update_notebook(output_context, text);
                 return undefined;  // indicate: no EvalWorker instance

@@ -88,7 +88,7 @@ function transform_text_result(result) {
 export class EvalWorker {
     /** Call this function instead of constructing an instance with new.
      *  @param {Object} eval_state will be present as "this" during evaluation
-     *  @param {OutputContext} output_context object containing output.
+     *  @param {OutputContext} output_context object containing output
      *                         manipulation methods and state.
      *  @param {string} expression to be evaluated.
      *  @return {Promise} resolves to the new instance after its _run()
@@ -97,7 +97,7 @@ export class EvalWorker {
      *                    mean that the instance is "done".
      */
     static async eval(eval_state, output_context, expression) {
-        return await new EvalWorker(eval_state, output_context, expression)._run();
+        return new EvalWorker(eval_state, output_context, expression)._run();
     }
 
     constructor(eval_state, output_context, expression) {
