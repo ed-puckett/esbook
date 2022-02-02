@@ -4,13 +4,11 @@
 
 (async () => {
 
-    const current_script = document.currentScript;
-
     globalThis.core = globalThis.core ?? {};
 
     // need to save document.currentScript because it will change after
     // this script returns (but before the async portions complete)
-    const core_script = document.currentScript;
+    const current_script = document.currentScript;
 
 
     /** a Promise-like object with its resolve and reject methods exposed externally
@@ -256,7 +254,7 @@
          *  or for error.
          */
         globalThis.core.load_script = async function load_script(parent, script_url) {
-            const full_script_url = new URL(script_url, core_script.src);
+            const full_script_url = new URL(script_url, current_script.src);
             const { promise_data, initial } = _establish_script_promise_data(full_script_url);
             if (initial) {
                 let script_el;
@@ -303,7 +301,7 @@
          *  or for error.
          */
         globalThis.core.load_script_and_wait_for_condition = async function load_script_and_wait_for_condition(parent, script_url, condition_poll_fn) {
-            const full_script_url = new URL(script_url, core_script.src);
+            const full_script_url = new URL(script_url, current_script.src);
             const { promise_data, initial } = _establish_script_promise_data(full_script_url);
             if (initial) {
                 let script_el;
@@ -346,8 +344,8 @@
 
         // === SHA256 AND UUID ===
 
-        const sha256_url = new URL('../node_modules/js-sha256/build/sha256.min.js', core_script.src);
-        const uuid_url   = new URL('../node_modules/uuid/dist/umd/uuid.min.js',     core_script.src);
+        const sha256_url = new URL('../node_modules/js-sha256/build/sha256.min.js', current_script.src);
+        const uuid_url   = new URL('../node_modules/uuid/dist/umd/uuid.min.js',     current_script.src);
 
         await globalThis.core.load_script(document.head, sha256_url);
         await globalThis.core.load_script(document.head, uuid_url);
@@ -383,8 +381,8 @@
 
         // === LOAD CSP AND CORE MODULES ===
 
-        const csp_url = new URL('./content-security-policy.js', core_script.src);
-        const nb_url  = new URL('./modules/notebook.js',        core_script.src);
+        const csp_url = new URL('./content-security-policy.js', current_script.src);
+        const nb_url  = new URL('./modules/notebook.js',        current_script.src);
 
         await globalThis.core.load_script(document.head, csp_url);
         await import(nb_url);
