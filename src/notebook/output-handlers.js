@@ -1,5 +1,6 @@
 const {
     escape_for_html,
+    set_element_attributes,
     load_script,
     create_stylesheet_link,
 } = await import('../dom-util.js');
@@ -173,11 +174,13 @@ class HTMLOutputHandler extends OutputHandler {
     constructor() { super('html'); }
 
     // output_data: { type: 'html', tag:string, attrs?:json_object, innerHTML?: string }
+    // returns the new HTML element
     async update_notebook(output_context, output_data) {
         const output_element = output_context.create_output_element({ tag: 'div' });
         const output_child = await this.generate_static_element(output_data)
         output_element.appendChild(output_child);
-        return output_context.create_generic_output_data(this.type, output_data);
+        await output_context.create_generic_output_data(this.type, output_data);
+        return output_child;
     }
 
     validate_output_data(output_data) {
@@ -205,9 +208,11 @@ class HTMLOutputHandler extends OutputHandler {
         }
         const element = document.createElement(output_data.tag);
         if (output_data.attrs) {
-            for (const prop in output_data.attrs) {
-                element.setAttribute(prop, output_data.attrs[prop])
-            }
+            set_element_attributes(element, output_data.attrs);
+        }
+        if (typeof element.id === 'undefined' || element.id === null || element.id === '') {
+            // id was not set from output_data.attrs
+            element.id = generate_object_id();
         }
         if (output_data.innerHTML) {
             element.innerHTML = output_data.innerHTML;

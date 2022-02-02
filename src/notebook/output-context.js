@@ -99,7 +99,7 @@ export function create_output_context(ie, output_data_collection) {
             if (!handler) {
                 throw new Error(`unknown output type: ${type}`);
             } else {
-                await handler.update_notebook(this, value);
+                return handler.update_notebook(this, value);
             }
         },
 

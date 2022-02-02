@@ -40,13 +40,19 @@ export function show_initialization_failed(error) {
  */
 export function set_element_attributes(element, attrs) {
     if (attrs) {
+        if ('id' in attrs && document.getElementById(_attr_value(attrs.id))) {
+            throw new Error(`element already exists with id ${attrs.id}`);
+        }
         for (const k in attrs) {
             const v = attrs[k];
-            const tv = (typeof v === 'undefined') ? '' : v.toString();
-            element.setAttribute(k, tv);
+            element.setAttribute(k, _attr_value(v));
         }
     }
     return element;
+}
+
+function _attr_value(v) {
+    return (typeof v === 'undefined') ? '' : v.toString();
 }
 
 /** create_element(tag_name, attrs)
