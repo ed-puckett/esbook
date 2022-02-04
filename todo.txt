@@ -8,9 +8,8 @@ investigate: seems like files are being reloaded a lot as elements are evaluated
 provide feedback when saving and provide visible modified indicator
 make whether opening or importing more apparent (in file open dialog)
 review Content-Security-Policy
-dagre: edges not rendered in image_uri / no arrow heads
+dagre: no arrow heads displayed in saved rendered image
 examples/cmjs-demo.esbook: output of count tree and of node graph are clipped and not positioned well
-svg elements are not displayed wide enough, both in the saved image form and the rendered form (see examples/cmjs-demo.esbook)
 preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems)
@@ -34,6 +33,8 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* dagre: edges not rendered in image_uri
+* svg elements are not displayed wide enough, both in the saved image form and the rendered form (see examples/cmjs-demo.esbook)
 * use Shift-ENTER for eval and Ctrl-ENTER for eval-and-stay
 * make global_export not modify globalThis
 * https://github.com/Yaffle/Expression / https://www.npmjs.com/package/@yaffle/expression
