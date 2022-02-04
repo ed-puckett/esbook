@@ -57,4 +57,4 @@ dev-server:
 
 .PHONY: start
 start: build-dir
-	if ! lsof -itcp:$(SERVER_PORT); then make server <&- & sleep 1; fi; chromium http://127.0.0.1:$(SERVER_PORT)/src/index.html
+	if ! lsof -itcp:$(SERVER_PORT); then make server <&- >/dev/null 2>&1 & sleep 1; fi; chromium --new-window http://127.0.0.1:$(SERVER_PORT)/src/index.html
