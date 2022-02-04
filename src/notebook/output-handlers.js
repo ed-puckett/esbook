@@ -416,9 +416,8 @@ class DagreOutputHandler extends _GraphicsOutputHandlerBase {
         const svg_d3 = d3.select(`#${svg.id}`);
         const inner = svg_d3.select("g");
         // set up zoom support
-        const zoom = d3.zoom().on("zoom", function() {
-console.log('>>>', d3.event);//!!!
-            if (d3.event) inner.attr("transform", d3.event.transform);
+        const zoom = d3.zoom().on("zoom", function (event) {
+            inner.attr("transform", event.transform);
         });
         svg_d3.call(zoom);
         // create and run the renderer
