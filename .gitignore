@@ -1,4 +1,4 @@
-dist/
+/dist/
 # build/
 .tmp/
 .nyc_output/
