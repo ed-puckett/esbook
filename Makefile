@@ -19,22 +19,23 @@ SERVER_PORT = 4300
 
 .PHONY: clean
 clean: kill-server
-	@-rm -fr $(BUILDDIR) >/dev/null 2>&1 || true
+	@-rm -fr "$(BUILDDIR)" >/dev/null 2>&1 || true
 
 .PHONY: full-clean
 full-clean: clean
 	@-rm -fr ./node_modules >/dev/null 2>&1 || true
 
 ./node_modules: ./package.json
-	npm install && \
-	( if [[ ! -e "./node_modules/@yaffle/expression/node_modules" ]]; then cd ./node_modules/@yaffle/expression/ && ln -s ../../../node_modules .; fi )
+	npm install
 
 .PHONY: build-dir
 build-dir: ./node_modules
 	mkdir -p "$(BUILDDIR)" && \
 	if [[ ! -e "$(BUILDDIR)/src" ]]; then ( cd "$(BUILDDIR)" && ln -s ../src . ); fi && \
 	if [[ ! -e "$(BUILDDIR)/lib" ]]; then ( cd "$(BUILDDIR)" && ln -s ../lib . ); fi && \
-	if [[ ! -e "$(BUILDDIR)/node_modules" ]]; then ( cd "$(BUILDDIR)" && ln -s ../node_modules . ); fi && \
+	rm -fr "$(BUILDDIR)/node_modules" && \
+	mkdir -p "$(BUILDDIR)/node_modules" && \
+	for d in chart.js codemirror d3 dagre-d3 dompurify js-sha256 marked mathjax nerdamer plotly.js-dist uuid; do cp -a "./node_modules/$${d}" "$(BUILDDIR)/node_modules/"; done && \
 	cp src/favicon.ico "$(BUILDDIR)/"
 
 .PHONY: lint

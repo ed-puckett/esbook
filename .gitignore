@@ -1,5 +1,5 @@
 dist/
-build/
+# build/
 .tmp/
 .nyc_output/
 node_modules/
