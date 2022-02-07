@@ -30,6 +30,15 @@ class FsInterface {
         return stats;
     }
 
+    async save_text(file_handle, text) {
+        await this.verify_permission(file_handle, true);
+        const writable = await file_handle.createWritable();
+        await writable.write(text);
+        await writable.close();
+        const stats = await this.get_fs_stats_for_file_handle(file_handle);
+        return stats;
+    }
+
     /** Load text from the file associated with a FileSystemFileHandle
      *  @param {FileSystemFileHandle} file_handle
      *  @return {Promise} resolves to { text: string, stats: object }

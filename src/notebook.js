@@ -228,7 +228,6 @@ class Notebook {
             }
             initializing_data_el.remove();  // remove the initializing element
             await this.load_nb_state(initializing_nb_state);
-            this.set_notebook_source(undefined);
         }
     }
 
@@ -495,6 +494,10 @@ class Notebook {
             this.save_notebook(interactive);
             break;
         }
+        case 'export_notebook': {
+            this.export_notebook();
+            break;
+        }
         case 'eval_element': {
             this.ie_ops_eval_element(this.current_ie, false);
             break;
@@ -750,6 +753,48 @@ class Notebook {
             Change.update_for_save(this);
             this.set_notebook_unmodified();
 console.log('>>> SAVED');//!!!
+            this.send_tab_state_to_parent_processes();
+
+        } catch (err) {
+            console.error('save failed', err.stack);
+            this.set_notebook_source(undefined);  // reset potentially problematic source info
+            await AlertDialog.run(`save failed: ${err.message}`);
+        }
+    }
+
+    async export_notebook() {
+        try {
+            this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
+            const contents = this.nb_state_to_contents(this.nb_state);
+            const save_dialog_options = {
+                description: 'esbook files',
+                accept: {
+                    'text/html': ['.esbook.html'],
+                },
+            };
+            const { canceled, file_handle } = await fs_interface.prompt_for_save(save_dialog_options);
+            if (canceled) {
+                // return with nothing changed
+                return;
+            }
+            const contents_json = JSON.stringify(contents);
+            const contents_base64 = btoa(contents_json);
+            const page_contents = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>${document.title}</title>
+    <script defer type="module" src="./init.js"></script>
+</head>
+<body>
+<div id="initializing-data-f55c8878-87c8-11ec-b7c3-273bd5f809b1" style="display:none">
+${contents_base64}
+</div>
+</body>
+</html>
+`;
+            await fs_interface.save_text(file_handle, page_contents);  // may throw an error
+console.log('>>> EXPORTED');//!!!
             this.send_tab_state_to_parent_processes();
 
         } catch (err) {

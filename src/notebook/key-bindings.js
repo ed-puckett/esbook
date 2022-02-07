@@ -20,6 +20,7 @@ export const initial_command_bindings = {  // command_string->key_bindings_array
     'reopen_notebook':      [ 'CmdOrCtrl+R' ],
     'save_notebook':        [ 'CmdOrCtrl+S' ],
     'save_as_notebook':     [ 'CmdOrCtrl+Shift+S' ],
+    'export_notebook':      [ 'CmdOrCtrl+Shift+E' ],
     'eval_element':         [ 'Shift+Enter' ],
     'eval_stay_element':    [ 'CmdOrCtrl+Enter' ],
     'eval_notebook':        [ 'CmdOrCtrl+Shift+!' ],

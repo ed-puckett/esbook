@@ -13,11 +13,11 @@ examples/cmjs-demo.esbook: output of count tree and of node graph are clipped an
 preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems)
+save/export to a loadable web page instead of a separate document format
 
 
 === THINK ABOUT ===
 re-install @yaffle/expression
-save/export to a loadable web page instead of a separate document format
 save to MIME format (multipart/mixed) to allow easy editing (issue: UTF-8) (see https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html )
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 keep "autoeval"?
