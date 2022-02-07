@@ -10,6 +10,8 @@ const DEFAULT_TITLE = 'Untitled';
 const CM_DARK_MODE_THEME  = 'blackboard';
 const CM_LIGHT_MODE_THEME = 'default';
 
+const initializing_data_element_id = 'initializing-data-f55c8878-87c8-11ec-b7c3-273bd5f809b1';
+
 
 // === EXTERNAL MODULES ===
 
@@ -203,9 +205,30 @@ class Notebook {
             // initialize empty notebook
             await this.clear_notebook(true);
 
+            // initialize from embedded data contained in an element
+            // with id = initializing_data_element_id, if any
+            await this.initialize_from_embedded_data();
+
         } catch (error) {
             show_initialization_failed(error);
             throw error;
+        }
+    }
+
+    async initialize_from_embedded_data() {
+        const initializing_data_el = document.getElementById(initializing_data_element_id);
+        if (initializing_data_el) {
+            let initializing_nb_state;
+            try {
+                const initializing_contents_json = atob(initializing_data_el.innerText.trim());
+                const initializing_contents = JSON.parse(initializing_contents_json);
+                initializing_nb_state = this.contents_to_nb_state(initializing_contents);
+            } catch (err) {
+                throw new Error(`corrupt initializing data contained in document; element id: ${initializing_data_element_id}`);
+            }
+            initializing_data_el.remove();  // remove the initializing element
+            await this.load_nb_state(initializing_nb_state);
+            this.set_notebook_source(undefined);
         }
     }
 
