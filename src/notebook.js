@@ -18,6 +18,7 @@ const initializing_data_element_id = 'initializing-data-f55c8878-87c8-11ec-b7c3-
 const {
     show_initialization_failed,
     escape_for_html,
+    make_string_literal,
     load_script,
     create_child_element,
     create_stylesheet_link,
@@ -777,6 +778,7 @@ console.log('>>> SAVED');//!!!
                 // return with nothing changed
                 return;
             }
+            const default_server_endpoint = new URL('..', location).toString();
             const contents_json = JSON.stringify(contents);
             const contents_base64 = btoa(contents_json);
             const page_contents = `<!DOCTYPE html>
@@ -784,7 +786,20 @@ console.log('>>> SAVED');//!!!
 <head>
     <meta charset="utf-8">
     <title>${document.title}</title>
-    <script defer type="module" src="./init.js"></script>
+    <script defer type="module">
+        const default_server_endpoint = ${make_string_literal(default_server_endpoint)};
+        const server_endpoint = new URL(location).searchParams.get('s') ?? default_server_endpoint;
+        const loading_indicator_el = document.createElement('h1');
+        loading_indicator_el.innerText = 'Loading...';
+        document.body.insertBefore(loading_indicator_el, document.body.firstChild);
+        try {
+            await import(server_endpoint+'/src/init.js');
+        } catch (error) {
+            document.body.innerHTML = '<h1>Failed to Load</h1><h2>Server endpoint: '+server_endpoint+'</h2><pre>'+error.stack+'</pre>';
+        } finally {
+            loading_indicator_el.remove();
+        }
+    </script>
 </head>
 <body>
 <div id="initializing-data-f55c8878-87c8-11ec-b7c3-273bd5f809b1" style="display:none">

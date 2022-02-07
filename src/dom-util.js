@@ -13,6 +13,14 @@ export function escape_for_html(s) {
     return s.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
 }
 
+/** make_string_literal(s)
+ *  @param {string} s
+ *  @return {string} string representation of a string literal for s
+ */
+export function make_string_literal(s) {
+    return `'${[ ...s ].map(s => s === "'" ? "\\'" : s).join('')}'`;
+}
+
 
 // === INITIALIZATION FAILED DISPLAY ===
 
