@@ -793,7 +793,7 @@ console.log('>>> SAVED');//!!!
         loading_indicator_el.innerText = 'Loading...';
         document.body.insertBefore(loading_indicator_el, document.body.firstChild);
         try {
-            await import(server_endpoint+'/src/init.js');
+            await import(new URL('./src/init.js', server_endpoint));
         } catch (error) {
             document.body.innerHTML = '<h1>Failed to Load</h1><h2>Server endpoint: '+server_endpoint+'</h2><pre>'+error.stack+'</pre>';
         } finally {

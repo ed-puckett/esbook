@@ -13,11 +13,20 @@ examples/cmjs-demo.esbook: output of count tree and of node graph are clipped an
 preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems)
+review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 save/export to a loadable web page instead of a separate document format
+provide recent file interface
+provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
+file open/save dialog does not use the "suggested" filename or extensions
+provide clear output/outputs
+provide status bar (modified status, eval running, help link, ...)
+provide help link
+create help/documentation
 
 
 === THINK ABOUT ===
-re-install @yaffle/expression
+enable api to perform operations programmatically (e.g., eval-notebook)
+re-install @yaffle/expression when it is more "distributable"
 save to MIME format (multipart/mixed) to allow easy editing (issue: UTF-8) (see https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html )
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 keep "autoeval"?
