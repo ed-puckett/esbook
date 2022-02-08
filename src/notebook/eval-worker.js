@@ -54,6 +54,10 @@ const {
     generate_uuid,
 } = await import('../uuid.js');
 
+const {
+    sprintf,
+} = await import('../sprintf.js');
+
 
 const nerdamer_script_url = new URL('../../node_modules/nerdamer/all.min.js', import.meta.url);
 await load_script(document.head, nerdamer_script_url);
