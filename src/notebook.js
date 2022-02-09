@@ -188,6 +188,7 @@ class Notebook {
 
         this._loaded_notebook_hash = undefined;  // used by this.set_notebook_unmodified() and this.notebook_modified()
 
+        this.controls              = undefined;  // will be set in this._setup_document()
         this.interaction_area      = undefined;  // will be set in this._setup_document()
 
         // notebook focus
@@ -240,12 +241,15 @@ class Notebook {
         // add initial notebook structure to document body:
         //
         //     <div id="content">
+        //         <div id="controls">
+        //         </div>
         //         <div id="interaction_area">
-        //             ....
+        //             ...
         //         </div>
         //     </div>
 
         const content_el = create_child_element(document.body, 'div', { id: 'content' });
+        this.controls         = create_child_element(content_el, 'div', { id: 'controls' });
         this.interaction_area = create_child_element(content_el, 'div', { id: 'interaction_area' });
 
         // add notebook stylesheet:

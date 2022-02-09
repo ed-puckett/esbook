@@ -1,9 +1,19 @@
-# EXPRESSION EVALUATION
+# Stucture of the Notebook
+
+The notebook is constructed from a series of Interaction Elements.
+Each Interaction Element (ie) is divided into an _input_ and, below,
+an _output_.
+
+# Interaction Elements
+
+...
+
+## Expression Evaluation
 
 Within an expression, the "this" object references the eval_state
 object of the notebook.  This object persists until the notebook
 is opened to a new file or is cleared, at which point it is reset
-to {}.
+to an empty object {}.
 
 During evaluation, this.eval_context references an object whose
 properties are available directly for evaluation within any
@@ -23,9 +33,9 @@ to reference them.
 
 A return statement within an interaction element terminates the
 evaluation and the value of the return statement becomes the result
-of the evaluation.
+of the evaluation, and that result will be output.
 
-## Ephemeral eval_context
+### Ephemeral eval_context
 
 During evaluation, a number of other values are available "globally",
 though these values do not persist after the particular evaluation

@@ -24,6 +24,9 @@ body {
 
     --color-bg-ie-error:               var(--color-bg-page-alert2);
     --color-fg-ie-error:               var(--color-c0-page-alert2);
+
+
+    --selected_indicator_width: 0.16rem;
 }
 
 html {
@@ -50,6 +53,12 @@ body {
     /* set in @media not print: overflow: hidden; */
 }
 
+#controls {
+    height: 1rem;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid black;
+}
+
 #interaction_area {
     margin-left: 2px;
     /* set in @media not print: overflow: auto; */
@@ -70,19 +79,18 @@ body {
 
 .interaction_element {
     display: grid;
-    grid-template-columns: 0.25rem auto;
+    grid-template-columns: var(--selected_indicator_width) 100%;
     grid-template-rows: auto;
     grid-template-areas:
         "selected_indicator input"
-        "selected_indicator output"
-        "selected_indicator graphics";
+        "selected_indicator output";
 }
 
 .selected_indicator {
-    margin: 2px 0 2px 0;
+    margin: 0 0 2px 0;
     grid-column: 1;
     grid-row: 1 / 5;
-    border-radius: 0.125rem;
+    border-radius: calc(var(--selected_indicator_width) / 2);
     background: var(--color-ie-selected-indicator);
 }
 
@@ -97,7 +105,7 @@ body {
 .input {
     width: calc(100% - 2em);
     padding: 0.5em;
-    margin: 0.5em 0.5em 0 0.5em;
+    margin: 0 0 2px 3px;
     border: 1px solid var(--color-border);
     background: var(--color-border);
 }
@@ -153,9 +161,6 @@ body {
 .output td {
     border: 1px solid var(--color-ie-output-td);
     padding: 0.5em;
-}
-
-.graphics {
 }
 
 .error {
