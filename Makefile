@@ -29,13 +29,14 @@ full-clean: clean
 	npm install
 
 .PHONY: build-dir
-build-dir: ./node_modules
+build-dir: ./node_modules README.md
 	mkdir -p "$(BUILDDIR)" && \
 	if [[ ! -e "$(BUILDDIR)/src" ]]; then ( cd "$(BUILDDIR)" && ln -s ../src . ); fi && \
 	if [[ ! -e "$(BUILDDIR)/lib" ]]; then ( cd "$(BUILDDIR)" && ln -s ../lib . ); fi && \
 	rm -fr "$(BUILDDIR)/node_modules" && \
 	mkdir -p "$(BUILDDIR)/node_modules" && \
 	for d in chart.js codemirror d3 dagre-d3 dompurify js-sha256 marked mathjax nerdamer plotly.js-dist sprintf-js uuid; do cp -a "./node_modules/$${d}" "$(BUILDDIR)/node_modules/"; done && \
+	node -e 'require("fs/promises").readFile("README.md").then(t => console.log(`<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n$${require("marked").marked(t.toString())}\n</body>\n</html>`))' > "$(BUILDDIR)/help.html"
 	cp src/favicon.ico "$(BUILDDIR)/"
 
 .PHONY: lint

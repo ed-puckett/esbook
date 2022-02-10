@@ -252,6 +252,8 @@ class Notebook {
         this.controls         = create_child_element(content_el, 'div', { id: 'controls' });
         this.interaction_area = create_child_element(content_el, 'div', { id: 'interaction_area' });
 
+        this.controls.innerHTML = '<a href="/help.html" class="help" target="_blank">Help</a>';
+
         // add notebook stylesheet:
         const stylesheet_url = new URL('notebook/notebook.css', import.meta.url);
         create_stylesheet_link(document.head, stylesheet_url);
