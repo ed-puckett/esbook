@@ -19,6 +19,7 @@ provide fallback for file open/save interfaces (when on e.g., non-chromium brows
 file open/save dialog does not use the "suggested" filename or extensions
 provide clear output/outputs
 create help/documentation
+notebook.js: send_tab_state_to_parent_processes: rename to something more appropriate
 
 
 === THINK ABOUT ===

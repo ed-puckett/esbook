@@ -230,6 +230,8 @@ class Notebook {
             }
             initializing_data_el.remove();  // remove the initializing element
             await this.load_nb_state(initializing_nb_state);
+            this.set_notebook_unmodified();
+            Change.update_for_open(this);
         }
     }
 
@@ -791,7 +793,6 @@ class Notebook {
             this.focus_to_current_ie();
             Change.update_for_save(this);
             this.set_notebook_unmodified();
-console.log('>>> SAVED');//!!!
             this.send_tab_state_to_parent_processes();
 
         } catch (err) {
@@ -847,7 +848,6 @@ ${contents_base64}
 </html>
 `;
             await fs_interface.save_text(file_handle, page_contents);  // may throw an error
-console.log('>>> EXPORTED');//!!!
             this.send_tab_state_to_parent_processes();
 
         } catch (err) {
