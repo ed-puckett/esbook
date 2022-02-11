@@ -15,11 +15,12 @@ sometimes input cell does not respond to keyboard shortcuts after focus is reset
 cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 provide recent file interface
-file osoldier of lovepen/save dialog does not use the "suggested" filename or extensions
+file open/save dialog does not use the "suggested" filename or extensions
 provide clear output/outputs action
 create help/documentation
 notebook.js: send_tab_state_to_parent_processes: rename to something more appropriate
 provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
+menus
 
 
 === THINK ABOUT ===
@@ -32,7 +33,6 @@ use "contenteditable" element instead of CodeMirror stuff?
 figure out what to do with nb_state
 figure out how to reload / re-initialize eval state
 figure out codemirror + emacs clipboard support
-menus
 deleting element with an eval worker running something like setInterval(): old eval worker keeps running even though "stopped" (maybe on_stopped event could help)
 provide on_stopped event to allow cleanup of background "processes" (e.g., setInterval)
 

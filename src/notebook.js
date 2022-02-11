@@ -260,11 +260,12 @@ class Notebook {
 
         this.modified_indicator = create_child_element(this.controls, 'div', { id: 'modified_indicator', title: 'Modified' });
         this.running_indicator  = create_child_element(this.controls, 'div', { id: 'running_indicator',  title: 'Running' });
-        create_child_element(this.controls, 'a', {
+        this.help_link = create_child_element(this.controls, 'a', {
             id:     'help_link',
             href:   '/help.html',
             target: '_blank',
-        }).innerText = 'Help';
+        });
+        this.help_link.innerText = 'Help';
 
         // add notebook stylesheet:
         const stylesheet_url = new URL('notebook/notebook.css', import.meta.url);
@@ -351,16 +352,20 @@ class Notebook {
     set_modified_status(state) {
         if (state) {
             this.modified_indicator.classList.add('active');
+            this.modified_indicator.title = 'Modified';
         } else {
             this.modified_indicator.classList.remove('active');
+            this.modified_indicator.title = 'Not modified';
         }
     }
 
     set_running_status(state) {
         if (state) {
             this.running_indicator.classList.add('active');
+            this.running_indicator.title = 'Running';
         } else {
             this.running_indicator.classList.remove('active');
+            this.running_indicator.title = 'Not running';
         }
     }
 
@@ -582,6 +587,10 @@ class Notebook {
         }
         case 'settings': {
             SettingsDialog.run();
+            break;
+        }
+        case 'help': {
+            this.help_link.click();
             break;
         }
         case 'open_last_recent': {//!!!

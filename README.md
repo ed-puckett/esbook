@@ -48,6 +48,7 @@ functions to manipluate the output.  Also included are:
     import_lib:    import other libraries from the lib/ directory
     global_export: export new "global" properties
     is_stopped:    determine if the evaluation has been stopped
+    delay_ms:      return a Promise that resolves after a specified delay
 
 These all continue to be available even after the evaluation has
 returned if there are any async actions still active.

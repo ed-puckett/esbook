@@ -33,6 +33,7 @@ export const initial_command_bindings = {  // command_string->key_bindings_array
     'add_after_element':    [ 'CmdOrCtrl+Alt+Down' ],
     'delete_element':       [ 'CmdOrCtrl+Alt+Backspace' ],
     'settings':             [ 'CmdOrCtrl+,' ],
+    'help':                 [ 'F1' ],
 
     'open_last_recent':     [ 'Ctrl-Alt-Shift-R' ],//!!!
 };

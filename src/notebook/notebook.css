@@ -8,8 +8,8 @@ body {
     --color-bg-body:                   var(--color-bg-page-major);
     --color-fg-body:                   var(--color-c0-page-major);
 
-    --color-bg-stop-eval:              var(--color-bg-page-alert1);
-    --color-fg-stop-eval:              var(--color-c0-page-alert1);
+    --color-bg-help-link:              var(--color-c0-page-minor);
+    --color-bg-help-link-hover:        var(--color-c1-page-minor);
 
     --color-ie-selected-indicator:     var(--color-border);
 
@@ -61,30 +61,21 @@ body {
     border-bottom: 1px solid black;
 }
 
-#controls #modified_indicator {
+#controls #modified_indicator,
+#controls #running_indicator {
     display: inline-block;
     align-self: center;
-    margin: 2px 2px 2px 8px;
+    margin: 0.1rem 0 0.1rem 0.625rem;
     width:  0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    border: 1px solid #00000000;
+    border: 1px solid #000000;
     background-color: #00000000;
+    box-shadow: 1px 1px 4px grey;
 }
 #controls #modified_indicator.active {
     border: 1px solid black;
     background-color: red;
-}
-
-#controls #running_indicator {
-    display: inline-block;
-    align-self: center;
-    margin: 2px 2px 2px 8px;
-    width:  0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    border: 1px solid #00000000;
-    background-color: #00000000;
 }
 #controls #running_indicator.active {
     border: 1px solid black;
@@ -94,7 +85,14 @@ body {
 #controls #help_link {
     align-self: center;
     margin-left: auto;
+    margin-right: 0.625rem;
     padding: 0.25rem;
+    font-family: sans-serif;
+    text-decoration: none;
+    color: var(--color-bg-help-link);
+}
+#controls #help_link:hover {
+    color: var(--color-bg-help-link-hover);
 }
 
 #interaction_area {
@@ -205,16 +203,6 @@ body {
     color: var(--color-fg-ie-error);
     background: var(--color-bg-ie-error);
     padding: 0.5em;
-}
-
-#stop_eval_button {
-    display: none;
-    color: var(--color-fg-stop-eval);
-    background: var(--color-bg-stop-eval);
-}
-
-#stop_eval_button.active {
-    display: inline;
 }
 
 
