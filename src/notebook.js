@@ -230,7 +230,7 @@ class Notebook {
             }
             initializing_data_el.remove();  // remove the initializing element
             await this.load_nb_state(initializing_nb_state);
-            Change.update_for_open(this);
+            Change.update_for_open(this);  // do this before this.set_notebook_unmodified()
             this.set_notebook_unmodified();
         }
     }

@@ -12,15 +12,14 @@ dagre: no arrow heads displayed in saved rendered image
 examples/cmjs-demo.esbook: output of count tree and of node graph are clipped and not positioned well
 preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
-cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems)
+cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 provide recent file interface
-provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
-file open/save dialog does not use the "suggested" filename or extensions
-provide clear output/outputs
+file osoldier of lovepen/save dialog does not use the "suggested" filename or extensions
+provide clear output/outputs action
 create help/documentation
 notebook.js: send_tab_state_to_parent_processes: rename to something more appropriate
-notebook imported from html embedded data starts out with modified indicator active (and yet can exit page without warning)
+provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
 
 
 === THINK ABOUT ===
@@ -44,6 +43,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* notebook imported from html embedded data starts out with modified indicator active (and yet can exit page without warning)
 * not prompting user when leaving a modified page
 * provide status bar (modified status, eval running, help link, ...)
 * provide help link
