@@ -14,14 +14,12 @@ preview images in saved notebooks that have been opened should cause a line brea
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
-save/export to a loadable web page instead of a separate document format
 provide recent file interface
 provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
 file open/save dialog does not use the "suggested" filename or extensions
 provide clear output/outputs
-provide status bar (modified status, eval running, help link, ...)
-provide help link
 create help/documentation
+not prompting user when leaving a modified page
 
 
 === THINK ABOUT ===
@@ -45,6 +43,9 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* provide status bar (modified status, eval running, help link, ...)
+* provide help link
+* save/export to a loadable web page instead of a separate document format
 * bundle code instead of loading out of node_modules
 * dagre: edges not rendered in image_uri
 * svg elements are not displayed wide enough, both in the saved image form and the rendered form (see examples/cmjs-demo.esbook)

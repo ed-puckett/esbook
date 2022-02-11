@@ -242,6 +242,9 @@ class Notebook {
         //
         //     <div id="content">
         //         <div id="controls">
+        //             <div id="modified_indicator"></div>
+        //             <div id="running_indicator"></div>
+        //             <a id="help_link" href="/help.html" target="_blank">Help</a>
         //         </div>
         //         <div id="interaction_area">
         //             ...
@@ -249,10 +252,17 @@ class Notebook {
         //     </div>
 
         const content_el = create_child_element(document.body, 'div', { id: 'content' });
+
         this.controls         = create_child_element(content_el, 'div', { id: 'controls' });
         this.interaction_area = create_child_element(content_el, 'div', { id: 'interaction_area' });
 
-        this.controls.innerHTML = '<a href="/help.html" class="help" target="_blank">Help</a>';
+        this.modified_indicator = create_child_element(this.controls, 'div', { id: 'modified_indicator', title: 'Modified' });
+        this.running_indicator  = create_child_element(this.controls, 'div', { id: 'running_indicator',  title: 'Running' });
+        create_child_element(this.controls, 'a', {
+            id:     'help_link',
+            href:   '/help.html',
+            target: '_blank',
+        }).innerText = 'Help';
 
         // add notebook stylesheet:
         const stylesheet_url = new URL('notebook/notebook.css', import.meta.url);
@@ -335,6 +345,23 @@ class Notebook {
         event.preventDefault();
         event.stopPropagation();
     }
+
+    set_modified_status(state) {
+        if (state) {
+            this.modified_indicator.classList.add('active');
+        } else {
+            this.modified_indicator.classList.remove('active');
+        }
+    }
+
+    set_running_status(state) {
+        if (state) {
+            this.running_indicator.classList.add('active');
+        } else {
+            this.running_indicator.classList.remove('active');
+        }
+    }
+
 
     // Set a new notebook source information and update things accordingly.
     set_notebook_source(file_handle, stats=undefined) {
@@ -600,17 +627,20 @@ class Notebook {
         // currently nothing...
     }
 
-    send_tab_state_to_parent_processes() {
-        //!!! nothing...
+    send_tab_state_to_parent_processes() {  // not really a relevant name anymore...
+        this.set_modified_status(Change.get_modified_state());
     }
 
     set_notebook_unmodified() {
         this._loaded_notebook_hash = this._current_notebook_hash();
+        this.set_modified_status(false);
     }
     notebook_modified() {
         // once modified, the notebook stays that way until this.set_notebook_unmodified() is called
         const current_hash = this._current_notebook_hash();
-        return (current_hash !== this._loaded_notebook_hash);
+        const modified_state = (current_hash !== this._loaded_notebook_hash);
+        set_modified_status(true);
+        return modified_state;
     }
     _current_notebook_hash() {
         const items = [
@@ -644,6 +674,8 @@ class Notebook {
         this.focus_to_current_ie();
         Change.update_for_clear(this);
         this.set_notebook_unmodified();
+
+        this.set_running_status(false);
 
         // inform main process of new state
         this.send_tab_state_to_parent_processes();
@@ -1149,33 +1181,40 @@ console.log('>>> EXPORTED');//!!!
 
     // Returns true iff no errors.
     async evaluate_ie(ie, stay=false) {
-        this.update_nb_state(ie);
-
-        const output_data_collection = this.reset_output(ie);
-        const output_context = create_output_context(ie, output_data_collection);
+        this.set_running_status(true);
 
         try {
+            this.update_nb_state(ie);
 
-            const input_text = this.get_input_text_for_ie_id(ie.id);
-            const eval_worker = await this.evaluate_input_text(output_context, input_text);
-            if (eval_worker) {
-                this.set_eval_worker_for_ie_id(ie.id, eval_worker);
+            const output_data_collection = this.reset_output(ie);
+            const output_context = create_output_context(ie, output_data_collection);
+
+            try {
+
+                const input_text = this.get_input_text_for_ie_id(ie.id);
+                const eval_worker = await this.evaluate_input_text(output_context, input_text);
+                if (eval_worker) {
+                    this.set_eval_worker_for_ie_id(ie.id, eval_worker);
+                }
+
+            } catch (err) {
+
+                await output_handlers.error.update_notebook(output_context, err);
+                if (err instanceof TextuallyLocatedError) {
+                    this.set_input_selection_for_ie_id(ie.id, err.line_col);
+                }
+                const output_element_collection = ie.querySelector('.output');
+                output_element_collection.scrollIntoView(false);  // show error
+                return false;
             }
 
-        } catch (err) {
+            add_ie_output_change(this, ie.id);
 
-            await output_handlers.error.update_notebook(output_context, err);
-            if (err instanceof TextuallyLocatedError) {
-                this.set_input_selection_for_ie_id(ie.id, err.line_col);
-            }
-            const output_element_collection = ie.querySelector('.output');
-            output_element_collection.scrollIntoView(false);  // show error
-            return false;
+            await this.typeset_notebook(ie);
+
+        } finally {
+            this.set_running_status(false);
         }
-
-        add_ie_output_change(this, ie.id);
-
-        await this.typeset_notebook(ie);
 
         if (!stay) {
             // move to next interaction_element, or add a new one if at the end

@@ -47,20 +47,53 @@ body {
 }
 
 #content {
-    height: 100%;
     display: flex;
+    height: 100%;
     flex-direction: column;
     /* set in @media not print: overflow: hidden; */
 }
 
 #controls {
+    display: flex;
+    width: 100%;
     height: fit-content;
     background-color: #f0f0f0;
     border-bottom: 1px solid black;
 }
 
-#controls .help {
-    float: right;
+#controls #modified_indicator {
+    display: inline-block;
+    align-self: center;
+    margin: 2px 2px 2px 8px;
+    width:  0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 1px solid #00000000;
+    background-color: #00000000;
+}
+#controls #modified_indicator.active {
+    border: 1px solid black;
+    background-color: red;
+}
+
+#controls #running_indicator {
+    display: inline-block;
+    align-self: center;
+    margin: 2px 2px 2px 8px;
+    width:  0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    border: 1px solid #00000000;
+    background-color: #00000000;
+}
+#controls #running_indicator.active {
+    border: 1px solid black;
+    background-color: aqua;
+}
+
+#controls #help_link {
+    align-self: center;
+    margin-left: auto;
     padding: 0.25rem;
 }
 
