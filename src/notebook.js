@@ -639,7 +639,7 @@ class Notebook {
         // once modified, the notebook stays that way until this.set_notebook_unmodified() is called
         const current_hash = this._current_notebook_hash();
         const modified_state = (current_hash !== this._loaded_notebook_hash);
-        set_modified_status(true);
+        this.set_modified_status(modified_state);
         return modified_state;
     }
     _current_notebook_hash() {

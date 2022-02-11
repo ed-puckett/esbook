@@ -19,7 +19,6 @@ provide fallback for file open/save interfaces (when on e.g., non-chromium brows
 file open/save dialog does not use the "suggested" filename or extensions
 provide clear output/outputs
 create help/documentation
-not prompting user when leaving a modified page
 
 
 === THINK ABOUT ===
@@ -43,6 +42,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* not prompting user when leaving a modified page
 * provide status bar (modified status, eval running, help link, ...)
 * provide help link
 * save/export to a loadable web page instead of a separate document format
