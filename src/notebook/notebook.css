@@ -11,8 +11,6 @@ body {
     --color-bg-help-link:              var(--color-c0-page-minor);
     --color-bg-help-link-hover:        var(--color-c1-page-minor);
 
-    --color-ie-selected-indicator:     var(--color-border);
-
     --color-ie-input-outline-selected: var(--color-bg-page-alert2);
 
     --color-bg-ie-input:               var(--color-bg-page-minor);
@@ -25,8 +23,8 @@ body {
     --color-bg-ie-error:               var(--color-bg-page-alert2);
     --color-fg-ie-error:               var(--color-c0-page-alert2);
 
-
-    --selected_indicator_width: 0.16rem;
+    --control-indicator-diameter:      0.5rem;
+    --selected-indicator-width:        0.16rem;
 }
 
 html {
@@ -66,12 +64,12 @@ body {
     display: inline-block;
     align-self: center;
     margin: 0.1rem 0 0.1rem 0.625rem;
-    width:  0.5rem;
-    height: 0.5rem;
+    width:  var(--control-indicator-diameter);
+    height: var(--control-indicator-diameter);
     border-radius: 50%;
     border: 1px solid #000000;
     background-color: #00000000;
-    box-shadow: 1px 1px 4px grey;
+    box-shadow: 0 0 calc(var(--control-indicator-diameter) / 2) grey;
 }
 #controls #modified_indicator.active {
     border: 1px solid black;
@@ -115,7 +113,7 @@ body {
 
 .interaction_element {
     display: grid;
-    grid-template-columns: var(--selected_indicator_width) 100%;
+    grid-template-columns: var(--selected-indicator-width) 100%;
     grid-template-rows: auto;
     grid-template-areas:
         "selected_indicator input"
@@ -126,8 +124,8 @@ body {
     margin: 0 0 2px 0;
     grid-column: 1;
     grid-row: 1 / 5;
-    border-radius: calc(var(--selected_indicator_width) / 2);
-    background: var(--color-ie-selected-indicator);
+    border-radius: calc(var(--selected-indicator-width) / 2);
+    background: transparent;
 }
 
 .interaction_element.selected .selected_indicator {
