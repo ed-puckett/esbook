@@ -121,9 +121,8 @@ body {
 }
 
 .selected_indicator {
-    margin: 0 0 2px 0;
-    grid-column: 1;
-    grid-row: 1 / 5;
+    grid-area: selected_indicator;
+    margin: 0.25rem 0 0 0;
     border-radius: calc(var(--selected-indicator-width) / 2);
     background: transparent;
 }
@@ -137,9 +136,10 @@ body {
 }
 
 .input {
-    width: calc(100% - 2em);
-    padding: 0.5em;
-    margin: 0 0 2px 3px;
+    grid-area: input;
+    width: calc(100% - 1.5rem);
+    padding: 0.25rem;
+    margin: 0.25rem 0 0 0.2rem;
     border: 1px solid var(--color-border);
     background: var(--color-border);
 }
@@ -162,6 +162,7 @@ body {
 }
 
 .output {
+    grid-area: output;
     margin: 0.5em;
     padding: 0.25em;
     color: var(--color-fg-ie-output);

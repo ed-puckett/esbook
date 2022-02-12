@@ -612,7 +612,6 @@ class Notebook {
     async ie_ops_eval_element(ie, stay=false) {
         if (this.get_input_text_for_ie_id(ie.id).trim()) {  // if there is anything to evaluate...
             await this.evaluate_ie(ie, stay);
-            this.send_tab_state_to_parent_processes();
         }
     }
 
@@ -631,14 +630,9 @@ class Notebook {
                 }
             }
         }
-        this.send_tab_state_to_parent_processes();
     }
 
     update_global_view_properties() {
-        // currently nothing...
-    }
-
-    send_tab_state_to_parent_processes() {  // not really a relevant name anymore...
         this.set_modified_status(Change.get_modified_state());
     }
 
@@ -678,7 +672,6 @@ class Notebook {
         // reset state
         this.set_new_notebook_state();
         this.set_notebook_source(undefined);
-        this.update_global_view_properties();
         this.current_ie = undefined;
         const ie = this.add_new_ie();  // add a single new interaction_element
         this.set_current_ie(ie);
@@ -687,9 +680,7 @@ class Notebook {
         this.set_notebook_unmodified();
 
         this.set_running_status(false);
-
-        // inform main process of new state
-        this.send_tab_state_to_parent_processes();
+        this.update_global_view_properties();
     }
 
     async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
@@ -715,7 +706,7 @@ class Notebook {
                 // check if this notebook is "autoeval"
                 await this._handle_autoeval();
             }
-            this.send_tab_state_to_parent_processes();
+            this.update_global_view_properties();
 
         } catch (err) {
             console.error('open failed', err.stack);
@@ -802,7 +793,7 @@ class Notebook {
             this.focus_to_current_ie();
             Change.update_for_save(this);
             this.set_notebook_unmodified();
-            this.send_tab_state_to_parent_processes();
+            this.update_global_view_properties();
 
         } catch (err) {
             console.error('save failed', err.stack);
@@ -857,7 +848,7 @@ ${contents_base64}
 </html>
 `;
             await fs_interface.save_text(file_handle, page_contents);  // may throw an error
-            this.send_tab_state_to_parent_processes();
+            this.update_global_view_properties();
 
         } catch (err) {
             console.error('save failed', err.stack);
@@ -936,8 +927,6 @@ ${contents_base64}
             for (const ie of this.interaction_area.querySelectorAll('.interaction_element')) {
                 this.interaction_area.removeChild(ie);
             }
-
-            this.update_global_view_properties();
 
             for (const id of new_nb_state.order) {
                 const ie = this.add_new_ie(undefined, true, id);
@@ -1223,6 +1212,7 @@ ${contents_base64}
 
         } finally {
             this.set_running_status(false);
+            this.update_global_view_properties();
         }
 
         if (!stay) {

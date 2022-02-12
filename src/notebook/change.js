@@ -49,7 +49,7 @@ export class Change {
                 change.do_change();
             }
 
-            change.notebook.send_tab_state_to_parent_processes();
+            change.notebook.update_global_view_properties();
         }
     }
 
@@ -60,7 +60,7 @@ export class Change {
         if (set_unmodified) {
             this.set_unmodified(notebook);
         }
-        notebook.send_tab_state_to_parent_processes();
+        notebook.update_global_view_properties();
     }
 
     static update_for_clear(notebook) {
@@ -84,7 +84,7 @@ export class Change {
         } else {
             this.neutral = this.current;
         }
-        notebook.send_tab_state_to_parent_processes();
+        notebook.update_global_view_properties();
     }
     static set_modified(notebook) {
         this.set_modified_state(notebook, true);
@@ -113,7 +113,7 @@ export class Change {
                 // are sent (and inhibited) before.
                 setTimeout(() => { this._inhibit_add_change = false });
             }
-            notebook.send_tab_state_to_parent_processes();
+            notebook.update_global_view_properties();
         }
     }
 
@@ -133,7 +133,7 @@ export class Change {
                 // are sent (and inhibited) before.
                 setTimeout(() => { this._inhibit_add_change = false });
             }
-            notebook.send_tab_state_to_parent_processes();
+            notebook.update_global_view_properties();
         }
     }
 
@@ -332,13 +332,11 @@ export class StateChange extends Change {
     undo_change() {
         Object.assign(this.notebook.nb_state, this.old_state);
         this.notebook.update_global_view_properties();
-        this.notebook.send_tab_state_to_parent_processes();
     }
 
     redo_change() {
         Object.assign(this.notebook.nb_state, this.new_state);
         this.notebook.update_global_view_properties();
-        this.notebook.send_tab_state_to_parent_processes();
     }
 }
 
