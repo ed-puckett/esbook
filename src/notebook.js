@@ -65,7 +65,6 @@ const {
 } = await import('./notebook/output-handlers.js');
 
 const {
-    ie_get_is_dialog_state,
     create_output_context,
 } = await import('./notebook/output-context.js');
 
@@ -339,9 +338,10 @@ class Notebook {
     }
     _ie_click_handler(event) {
         const ie = event.target.closest('.interaction_element');
-        if (ie_get_is_dialog_state(ie) || event.target.closest('.interaction_element .output')) {
-            // don't handle if a "dialog" or target is in output area otherwise
-            // this causes checkboxes & buttons in output areas to fail
+        if (event.target.closest('.interaction_element .output')) {
+            // don't handle if target is in output area, otherwise
+            // this causes checkboxes & buttons in output areas to
+            // not respond to clicks
             return;
         }
         if (!event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
