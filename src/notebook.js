@@ -339,8 +339,10 @@ class Notebook {
     }
     _ie_click_handler(event) {
         const ie = event.target.closest('.interaction_element');
-        if (ie_get_is_dialog_state(ie)) {
-            return;  // don't handle; causes checkboxes in output areas to fail
+        if (ie_get_is_dialog_state(ie) || event.target.closest('.interaction_element .output')) {
+            // don't handle if a "dialog" or target is in output area otherwise
+            // this causes checkboxes & buttons in output areas to fail
+            return;
         }
         if (!event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
             this.set_current_ie(ie, true);

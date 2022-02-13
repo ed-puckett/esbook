@@ -11,18 +11,17 @@ dagre: no arrow heads displayed in saved rendered image
 preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)
 provide recent file interface
 update theme-colors (dark/light)
-dark/light mode switch does not happen (even in firefox)
+system dark/light mode switch is not detected (chromium bug on gnome/linux)
 
 set width on graphics output DIVs
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
-cannot receive click events on things like button elements in the output portion of an ie (more focus-handling problems?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
-provide clear action for current output or all outputs
+provide "clear" action for current output or all outputs
 update and improve help/documentation
 document interaction with SVG elements (SHIFT-click to zoom, etc)
 file open/save dialog does not use the "suggested" filename or extensions
 provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
-menus
+provide menus
 
 
 === THINK ABOUT ===
@@ -47,6 +46,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* cannot receive click events on things like button elements in the output portion of an ie (problem: redirecting click focus from output to input)
 * examples/cmjs-demo.esbook: output of count tree and of node graph are clipped and not positioned well
 * notebook.js: send_tab_state_to_parent_processes: rename to something more appropriate (re-appropriated update_global_view_properties)
 * provide feedback when saving and provide visible modified indicator
