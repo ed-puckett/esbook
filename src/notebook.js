@@ -12,6 +12,8 @@ const CM_LIGHT_MODE_THEME = 'default';
 
 const initializing_data_element_id = 'initializing-data-f55c8878-87c8-11ec-b7c3-273bd5f809b1';
 
+const current_script_url = import.meta.url;
+
 
 // === EXTERNAL MODULES ===
 
@@ -50,7 +52,13 @@ const {
     ThemeSettingsUpdatedEvent,
 } = await import('./notebook/theme-settings.js');
 
-const { KeyBindingCommandEvent } = await import('./notebook/key-bindings.js');
+const {
+    KeyBindingCommandEvent,
+} = await import('./notebook/key-bindings.js');
+
+const {
+    open_help_window,
+} = await import('./notebook/help-window.js');
 
 const {
     marked,
@@ -591,7 +599,7 @@ class Notebook {
             break;
         }
         case 'help': {
-            this.help_link.click();
+            open_help_window();
             break;
         }
         case 'open_last_recent': {//!!!
@@ -818,7 +826,7 @@ class Notebook {
                 // return with nothing changed
                 return;
             }
-            const default_server_endpoint = new URL('..', location).toString();
+            const default_server_endpoint = new URL('..', current_script_url).toString();
             const contents_json = JSON.stringify(contents);
             const contents_base64 = btoa(contents_json);
             const page_contents = `<!DOCTYPE html>
