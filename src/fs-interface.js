@@ -128,7 +128,7 @@ class FsInterface {
         try {
             return await picker(options);
         } catch (err) {
-            // Chromium not longer throws AbortError, instead it throws
+            // Chromium no longer throws AbortError, instead it throws
             // a DOMException, so just count any exception as "canceled"
             return undefined;  // indicate: canceled
         }

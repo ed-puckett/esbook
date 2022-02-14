@@ -337,18 +337,17 @@ class Notebook {
         ie.addEventListener('click', this._ie_click_handler.bind(this), true);
     }
     _ie_click_handler(event) {
-        const ie = event.target.closest('.interaction_element');
-        if (event.target.closest('.interaction_element .output')) {
-            // don't handle if target is in output area, otherwise
-            // this causes checkboxes & buttons in output areas to
-            // not respond to clicks
-            return;
-        }
-        if (!event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+        if (!event.ctrlKey && !event.shiftKey && !event.altKey && !event.metaKey) {
+            const ie = event.target.closest('.interaction_element');
             this.set_current_ie(ie, true);
         }
-        event.preventDefault();
-        event.stopPropagation();
+        if (!event.target.closest('.interaction_element .output')) {
+            // don't change propagation if target is in output area,
+            // otherwise this causes checkboxes & buttons in output areas
+            // to not respond to clicks
+            event.preventDefault();
+            event.stopPropagation();
+        }
     }
 
     set_modified_status(state) {
@@ -725,20 +724,20 @@ class Notebook {
                     return;
                 }
             }
-            const open_dialog_options = do_import
-                  ? {
-                      description: 'JavaScript files',
+            const open_dialog_types = do_import
+                  ? [{
+                      description: 'JavaScript files (import)',
                       accept: {
                           'text/javascript': ['.js'],
                       },
-                  }
-                  : {
+                  }]
+                  : [{
                       description: 'esbook files',
                       accept: {
                           'application/x-esbook': ['.esbook', '.esb'],
                       },
-                  };
-            const { canceled, file_handle } = await fs_interface.prompt_for_open(open_dialog_options)
+                  }];
+            const { canceled, file_handle } = await fs_interface.prompt_for_open({ types: open_dialog_types })
             if (!canceled) {
                 await this.open_notebook_from_file_handle(file_handle, do_import, true);
             }
@@ -778,13 +777,13 @@ class Notebook {
                 const stats = await fs_interface.save_json(file_handle, contents);
                 this.set_notebook_source(file_handle, stats);
             } else {
-                const save_dialog_options = {
+                const save_dialog_types = [{
                     description: 'esbook files',
                     accept: {
                         'application/x-esbook': ['.esbook', '.esb'],
                     },
-                };
-                const { canceled, file_handle } = await fs_interface.prompt_for_save(save_dialog_options);
+                }];
+                const { canceled, file_handle } = await fs_interface.prompt_for_save({ types: save_dialog_types });
                 if (canceled) {
                     // return with nothing changed
                     return;
