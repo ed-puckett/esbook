@@ -227,6 +227,19 @@ export class EvalWorker {
             return process_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
         }
 
+        async function print_tex(...args) {
+            const markup = args.map(a => {
+                if (typeof a === 'undefined') {
+                    return '';
+                } else if (typeof a.toTeX === 'function') {
+                    return a.toTeX();
+                } else {
+                    return a.toString();
+                }
+            }).join('');
+            printf('$$%s$$', markup);
+        }
+
         async function html(tag, attrs, innerHTML) {
             const action = {
                 type: 'html',
@@ -274,6 +287,7 @@ export class EvalWorker {
             process_error,
             println,
             printf,
+            print_tex,
             html,
             graphics,
             chart,
