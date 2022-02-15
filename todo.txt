@@ -30,6 +30,7 @@ provide options when doing export (e.g., clear outputs)
 more extensively support Change for output
 enable api to perform operations programmatically (e.g., eval-notebook)
 re-install @yaffle/expression when it is more "distributable"
+add Algebite and Mathjs
 save to MIME format (multipart/mixed) to allow easy editing (issue: UTF-8) (see https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html )
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 keep "autoeval"?
