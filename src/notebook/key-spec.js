@@ -128,7 +128,7 @@ export function parse_key_spec(key_spec) {
     return _modifier_descs_and_key_to_canoncial_key_spec(modifier_descs, key);
 }
 
-// parse_event() returns a canonical key spec (which is a string)
+// parse_keboard_event() returns a canonical key spec (which is a string)
 export function parse_keyboard_event(keyboard_event) {
     const modifier_descs = [];
     for (const modifier in basic_modifier_desc_map) {

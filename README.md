@@ -1,9 +1,9 @@
-# WARNING
+# WARNING!
 
 This application implements a notebook interface which allows execution
 of arbitrary JavaScript code from the notebooks it loads.  If you receive
 a notebook from an unknown or untrusted source and load and evaluate it,
-you will be excuting JavaScript code from that source.  You must beware.
+you will be excuting JavaScript code from that source.  Beware.
 
 # Stucture of the Notebook
 

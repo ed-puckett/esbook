@@ -8,9 +8,6 @@ body {
     --color-bg-body:                   var(--color-bg-page-major);
     --color-fg-body:                   var(--color-c0-page-major);
 
-    --color-bg-help-link:              var(--color-c0-page-minor);
-    --color-bg-help-link-hover:        var(--color-c1-page-minor);
-
     --color-ie-input-outline-selected: var(--color-bg-page-alert2);
 
     --color-bg-ie-input:               var(--color-bg-page-minor);
@@ -59,11 +56,17 @@ body {
     border-bottom: 1px solid black;
 }
 
+#controls #indicators {
+    align-self: center;
+    display: flex;
+    margin-left: auto;
+}
+
 #controls #modified_indicator,
 #controls #running_indicator {
-    display: inline-block;
     align-self: center;
-    margin: 0.1rem 0 0.1rem 0.625rem;
+    display: inline-block;
+    margin: 0.25rem 0.625rem 0.25rem 0;
     width:  var(--control-indicator-diameter);
     height: var(--control-indicator-diameter);
     border-radius: 50%;

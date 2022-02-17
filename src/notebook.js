@@ -57,6 +57,10 @@ const {
 } = await import('./notebook/key-bindings.js');
 
 const {
+    build_menubar,
+} = await import('./notebook/menu.js');
+
+const {
     open_help_window,
 } = await import('./notebook/help-window.js');
 
@@ -251,9 +255,11 @@ class Notebook {
         //
         //     <div id="content">
         //         <div id="controls">
-        //             <div id="modified_indicator"></div>
-        //             <div id="running_indicator"></div>
-        //             <a id="help_link" href="/help.html" target="_blank">Help</a>
+        //             ... menu ...
+        //             <div id="indicators">
+        //                 <div id="modified_indicator"></div>
+        //                 <div id="running_indicator"></div>
+        //             </div>
         //         </div>
         //         <div id="interaction_area">
         //             ...
@@ -265,18 +271,19 @@ class Notebook {
         this.controls         = create_child_element(content_el, 'div', { id: 'controls' });
         this.interaction_area = create_child_element(content_el, 'div', { id: 'interaction_area' });
 
-        this.modified_indicator = create_child_element(this.controls, 'div', { id: 'modified_indicator', title: 'Modified' });
-        this.running_indicator  = create_child_element(this.controls, 'div', { id: 'running_indicator',  title: 'Running' });
-        this.help_link = create_child_element(this.controls, 'a', {
-            id:     'help_link',
-            href:   '/help.html',
-            target: '_blank',
-        });
-        this.help_link.innerText = 'Help';
+        this.menubar = build_menubar(this.controls);
+
+        const indicators_el = create_child_element(this.controls, 'div', { id: 'indicators' });
+        this.modified_indicator = create_child_element(indicators_el, 'div', { id: 'modified_indicator', title: 'Modified' });
+        this.running_indicator  = create_child_element(indicators_el, 'div', { id: 'running_indicator',  title: 'Running' });
 
         // add notebook stylesheet:
         const stylesheet_url = new URL('notebook/notebook.css', import.meta.url);
         create_stylesheet_link(document.head, stylesheet_url);
+
+        // add menu stylesheet:
+        const menu_stylesheet_url = new URL('notebook/menu/menu.css', import.meta.url);
+        create_stylesheet_link(document.head, menu_stylesheet_url);
 
         // load CodeMirror scripts:
         async function load_cm_script(script_path) {

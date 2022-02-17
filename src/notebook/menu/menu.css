@@ -1,0 +1,52 @@
+#content .menu:not(.active) {
+    display: none;
+}
+
+#content .menubar {
+    margin: 0;
+    padding: 0.1rem 0 0.1rem 0;
+}
+
+#content .menubar>li {
+    display: inline;
+    padding: 0 0.5rem 0 0.5rem;
+}
+
+#content .menubar .menuitem {
+    list-style-type: none;
+}
+
+#content .menubar span {
+    font-family: sans-serif;
+    font-size: 90%;
+}
+
+#content .menubar div {
+    display: inline;
+}
+
+#content .menu {
+    position: absolute;
+    z-index: 999;
+    background-color: #f0f0f0;
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    border: 1px solid grey;
+    box-shadow: 3px 3px 16px lightgrey;
+}
+
+#content .menuitem.separator {
+    margin: 0.2rem 0 0.2rem 0;
+    height: 0px;
+    color: transparent;
+    border-bottom: 1px solid #00000040;
+}
+
+#content .menu .menuitem-annotation {
+    margin-left: 2rem;
+    float: right;
+}
+
+#content .menu .menuitem kbd {
+    margin: 0 0 0 0.5rem;
+}
