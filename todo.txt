@@ -22,7 +22,10 @@ review setting of focus overall (many places use setTimeout() to defer setting o
 provide "clear" action for current output or all outputs
 provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
 provide keyboard navigation into and out of input areas
-provide menus
+provide menus: add keyboard navigation
+provide menus: position submenus when opening
+provide menus: enable/disable menu items based on notebook state
+provide menus: provide way to activate menu from keyboard (including TAB navigation to menu)
 
 
 === THINK ABOUT ===
@@ -48,6 +51,8 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* provide menus: show keyboard shortcuts using glyphs
+* provide menus: basic functionality
 * make whether opening or importing more apparent (in file open dialog)
 * file open/save dialog does not use the "suggested" filename or extensions (seems to be a deficiency of ShowSaveFilePicker)
 * cannot receive click events on things like button elements in the output portion of an ie (problem: redirecting click focus from output to input)

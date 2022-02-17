@@ -15,6 +15,10 @@ const {
     get_command_bindings,
 } = await import('./key-bindings.js');
 
+const {
+    key_spec_to_glyphs,
+} = await import('./key-spec.js');
+
 
 // === INITIAL MENUBAR SPECIFICATION ===
 
@@ -45,8 +49,8 @@ const initial_menubar_collection = [
     { label: 'Element', collection: [
         { label: 'Eval',          item: { command: 'eval_element',         } },
         { label: 'Eval and stay', item: { command: 'eval_stay_element',    } },
-        { label: 'Eval notebook', item: { command: 'eval_notebook',        } },
         { label: 'Eval before',   item: { command: 'eval_notebook_before', } },
+        { label: 'Eval notebook', item: { command: 'eval_notebook',        } },
         '---',
         { label: 'Focus up',      item: { command: 'focus_up_element',     }, id: 'focus_up_element' },
         { label: 'Focus down',    item: { command: 'focus_down_element',   }, id: 'focus_down_element' },
@@ -239,7 +243,7 @@ function build_menu(menu_spec, parent, toplevel=false) {
             if (!toplevel) {
                 create_child_element(element, 'div', {
                     class: 'menuitem-annotation collection-arrow',
-                }).innerText = '>';  // arrow
+                }).innerText = '\u25b8';  // arrow
             }
             collection.forEach(spec => build_menu(spec, collection_element));
 
@@ -266,7 +270,8 @@ function build_menu(menu_spec, parent, toplevel=false) {
                 });
                 // create <kbd>...</kbd> elements
                 kbd_bindings.forEach(binding => {
-                    create_child_element(kbd_container, 'kbd').innerText = binding;
+                    const binding_glyphs = key_spec_to_glyphs(binding);
+                    create_child_element(kbd_container, 'kbd').innerText = binding_glyphs;
                 });
             }
             element.addEventListener('click', (event) => {

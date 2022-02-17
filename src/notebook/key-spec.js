@@ -3,10 +3,20 @@
 // basic_modifier_desc_map is the definition from which
 // modifier_desc_map and modifier_code_desc_map are derived.
 const basic_modifier_desc_map = {
-    ctrl:  { code: 'c', event_prop: 'ctrlKey',  alternates: [ 'control' ] },
-    shift: { code: 's', event_prop: 'shiftKey', alternates: [] },
-    meta:  { code: 'm', event_prop: 'metaKey',  alternates: ['cmd', 'command' ] },
-    alt:   { code: 'a', event_prop: 'altKey',   alternates: [] },
+    ctrl:  { code: 'c', event_prop: 'ctrlKey',  glyph: '\u2303', alternates: [ 'control' ] },
+    shift: { code: 's', event_prop: 'shiftKey', glyph: '\u21E7', alternates: [] },
+    meta:  { code: 'm', event_prop: 'metaKey',  glyph: '\u2318', alternates: ['cmd', 'command' ] },
+    alt:   { code: 'a', event_prop: 'altKey',   glyph: '\u2325', alternates: [] },
+};
+
+const other_key_glyphs = {
+    arrowleft:  '\u2190',
+    arrowup:    '\u2191',
+    arrowright: '\u2192',
+    arrowdown:  '\u2193',
+    enter:      'Enter',
+    backspace:  'Backspace',
+    delete:     'Delete',
 };
 
 export const canonical_key_modifier_separator = '+';  // separator between modifier codes and key in a canonical key spec
@@ -126,6 +136,29 @@ export function parse_key_spec(key_spec) {
         modifier_descs.push(desc);
     }
     return _modifier_descs_and_key_to_canoncial_key_spec(modifier_descs, key);
+}
+
+const _modifier_code_to_glyph =  // code->glyph
+      Object.fromEntries(
+          Object.entries(basic_modifier_desc_map)
+              .map(([modifier_key, { code, glyph }]) => [ code, glyph ])
+      );
+
+export function key_spec_to_glyphs(key_spec, is_on_macos_result=undefined) {
+    const canonical_key_spec = parse_key_spec(key_spec);
+    const [ cks_modifier_codes, cks_key ] = canonical_key_spec.split(canonical_key_modifier_separator);
+    const result_segments = [];
+    for (const code of cks_modifier_codes) {
+        result_segments.push(_modifier_code_to_glyph[code]);
+    }
+    if (cks_key in other_key_glyphs) {
+        result_segments.push(other_key_glyphs[cks_key]);
+    } else if (cks_key.match(/^[a-zA-Z]$/) || cks_key.match(/^[fF][0-9]{1,2}$/)) {
+        result_segments.push(cks_key.toUpperCase());
+    } else {
+        result_segments.push(cks_key);
+    }
+    return result_segments.join('');
 }
 
 // parse_keboard_event() returns a canonical key spec (which is a string)
