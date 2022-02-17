@@ -5,6 +5,15 @@ of arbitrary JavaScript code from the notebooks it loads.  If you receive
 a notebook from an unknown or untrusted source and load and evaluate it,
 you will be excuting JavaScript code from that source.  Beware.
 
+---
+
+# Availability
+
+* Try it [here](https://blackguard.github.io/esbook/build/src/index.html)
+* Code [repository](https://github.com/blackguard/esbook)
+
+---
+
 # Stucture of the Notebook
 
 The notebook is constructed from a series of Interaction Elements.

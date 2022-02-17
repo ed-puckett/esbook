@@ -11,7 +11,7 @@ update theme-colors (dark/light modes)
 system dark/light mode switch is not detected (chromium bug on gnome/linux)
 
 documentation: update and improve help
-documentation: interaction with SVG elements (SHIFT-click to zoom, etc)
+documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: warning about executable content
 
 dagre: no arrow heads displayed in saved rendered image
