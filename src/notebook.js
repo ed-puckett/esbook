@@ -57,7 +57,9 @@ const {
 } = await import('./notebook/key-bindings.js');
 
 const {
+    MenuCommandEvent,
     build_menubar,
+    deactivate_menu,
 } = await import('./notebook/menu.js');
 
 const {
@@ -336,6 +338,9 @@ class Notebook {
     // called exactly once (by setup())
     init_event_handlers() {
         KeyBindingCommandEvent.subscribe((event) => this.handle_command(event.command));
+        MenuCommandEvent.subscribe((event) => this.handle_command(event.command));
+
+        this.interaction_area.addEventListener('click', (event) => deactivate_menu(this.menubar), true);
 
         window.onbeforeunload = (event) => {
             // On Chromium, don't try any of the typical things like event.preventDefault()
@@ -345,7 +350,6 @@ class Notebook {
                 return true;
             }
         };
-
     }
 
     init_ie_event_handlers(ie) {
@@ -508,6 +512,8 @@ class Notebook {
     }
 
     handle_command(command) {
+        deactivate_menu(this.menubar);  // just in case
+
         switch (command) {
         case 'undo': {
             Change.perform_undo(this);

@@ -1,4 +1,8 @@
 const {
+    define_subscribable,
+} = await import('../subscribable.js');
+
+const {
     generate_object_id,
 } = await import('../uuid.js');
 
@@ -17,19 +21,19 @@ const {
 const initial_menubar_collection = [
     { label: 'File', collection: [
         { label: 'Clear',         item: { command: 'clear_notebook',       } },
-        'separator',
+        '---',
         { label: 'Open...',       item: { command: 'open_notebook',        } },
         { label: 'Import...',     item: { command: 'import_notebook',      } },
         { label: 'Reopen',        item: { command: 'reopen_notebook',      } },
-        'separator',
+        '---',
         { label: 'Save',          item: { command: 'save_notebook',        }, id: 'save' },
         { label: 'Save as...',    item: { command: 'save_as_notebook',     } },
         { label: 'Export...',     item: { command: 'export_notebook',      } },
-        'separator',
+        '---',
         { label: 'Recents', id: 'recents', collection: [
             // ...
         ] },
-        'separator',
+        '---',
         { label: 'Settings...',   item: { command: 'settings',             } },
     ] },
 
@@ -43,10 +47,10 @@ const initial_menubar_collection = [
         { label: 'Eval and stay', item: { command: 'eval_stay_element',    } },
         { label: 'Eval notebook', item: { command: 'eval_notebook',        } },
         { label: 'Eval before',   item: { command: 'eval_notebook_before', } },
-        'separator',
+        '---',
         { label: 'Focus up',      item: { command: 'focus_up_element',     }, id: 'focus_up_element' },
         { label: 'Focus down',    item: { command: 'focus_down_element',   }, id: 'focus_down_element' },
-        'separator',
+        '---',
         { label: 'Move up',       item: { command: 'move_up_element',      }, id: 'move_up_element' },
         { label: 'Move down',     item: { command: 'move_down_element',    }, id: 'move_down_element' },
         { label: 'Add before',    item: { command: 'add_before_element',   } },
@@ -60,38 +64,89 @@ const initial_menubar_collection = [
 ];
 
 
+// === SUBSCRIBABLE/EVENT ===
+
+export class MenuCommandEvent extends define_subscribable('menu-command') {
+    get command (){ return this.data; }
+}
+
+
 // === MENU BUILD/CREATION ===
 
+// css classification classes: menubar, menu, menuitem
 // other css classes: disabled, selected, active
-// also: menuitem-annotation, collection-arrow
+// also: menuitem-label, menuitem-separator, menuitem-annotation, collection, collection-arrow
 
 const menu_element_tag_name     = 'ul';
 const menuitem_element_tag_name = 'li';
 
-const menubar_css_class = 'menubar';
-const menubar_role      = 'menubar';
 
-const menu_css_class = 'menu';
-const menu_role      = 'menu';
+/** deactivate the menubar or menu that contains the given menuitem
+ *  and reset all subordinate state.
+ *  @param {Element|undefined|null} menu_element an Element object with class either .menubar or .menu
+ *  This is compatible with menuitem elements that are contained
+ *  in either a .menubar or .menu element.
+ */
+export function deactivate_menu(menu_element) {
+    if (menu_element) {
+        if ( !(menu_element instanceof Element) ||
+             (!menu_element.classList.contains('menubar') && !menu_element.classList.contains('menu')) ) {
+            throw new Error('menu_element must be an Element with class "menubar" or "menu"');
+        }
+        menu_element.classList.remove('active');
+        menu_element.classList.remove('selected');
+        for (const mi of menu_element.children) {
+            mi.classList.remove('selected');
+            if (mi.classList.contains('collection')) {
+                deactivate_menu(mi.querySelector('.menu'));
+            }
+        }
+    }
+}
 
-const menuitem_css_class = 'menuitem';
-const menuitem_role      = 'menuitem';
+/** deselect the given menuitem
+ *  @param {Element} menuitem_element
+ *  This is compatible with menuitem elements that are contained
+ *  in either a .menubar or .menu element.
+ */
+function deselect_menuitem(menuitem_element) {
+    menuitem_element.classList.remove('selected');
+    if (menuitem_element.classList.contains('collection')) {
+        deactivate_menu(menuitem_element.querySelector('.menu'));
+    }
+}
 
-const menuitem_separator_css_class = 'separator';
+/** select the given menuitem and deselect all others
+ *  @param {Element} menuitem_element
+ *  This is compatible with menuitem elements that are contained
+ *  in either a .menubar or .menu element.
+ */
+function select_menuitem(menuitem_element) {
+    if (!menuitem_element.classList.contains('selected')) {
+        // change selection only if not already selected
+        for (const mi of menuitem_element.closest('.menubar, .menu').children) {
+            if (mi === menuitem_element) {
+                mi.classList.add('selected');
+                if (mi.classList.contains('collection')) {
+                    mi.querySelector('.menu').classList.add('active');
+                }
+            } else {
+                deselect_menuitem(mi);
+            }
+        }
+    }
+}
 
 
 /** Return a new menu Element object which represents a separator.
  *  @param {Element} parent
  */
-function build_separator_menu_item(parent) {
-    if (parent) {
-        if (! (parent instanceof Element)) {
-            throw new Error('parent must be an instance of Element');
-        }
+function build_menu_item_separator(parent) {
+    if (! (parent instanceof Element)) {
+        throw new Error('parent must be an instance of Element');
     }
     const element = create_child_element(parent, menuitem_element_tag_name, {
-        class: `disabled ${menuitem_css_class} ${menuitem_separator_css_class}`,
-        role:  menuitem_role,
+        class: 'disabled menuitem menuitem-separator',
     });
 }
 
@@ -100,19 +155,18 @@ let _object_id_to_menu_id = {};
 
 /** Return a new menu Element object for the given menu_spec.
  *  @param {object|string} menu_spec specification for menu item or collection.
- *                         If a string, then create a separator.
+ *         If a string, then create a separator (regardless of the string contents).
  *  @param {Element} parent
+ *  @param {boolean} toplevel if the menu is the top-level "menubar" menu
  *  @return {Element} new menu Element
  *  Also updates _menu_id_to_object_id and _object_id_to_menu_id.
  */
-function build_menu(menu_spec, parent=null, toplevel=false) {
-    if (parent) {
-        if (! (parent instanceof Element)) {
-            throw new Error('parent must be an instance of Element');
-        }
+function build_menu(menu_spec, parent, toplevel=false) {
+    if (! (parent instanceof Element)) {
+        throw new Error('parent must be an instance of Element');
     }
     if (typeof menu_spec === 'string') {
-        return build_separator_menu_item(parent);
+        return build_menu_item_separator(parent);
     }
 
     const {
@@ -160,18 +214,27 @@ function build_menu(menu_spec, parent=null, toplevel=false) {
         // collection also has children...
         const element = create_element(menuitem_element_tag_name, {
             id,
-            class: `${menuitem_css_class}`,
-            role:  menuitem_role,
+            class: 'menuitem',
+        });
+        element.addEventListener('mousemove', (event) => {
+            // don't pop open top-level menus unless one is already selected
+            // this means that the user must click the top-level menu to get things started
+            if (!toplevel || [ ...parent.children ].some(c => c.classList.contains('selected'))) {
+                select_menuitem(element);
+            }
         });
 
-        const label_element = create_child_element(element, 'span');
-        label_element.innerText = label;
+        // add the label
+        create_child_element(element, 'div', {
+            class: 'menuitem-label',
+        }).innerText = label;
 
         if (collection) {
 
+            element.classList.add('collection');
+
             const collection_element = create_child_element(element, menu_element_tag_name, {
-                class: `${menu_css_class}`,
-                role:  menu_role,
+                class: 'menu',
             });
             if (!toplevel) {
                 create_child_element(element, 'div', {
@@ -179,7 +242,19 @@ function build_menu(menu_spec, parent=null, toplevel=false) {
                 }).innerText = '>';  // arrow
             }
             collection.forEach(spec => build_menu(spec, collection_element));
-            //!!! event handler (mouse, keyboard)
+
+            if (toplevel) {
+                element.addEventListener('click', (event) => {
+                    if (event.target.closest('.menuitem') === element) {  // make sure click not in child (submenu)
+                        if (element.classList.contains('selected')) {
+                            deselect_menuitem(element);
+                        } else {
+                            select_menuitem(element);
+                        }
+                    }
+                });
+            }
+            //!!! keyboard event handler
 
         } else {  // item
 
@@ -194,7 +269,11 @@ function build_menu(menu_spec, parent=null, toplevel=false) {
                     create_child_element(kbd_container, 'kbd').innerText = binding;
                 });
             }
-            //!!! event handler (mouse, keyboard; using command)
+            element.addEventListener('click', (event) => {
+                deactivate_menu(element.closest('.menubar'));
+                MenuCommandEvent.dispatch_event(item.command);
+            });
+            //!!! keyboard event handler
 
         }
 
@@ -223,8 +302,7 @@ export function build_menubar(parent) {
     _object_id_to_menu_id = {};
 
     const menubar_container = create_child_element(parent, menu_element_tag_name, {
-        class: `active ${menubar_css_class}`,
-        role:  menubar_role,
+        class: 'active menubar',
     }, true);
 
     initial_menubar_collection.forEach(spec => build_menu(spec, menubar_container, true));
