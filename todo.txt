@@ -14,6 +14,7 @@ documentation: update and improve help
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: warning about executable content
 
+delete_element should clear the element if there is only one element
 dagre: no arrow heads displayed in saved rendered image
 review Content-Security-Policy
 set width on graphics output DIVs
@@ -22,7 +23,6 @@ review setting of focus overall (many places use setTimeout() to defer setting o
 provide "clear" action for current output or all outputs
 provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
 provide keyboard navigation into and out of input areas
-menus: enable/disable menu items based on notebook state
 menus: provide way to activate menu from keyboard (including TAB navigation to menu)
 menus: position submenus when opening
 
@@ -50,6 +50,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* menus: enable/disable menu items based on notebook state
 * menus: add keyboard navigation
 * menus: adjust order of modified keys in display of keyboard equivalent
 * key-spec.js: key_spec_to_glyphs: is_on_macos_result not implemented (removed)

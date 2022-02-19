@@ -43,6 +43,10 @@
     box-shadow: 3px 3px 16px lightgrey;
 }
 
+#content .menuitem.disabled {
+    color: #bbb;
+}
+
 #content .menuitem.selected {
     background-color: #0004;
 }

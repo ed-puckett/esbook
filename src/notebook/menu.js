@@ -59,7 +59,7 @@ const initial_menubar_collection = [
         { label: 'Move down',     item: { command: 'move_down_element',    }, id: 'move_down_element' },
         { label: 'Add before',    item: { command: 'add_before_element',   } },
         { label: 'Add after',     item: { command: 'add_after_element',    } },
-        { label: 'Delete',        item: { command: 'delete_element',       }, id: 'delete_element' },
+        { label: 'Delete',        item: { command: 'delete_element',       } },
     ] },
 
     { label: 'Help', collection: [
@@ -154,18 +154,18 @@ function build_menu_item_separator(parent) {
     });
 }
 
-let _menu_id_to_object_id = {};
-let _object_id_to_menu_id = {};
-
 /** Return a new menu Element object for the given menu_spec.
  *  @param {object|string} menu_spec specification for menu item or collection.
  *         If a string, then create a separator (regardless of the string contents).
  *  @param {Element} parent
- *  @param {boolean} toplevel if the menu is the top-level "menubar" menu
+ *  @param {object} menu_id_to_element will be updated with elements for which
+ *         a menu id was specified
+ *  @param {boolean} (optional) toplevel if the menu is the top-level "menubar" menu
+ *         default value: false
  *  @return {Element} new menu Element
  *  Also updates _menu_id_to_object_id and _object_id_to_menu_id.
  */
-function build_menu(menu_spec, parent, toplevel=false) {
+function build_menu(menu_spec, parent, menu_id_to_element, toplevel=false) {
     if (! (parent instanceof Element)) {
         throw new Error('parent must be an instance of Element');
     }
@@ -201,102 +201,89 @@ function build_menu(menu_spec, parent, toplevel=false) {
     }
 
     const id = generate_object_id();
-    let prior_menu_id_to_object_id_value;
-    let prior_object_id_to_menu_id_value;
-    if (menu_id) {
-        // save these in case of error
-        prior_menu_id_to_object_id_value = _menu_id_to_object_id[menu_id];
-        prior_object_id_to_menu_id_value = _object_id_to_menu_id[id];
 
-        _menu_id_to_object_id[menu_id] = id;
-        _object_id_to_menu_id[id] = menu_id;
-    }
+    // both items and collections are a menuitem, but the
+    // collection also has children...
+    const element = create_element(menuitem_element_tag_name, {
+        id,
+        class: 'menuitem',
+    });
+    // add the label
+    create_child_element(element, 'div', {
+        class: 'menuitem-label',
+    }).innerText = label;
 
-    try {
-
-        // both items and collections are a menuitem, but the
-        // collection also has children...
-        const element = create_element(menuitem_element_tag_name, {
-            id,
-            class: 'menuitem',
-        });
-        // add the label
-        create_child_element(element, 'div', {
-            class: 'menuitem-label',
-        }).innerText = label;
-
-        element.addEventListener('mousemove', (event) => {
-            // don't pop open top-level menus unless one is already selected
-            // this means that the user must click the top-level menu to get things started
-            if (!toplevel || [ ...parent.children ].some(c => c.classList.contains('selected'))) {
+    element.addEventListener('mousemove', (event) => {
+        // don't pop open top-level menus unless one is already selected
+        // this means that the user must click the top-level menu to get things started
+        if (!toplevel || [ ...parent.children ].some(c => c.classList.contains('selected'))) {
+            if (!element.classList.contains('disabled')) {
                 select_menuitem(element);
             }
+        }
+    });
+
+    if (collection) {
+
+        element.classList.add('collection');
+
+        const collection_element = create_child_element(element, menu_element_tag_name, {
+            class: 'menu',
+        });
+        if (!toplevel) {
+            create_child_element(element, 'div', {
+                class: 'menuitem-annotation collection-arrow',
+            }).innerText = '\u25b8';  // right-pointing triangle
+        }
+        collection.forEach(spec => build_menu(spec, collection_element, menu_id_to_element));
+
+        if (toplevel) {
+            element.addEventListener('click', (event) => {
+                if (event.target.closest('.menuitem') === element) {  // make sure click is not in a child (submenu)
+                    if (element.classList.contains('selected')) {
+                        deselect_menuitem(element);
+                    } else {
+                        select_menuitem(element);
+                    }
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+            });
+        }
+
+    } else {  // item
+
+        const command_bindings = get_command_bindings();
+        const kbd_bindings = command_bindings[item.command];
+        if (kbd_bindings) {
+            const kbd_container = create_child_element(element, 'div', {
+                class: 'menuitem-annotation',
+            });
+            // create <kbd>...</kbd> elements
+            kbd_bindings.forEach(binding => {
+                const binding_glyphs = key_spec_to_glyphs(binding);
+                create_child_element(kbd_container, 'kbd').innerText = binding_glyphs;
+            });
+        }
+        element.addEventListener('click', (event) => {
+            deactivate_menu(element.closest('.menubar'));
+            MenuCommandEvent.dispatch_event(item.command);
+            event.stopPropagation();
+            event.preventDefault();
         });
 
-        if (collection) {
-
-            element.classList.add('collection');
-
-            const collection_element = create_child_element(element, menu_element_tag_name, {
-                class: 'menu',
-            });
-            if (!toplevel) {
-                create_child_element(element, 'div', {
-                    class: 'menuitem-annotation collection-arrow',
-                }).innerText = '\u25b8';  // right-pointing triangle
-            }
-            collection.forEach(spec => build_menu(spec, collection_element));
-
-            if (toplevel) {
-                element.addEventListener('click', (event) => {
-                    if (event.target.closest('.menuitem') === element) {  // make sure click is not in a child (submenu)
-                        if (element.classList.contains('selected')) {
-                            deselect_menuitem(element);
-                        } else {
-                            select_menuitem(element);
-                        }
-                        event.stopPropagation();
-                        event.preventDefault();
-                    }
-                });
-            }
-
-        } else {  // item
-
-            const command_bindings = get_command_bindings();
-            const kbd_bindings = command_bindings[item.command];
-            if (kbd_bindings) {
-                const kbd_container = create_child_element(element, 'div', {
-                    class: 'menuitem-annotation',
-                });
-                // create <kbd>...</kbd> elements
-                kbd_bindings.forEach(binding => {
-                    const binding_glyphs = key_spec_to_glyphs(binding);
-                    create_child_element(kbd_container, 'kbd').innerText = binding_glyphs;
-                });
-            }
-            element.addEventListener('click', (event) => {
-                deactivate_menu(element.closest('.menubar'));
-                MenuCommandEvent.dispatch_event(item.command);
-                event.stopPropagation();
-                event.preventDefault();
-            });
-
-        }
-
-        // wait to add to parent until everything else happens without error
-        if (parent) {
-            parent.appendChild(element);
-        }
-        return element;
-
-    } catch (error) {
-        if (menu_id) {
-            _menu_id_to_object_id[menu_id] = prior_menu_id_to_object_id_value;
-            _object_id_to_menu_id[id]      = prior_object_id_to_menu_id_value;
-        }
-        throw error;
     }
+
+    if (menu_id) {
+        menu_id_to_element[menu_id] = element;
+    }
+
+    // wait to add to parent until everything else happens without error
+    if (parent) {
+        parent.appendChild(element);
+    }
+
+    return element;
 }
 
 export function build_menubar(parent) {
@@ -304,15 +291,13 @@ export function build_menubar(parent) {
         throw new Error('parent must be an instance of Element');
     }
 
-    // reset id mappings
-    _menu_id_to_object_id = {};
-    _object_id_to_menu_id = {};
+    const menu_id_to_element = {};
 
     const menubar_container = create_child_element(parent, menu_element_tag_name, {
         class:    'active menubar',
         tabindex: 0,
     }, true);
-    initial_menubar_collection.forEach(spec => build_menu(spec, menubar_container, true));
+    initial_menubar_collection.forEach(spec => build_menu(spec, menubar_container, menu_id_to_element, true));
 
     menubar_container.addEventListener('blur', (event) => {
         deactivate_menu(menubar_container);
@@ -393,5 +378,23 @@ export function build_menubar(parent) {
         capture: true,
     });
 
-    return menubar_container;
+    function set_menu_enabled_state(menu_id, new_enabled_state) {
+        const element = menu_id_to_element[menu_id];
+        if (!element) {
+            throw new Error(`no element found for menu id "${menu_id}"`);
+        }
+        if (!element.classList.contains('menuitem')) {
+            throw new Error(`element for menu id "${menu_id}" is not a menuitem`);
+        }
+        if (new_enabled_state) {
+            element.classList.remove('disabled');
+        } else {
+            element.classList.add('disabled');
+        }
+    }
+
+    return {
+        menubar_container,
+        set_menu_enabled_state,
+    };
 }

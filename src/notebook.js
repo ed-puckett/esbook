@@ -273,7 +273,12 @@ class Notebook {
         this.controls         = create_child_element(content_el, 'div', { id: 'controls' });
         this.interaction_area = create_child_element(content_el, 'div', { id: 'interaction_area' });
 
-        this.menubar = build_menubar(this.controls);
+        const {
+            menubar_container,
+            set_menu_enabled_state,
+        } = build_menubar(this.controls);
+        this.menubar = menubar_container;
+        this.set_menu_enabled_state = set_menu_enabled_state;
 
         const indicators_el = create_child_element(this.controls, 'div', { id: 'indicators' });
         this.modified_indicator = create_child_element(indicators_el, 'div', { id: 'modified_indicator', title: 'Modified' });
@@ -339,8 +344,6 @@ class Notebook {
     init_event_handlers() {
         KeyBindingCommandEvent.subscribe((event) => this.handle_command(event.command));
         MenuCommandEvent.subscribe((event) => this.handle_command(event.command));
-
-        this.interaction_area.addEventListener('click', (event) => deactivate_menu(this.menubar), true);
 
         window.onbeforeunload = (event) => {
             // On Chromium, don't try any of the typical things like event.preventDefault()
@@ -655,7 +658,17 @@ class Notebook {
     }
 
     update_global_view_properties() {
-        this.set_modified_status(Change.get_modified_state());
+        const is_modified = Change.get_modified_state();
+        const is_on_first_element = this.is_on_first_element();
+        const is_on_last_element  = this.is_on_last_element();
+        this.set_modified_status(is_modified);
+        this.set_menu_enabled_state('save', is_modified);
+        this.set_menu_enabled_state('undo', Change.can_perform_undo());
+        this.set_menu_enabled_state('redo', Change.can_perform_redo());
+        this.set_menu_enabled_state('focus_up_element', !is_on_first_element);
+        this.set_menu_enabled_state('move_up_element',  !is_on_first_element);
+        this.set_menu_enabled_state('focus_down_element', !is_on_last_element);
+        this.set_menu_enabled_state('move_down_element',  !is_on_last_element);
     }
 
     set_notebook_unmodified() {
@@ -1130,6 +1143,17 @@ ${contents_base64}
         this.interaction_area.removeChild(ie);
     }
 
+    is_on_first_element() {
+        const order = this.nb_state.order;
+        const ie_position = order.indexOf(this.current_ie.id);
+        return (ie_position <= 0);
+    }
+    is_on_last_element() {
+        const order = this.nb_state.order;
+        const ie_position = order.indexOf(this.current_ie.id);
+        return (ie_position >= order.length-1);
+    }
+
     set_current_ie(ie, leave_focus_alone=false) {
         if (ie !== this.current_ie) {
             if (this.current_ie) {
@@ -1143,6 +1167,7 @@ ${contents_base64}
         if (!leave_focus_alone) {
             this.focus_to_current_ie();
         }
+        this.update_global_view_properties();
     }
 
     set_ie_selection_state(ie, selected) {
