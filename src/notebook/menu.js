@@ -335,9 +335,14 @@ export function build_menubar(parent) {
     menubar_container.addEventListener('keydown', (event) => {
         const selected_elements = menubar_container.querySelectorAll('.selected');
         if (selected_elements.length <= 0) {
-            const menubar_first_menuitem = menubar_container.querySelector('.menuitem');
-            if (menubar_first_menuitem) {
-                select_menuitem(menubar_first_menuitem);
+            if (! ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', ' '].includes(event.key)) {
+                return;  // do not handle or alter propagation
+            } else {
+                // select the first menuitem of the menubar
+                const menubar_first_menuitem = menubar_container.querySelector('.menuitem');
+                if (menubar_first_menuitem) {
+                    select_menuitem(menubar_first_menuitem);
+                }
             }
         } else {
             const menuitem = selected_elements[selected_elements.length-1];
@@ -418,8 +423,8 @@ export function build_menubar(parent) {
             }
         }
 
-        // if we get here, assume the event was handled and
-        // therefore we should stop propagation.
+        // if we get here, assume the event was handled and therefore
+        // we should stop propagation and prevent default action.
         event.stopPropagation();
         event.preventDefault();
     }, {
