@@ -49,6 +49,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* menus: allow cross-navigation without going all the way to the top of the current menu
 * menus: position submenus when opening
 * menus: enable/disable menu items based on notebook state
 * menus: add keyboard navigation

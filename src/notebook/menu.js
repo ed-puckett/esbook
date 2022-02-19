@@ -297,6 +297,22 @@ function build_menu(menu_spec, parent, menu_id_to_element, toplevel=false) {
     return element;
 }
 
+function find_previous_menuitem(menuitem) {
+    let mi = menuitem.previousElementSibling;
+    while (mi && (!mi.classList.contains('menuitem') || mi.classList.contains('disabled'))) {
+        mi = mi.previousElementSibling;
+    }
+    return mi;
+}
+
+function find_next_menuitem(menuitem) {
+    let mi = menuitem.nextElementSibling;
+    while (mi && (!mi.classList.contains('menuitem') || mi.classList.contains('disabled'))) {
+        mi = mi.nextElementSibling;
+    }
+    return mi;
+}
+
 export function build_menubar(parent) {
     if (! (parent instanceof Element)) {
         throw new Error('parent must be an instance of Element');
@@ -326,15 +342,19 @@ export function build_menubar(parent) {
         } else {
             const menuitem = selected_elements[selected_elements.length-1];
 
-            let key_menu_prev, key_menu_next, key_submenu_enter;
-            if (menuitem.parentElement === menubar_container) {
-                key_menu_prev     = 'ArrowLeft';
-                key_menu_next     = 'ArrowRight';
-                key_submenu_enter = 'ArrowDown';
+            const is_in_menubar = (menuitem.parentElement === menubar_container);
+
+            let key_menu_prev, key_menu_next, key_cross_prev, key_cross_next;
+            if (is_in_menubar) {
+                key_menu_prev  = 'ArrowLeft';
+                key_menu_next  = 'ArrowRight';
+                key_cross_prev = 'ArrowUp';
+                key_cross_next = 'ArrowDown';
             } else {
-                key_menu_prev     = 'ArrowUp';
-                key_menu_next     = 'ArrowDown';
-                key_submenu_enter = 'ArrowRight';
+                key_menu_prev  = 'ArrowUp';
+                key_menu_next  = 'ArrowDown';
+                key_cross_prev = 'ArrowLeft';
+                key_cross_next = 'ArrowRight';
             }
 
             switch (event.key) {
@@ -348,32 +368,47 @@ export function build_menubar(parent) {
                 break;
             }
             case key_menu_prev: {
-                let mi = menuitem.previousElementSibling;
-                while (mi && (!mi.classList.contains('menuitem') || mi.classList.contains('disabled'))) {
-                    mi = mi.previousElementSibling;
-                }
+                const mi = find_previous_menuitem(menuitem);
                 if (mi) {
                     select_menuitem(mi);
-                } else {
+                } else if (!is_in_menubar) {
                     menuitem.classList.remove('selected');  // parent menuitem will still be selected
                 }
                 break;
             }
             case key_menu_next: {
-                let mi = menuitem.nextElementSibling;
-                while (mi && (!mi.classList.contains('menuitem') || mi.classList.contains('disabled'))) {
-                    mi = mi.nextElementSibling;
-                }
-                select_menuitem(mi);
-                break;
-            }
-            case key_submenu_enter: {
-                if (!menuitem.classList.contains('collection')) {
-                    return;  // do not handle or alter propagation
-                }
-                const mi = menuitem.querySelector('.menuitem');
+                const mi = find_next_menuitem(menuitem);
                 if (mi) {
                     select_menuitem(mi);
+                }
+                break;
+            }
+            case key_cross_prev: {
+                if (!is_in_menubar) {
+                    const menubar_menuitem = menubar_container.querySelector('.menuitem.selected');
+                    const mbi = find_previous_menuitem(menubar_menuitem);
+                    if (mbi) {
+                        select_menuitem(mbi);
+                    }
+                }
+                break;
+            }
+            case key_cross_next: {
+                let navigated_into_collection = false;
+                if (menuitem.classList.contains('collection')) {
+                    // enter collection if possible
+                    const mi = menuitem.querySelector('.menuitem:not(.disabled)');
+                    if (mi) {
+                        select_menuitem(mi);
+                        navigated_into_collection = true;
+                    }
+                }
+                if (!navigated_into_collection && !is_in_menubar) {
+                    const menubar_menuitem = menubar_container.querySelector('.menuitem.selected');
+                    const mbi = find_next_menuitem(menubar_menuitem);
+                    if (mbi) {
+                        select_menuitem(mbi);
+                    }
                 }
                 break;
             }
