@@ -1,18 +1,15 @@
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
 call cleanup on change objects that are deleted
 coalesce "empty" changes to output (Change)
-settings update broadcast to other instances (polling?)
 provide "toast" messages + dialog to display past messages
-first ie is initially too tall and has extraneous scroll bar
-investigate: seems like files are being reloaded a lot as elements are evaluated
 preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)
-provide recent file interface
 update theme-colors (dark/light modes)
 system dark/light mode switch is not detected (chromium bug on gnome/linux)
 
 documentation: update and improve help
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: warning about executable content
+documentation: export, also ?s= parameter
 
 delete_element should clear the element if there is only one element
 dagre: no arrow heads displayed in saved rendered image
@@ -24,10 +21,11 @@ provide "clear" action for current output or all outputs
 provide fallback for file open/save interfaces (when on non-chromium browsers)
 provide keyboard navigation into and out of input areas
 menus: provide way to activate menu from keyboard (including TAB navigation to menu)
-when loading, menus flash briefly as unformatted <ul>s before turning into menus
+provide recent file interface
 
 
 === THINK ABOUT ===
+settings update broadcast to other instances (polling?)
 provide options when doing export (e.g., clear outputs)
 more extensively support Change for output
 enable api to perform operations programmatically (e.g., eval-notebook)
@@ -45,11 +43,14 @@ provide on_stopped event to allow cleanup of background "processes" (e.g., setIn
 
 
 === UNREPEATED BUGS ====
+investigate: seems like files are being reloaded a lot as elements are evaluated
 pythagorean-triples.esbook: first cell lines are concatenated (saw once, but not again...)
 have witnessed stray text in buffers after copying/pasting/evaluating (accidental scroll wheel paste?)
 
 
 === DONE ===
+* when loading, menus flash briefly as unformatted <ul>s before turning into menus
+* first ie is initially too tall and has extraneous scroll bar
 * defer loading of code until used for graphics output-handlers (e.g., plotly)
 * menus: allow cross-navigation without going all the way to the top of the current menu
 * menus: position submenus when opening

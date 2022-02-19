@@ -273,13 +273,6 @@ class Notebook {
         this.controls         = create_child_element(content_el, 'div', { id: 'controls' });
         this.interaction_area = create_child_element(content_el, 'div', { id: 'interaction_area' });
 
-        const {
-            menubar_container,
-            set_menu_enabled_state,
-        } = build_menubar(this.controls);
-        this.menubar = menubar_container;
-        this.set_menu_enabled_state = set_menu_enabled_state;
-
         const indicators_el = create_child_element(this.controls, 'div', { id: 'indicators' });
         this.modified_indicator = create_child_element(indicators_el, 'div', { id: 'modified_indicator', title: 'Modified' });
         this.running_indicator  = create_child_element(indicators_el, 'div', { id: 'running_indicator',  title: 'Running' });
@@ -291,6 +284,16 @@ class Notebook {
         // add menu stylesheet:
         const menu_stylesheet_url = new URL('notebook/menu/menu.css', import.meta.url);
         create_stylesheet_link(document.head, menu_stylesheet_url);
+
+        // load CodeMirror stylesheets:
+        for (const stylesheet_path of [
+            '../node_modules/codemirror/lib/codemirror.css',
+            '../node_modules/codemirror/theme/blackboard.css',
+            '../node_modules/codemirror/addon/dialog/dialog.css',
+        ]) {
+            const stylesheet_url = new URL(stylesheet_path, import.meta.url);
+            create_stylesheet_link(document.head, stylesheet_url);
+        }
 
         // load CodeMirror scripts:
         async function load_cm_script(script_path) {
@@ -314,15 +317,13 @@ class Notebook {
         );
         await load_cm_script('notebook/codemirror-md+mj-mode.js');
 
-        // load CodeMirror stylesheets:
-        for (const stylesheet_path of [
-            '../node_modules/codemirror/lib/codemirror.css',
-            '../node_modules/codemirror/theme/blackboard.css',
-            '../node_modules/codemirror/addon/dialog/dialog.css',
-        ]) {
-            const stylesheet_url = new URL(stylesheet_path, import.meta.url);
-            create_stylesheet_link(document.head, stylesheet_url);
-        }
+        // build menubar
+        const {
+            menubar_container,
+            set_menu_enabled_state,
+        } = build_menubar(this.controls);
+        this.menubar = menubar_container;
+        this.set_menu_enabled_state = set_menu_enabled_state;
     }
 
     _object_hasher(obj) {
