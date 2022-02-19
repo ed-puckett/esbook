@@ -3,10 +3,10 @@
 // basic_modifier_desc_map is the definition from which
 // modifier_desc_map and modifier_code_desc_map are derived.
 const basic_modifier_desc_map = {
-    ctrl:  { code: 'c', event_prop: 'ctrlKey',  glyph: '\u2303', alternates: [ 'control' ] },
-    shift: { code: 's', event_prop: 'shiftKey', glyph: '\u21E7', alternates: [] },
-    meta:  { code: 'm', event_prop: 'metaKey',  glyph: '\u2318', alternates: ['cmd', 'command' ] },
-    alt:   { code: 'a', event_prop: 'altKey',   glyph: '\u2325', alternates: [] },
+    ctrl:  { code: 'c', event_prop: 'ctrlKey',  glyph: '\u2303', display_order: 1, alternates: [ 'control' ] },
+    shift: { code: 's', event_prop: 'shiftKey', glyph: '\u21E7', display_order: 2, alternates: [] },
+    meta:  { code: 'm', event_prop: 'metaKey',  glyph: '\u2318', display_order: 3, alternates: ['cmd', 'command' ] },
+    alt:   { code: 'a', event_prop: 'altKey',   glyph: '\u2325', display_order: 4, alternates: [] },
 };
 
 const other_key_glyphs = {
@@ -144,11 +144,19 @@ const _modifier_code_to_glyph =  // code->glyph
               .map(([modifier_key, { code, glyph }]) => [ code, glyph ])
       );
 
-export function key_spec_to_glyphs(key_spec, is_on_macos_result=undefined) {
+const _modifier_code_to_display_order =  // code->number
+      Object.fromEntries(
+          Object.entries(basic_modifier_desc_map)
+              .map(([modifier_key, { code, display_order }]) => [ code, display_order ])
+      );
+
+export function key_spec_to_glyphs(key_spec) {
     const canonical_key_spec = parse_key_spec(key_spec);
     const [ cks_modifier_codes, cks_key ] = canonical_key_spec.split(canonical_key_modifier_separator);
+    const sorted_cks_modifier_codes = [ ...cks_modifier_codes ]
+          .sort((a, b) => _modifier_code_to_display_order[a]-_modifier_code_to_display_order[b]);
     const result_segments = [];
-    for (const code of cks_modifier_codes) {
+    for (const code of sorted_cks_modifier_codes) {
         result_segments.push(_modifier_code_to_glyph[code]);
     }
     if (cks_key in other_key_glyphs) {

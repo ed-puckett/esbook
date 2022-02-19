@@ -220,6 +220,11 @@ function build_menu(menu_spec, parent, toplevel=false) {
             id,
             class: 'menuitem',
         });
+        // add the label
+        create_child_element(element, 'div', {
+            class: 'menuitem-label',
+        }).innerText = label;
+
         element.addEventListener('mousemove', (event) => {
             // don't pop open top-level menus unless one is already selected
             // this means that the user must click the top-level menu to get things started
@@ -227,11 +232,6 @@ function build_menu(menu_spec, parent, toplevel=false) {
                 select_menuitem(element);
             }
         });
-
-        // add the label
-        create_child_element(element, 'div', {
-            class: 'menuitem-label',
-        }).innerText = label;
 
         if (collection) {
 
@@ -243,22 +243,23 @@ function build_menu(menu_spec, parent, toplevel=false) {
             if (!toplevel) {
                 create_child_element(element, 'div', {
                     class: 'menuitem-annotation collection-arrow',
-                }).innerText = '\u25b8';  // arrow
+                }).innerText = '\u25b8';  // right-pointing triangle
             }
             collection.forEach(spec => build_menu(spec, collection_element));
 
             if (toplevel) {
                 element.addEventListener('click', (event) => {
-                    if (event.target.closest('.menuitem') === element) {  // make sure click not in child (submenu)
+                    if (event.target.closest('.menuitem') === element) {  // make sure click is not in a child (submenu)
                         if (element.classList.contains('selected')) {
                             deselect_menuitem(element);
                         } else {
                             select_menuitem(element);
                         }
+                        event.stopPropagation();
+                        event.preventDefault();
                     }
                 });
             }
-            //!!! keyboard event handler
 
         } else {  // item
 
@@ -277,8 +278,9 @@ function build_menu(menu_spec, parent, toplevel=false) {
             element.addEventListener('click', (event) => {
                 deactivate_menu(element.closest('.menubar'));
                 MenuCommandEvent.dispatch_event(item.command);
+                event.stopPropagation();
+                event.preventDefault();
             });
-            //!!! keyboard event handler
 
         }
 
@@ -307,10 +309,89 @@ export function build_menubar(parent) {
     _object_id_to_menu_id = {};
 
     const menubar_container = create_child_element(parent, menu_element_tag_name, {
-        class: 'active menubar',
+        class:    'active menubar',
+        tabindex: 0,
     }, true);
-
     initial_menubar_collection.forEach(spec => build_menu(spec, menubar_container, true));
+
+    menubar_container.addEventListener('blur', (event) => {
+        deactivate_menu(menubar_container);
+    });
+
+    menubar_container.addEventListener('keydown', (event) => {
+        const selected_elements = menubar_container.querySelectorAll('.selected');
+        if (selected_elements.length <= 0) {
+            const menubar_first_menuitem = menubar_container.querySelector('.menuitem');
+            if (menubar_first_menuitem) {
+                select_menuitem(menubar_first_menuitem);
+            }
+        } else {
+            const menuitem = selected_elements[selected_elements.length-1];
+
+            let key_menu_prev, key_menu_next, key_submenu_enter;
+            if (menuitem.parentElement === menubar_container) {
+                key_menu_prev     = 'ArrowLeft';
+                key_menu_next     = 'ArrowRight';
+                key_submenu_enter = 'ArrowDown';
+            } else {
+                key_menu_prev     = 'ArrowUp';
+                key_menu_next     = 'ArrowDown';
+                key_submenu_enter = 'ArrowRight';
+            }
+
+            switch (event.key) {
+            case 'Enter':
+            case ' ': {
+                menuitem.click();
+                break;
+            }
+            case 'Escape': {
+                deactivate_menu(menubar_container);
+                break;
+            }
+            case key_menu_prev: {
+                let mi = menuitem.previousElementSibling;
+                while (mi && (!mi.classList.contains('menuitem') || mi.classList.contains('disabled'))) {
+                    mi = mi.previousElementSibling;
+                }
+                if (mi) {
+                    select_menuitem(mi);
+                } else {
+                    menuitem.classList.remove('selected');  // parent menuitem will still be selected
+                }
+                break;
+            }
+            case key_menu_next: {
+                let mi = menuitem.nextElementSibling;
+                while (mi && (!mi.classList.contains('menuitem') || mi.classList.contains('disabled'))) {
+                    mi = mi.nextElementSibling;
+                }
+                select_menuitem(mi);
+                break;
+            }
+            case key_submenu_enter: {
+                if (!menuitem.classList.contains('collection')) {
+                    return;  // do not handle or alter propagation
+                }
+                const mi = menuitem.querySelector('.menuitem');
+                if (mi) {
+                    select_menuitem(mi);
+                }
+                break;
+            }
+
+            default:
+                return;  // do not handle or alter propagation
+            }
+        }
+
+        // if we get here, assume the event was handled and
+        // therefore we should stop propagation.
+        event.stopPropagation();
+        event.preventDefault();
+    }, {
+        capture: true,
+    });
 
     return menubar_container;
 }

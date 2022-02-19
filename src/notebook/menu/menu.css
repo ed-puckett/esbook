@@ -2,6 +2,10 @@
     display: none;
 }
 
+#content .menubar:focus {
+    outline: none;  /* no need for outline, we provide other visual feedback */
+}
+
 #content .menubar {
     margin: 0;
     padding: 0.1rem 0 0.1rem 0;
