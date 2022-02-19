@@ -132,7 +132,18 @@ function select_menuitem(menuitem_element) {
             if (mi === menuitem_element) {
                 mi.classList.add('selected');
                 if (mi.classList.contains('collection')) {
+                    // make it "active" so that the submenu is displayed
                     mi.querySelector('.menu').classList.add('active');
+                    // adjust the position of the collection
+                    const collection = mi.querySelector('.menu');
+                    const mi_br = mi.getBoundingClientRect();
+                    if (mi.parentElement.classList.contains('menubar')) {
+                        collection.style.top  = `${mi_br.y + mi_br.height}px`;
+                        collection.style.left = `${mi_br.x}px`;
+                    } else {
+                        collection.style.top  = `${mi_br.y - mi_br.height - 7}px`;  // kludge: subtract extra to account for menu padding
+                        collection.style.left = `${mi_br.x + mi_br.width}px`;
+                    }
                 }
             } else {
                 deselect_menuitem(mi);
@@ -299,10 +310,12 @@ export function build_menubar(parent) {
     }, true);
     initial_menubar_collection.forEach(spec => build_menu(spec, menubar_container, menu_id_to_element, true));
 
+    // add event listener to close menu when focus is lost
     menubar_container.addEventListener('blur', (event) => {
         deactivate_menu(menubar_container);
     });
 
+    // add keyboard navigation event listener
     menubar_container.addEventListener('keydown', (event) => {
         const selected_elements = menubar_container.querySelectorAll('.selected');
         if (selected_elements.length <= 0) {
@@ -378,6 +391,7 @@ export function build_menubar(parent) {
         capture: true,
     });
 
+    // create the set_menu_enabled_state() utility function
     function set_menu_enabled_state(menu_id, new_enabled_state) {
         const element = menu_id_to_element[menu_id];
         if (!element) {

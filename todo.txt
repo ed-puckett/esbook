@@ -21,10 +21,9 @@ set width on graphics output DIVs
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 provide "clear" action for current output or all outputs
-provide fallback for file open/save interfaces (when on e.g., non-chromium browsers)
+provide fallback for file open/save interfaces (when on non-chromium browsers)
 provide keyboard navigation into and out of input areas
 menus: provide way to activate menu from keyboard (including TAB navigation to menu)
-menus: position submenus when opening
 
 
 === THINK ABOUT ===
@@ -50,6 +49,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* menus: position submenus when opening
 * menus: enable/disable menu items based on notebook state
 * menus: add keyboard navigation
 * menus: adjust order of modified keys in display of keyboard equivalent
