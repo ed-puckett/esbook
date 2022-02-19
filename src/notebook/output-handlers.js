@@ -9,18 +9,7 @@ const {
     generate_object_id,
 } = await import('../uuid.js');
 
-await Promise.all(
-    [
-        '../../node_modules/dompurify/dist/purify.min.js',       // defines globalThis.DOMPurify
-        '../../node_modules/chart.js/dist/Chart.bundle.min.js',  // defines globalThis.Chart
-        '../../node_modules/d3/dist/d3.min.js',                  // defines globalThis.d3
-        '../../node_modules/dagre-d3/dist/dagre-d3.min.js',      // defines globalThis.dagreD3
-        '../../node_modules/plotly.js-dist/plotly.js',           // defines globalThis.Plotly
-    ].map(p => load_script(document.head, new URL(p, import.meta.url)))
-);
-
-const dagreD3_stylesheet_url = new URL('output-handlers/dagre-d3.css', import.meta.url);
-create_stylesheet_link(document.head, dagreD3_stylesheet_url);
+await load_script(document.head, new URL('../../node_modules/dompurify/dist/purify.min.js', import.meta.url));  // defines globalThis.DOMPurify
 
 
 // === CONSTANTS ===
@@ -281,6 +270,7 @@ class ChartOutputHandler extends _GraphicsOutputHandlerBase {
     // may throw an error
     // output_data: { type: 'chart', image_format: string, image_format_quality: number, image_uri: string }
     async update_notebook(output_context, value) {
+        const { Chart } = await import('./output-handlers/chart.js');
         const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: chart([size_config], config)');
         const canvas = output_context.create_output_element({
             size_config,
@@ -328,6 +318,7 @@ class DagreOutputHandler extends _GraphicsOutputHandlerBase {
     // may throw an error
     // output_data: { type: 'dagre', image_format: string, image_format_quality: number, image_uri: string }
     async update_notebook(output_context, value) {
+        const { d3, dagreD3 } = await import('./output-handlers/dagre-d3.js');
         const [ size_config, dagre_config ] = output_context.parse_graphics_args(value.args, 'usage: dagre([size_config], config)');
         // svg elements must be created with a special namespace
         // (otherwise, will get error when rendering: xxx.getBBox is not a function)
@@ -471,6 +462,7 @@ class PlotlyOutputHandler extends _GraphicsOutputHandlerBase {
     // may throw an error
     // output_data: { type: 'plotly', image_format: string, image_format_quality: number, image_uri: string }
     async update_notebook(output_context, value) {
+        const { Plotly } = await import('./output-handlers/plotly.js');
         const [ size_config, config ] = output_context.parse_graphics_args(value.args, 'usage: plotly([size_config], { data, layout?, config?, frames? })');
         const output_element = output_context.create_output_element({
             size_config,
