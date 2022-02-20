@@ -227,6 +227,7 @@ function _generate_image_element_from_output_data(output_data) {
         }
         img_element.src = output_data.image_uri;
         img_element.alt = `${output_data.type ? `${output_data.type} ` : ''}graphics`;
+        img_element.classList.add('output-graphics');
         return img_element;
     }
 }

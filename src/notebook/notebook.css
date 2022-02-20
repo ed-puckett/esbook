@@ -201,6 +201,10 @@ body {
     padding: 0.5em;
 }
 
+.output-graphics {
+    display: block;  /* break lines after img from saved graphics */
+}
+
 .error {
     color: var(--color-fg-ie-error);
     background: var(--color-bg-ie-error);

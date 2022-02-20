@@ -106,9 +106,9 @@ export function get_all_css_with_selector_prefix(selector_prefix) {
 
     for (const s of document.styleSheets) {
         try {
-            if(!s.cssRules) continue;
+            if (!s.cssRules) continue;
         } catch (e) {
-            if(e.name !== 'SecurityError') throw e;  // for Firefox
+            if (e.name !== 'SecurityError') throw e;  // for Firefox
             continue;
         }
 
