@@ -422,7 +422,7 @@ class DagreOutputHandler extends _GraphicsOutputHandlerBase {
         svg_d3.call(zoom.transform, d3.zoomIdentity.translate(left_margin, height_margin/2).scale(initial_scale));
         svg_d3.attr('height', (g_height*initial_scale + height_margin));
         // finally, render the data uri
-        return output_context.create_svg_output_data(this.type, svg);
+        return output_context.create_svg_output_data(this.type, svg, false, 'svg.dagre');
     }
 }
 

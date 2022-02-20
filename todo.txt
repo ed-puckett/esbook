@@ -12,7 +12,6 @@ documentation: warning about executable content
 documentation: export, also ?s= parameter
 
 delete_element should clear the element if there is only one element
-dagre: no arrow heads displayed in saved rendered image
 review Content-Security-Policy
 set width on graphics output DIVs
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
@@ -49,6 +48,8 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* output-context.js: create_svg_output_data() hard-codes css selector 'svg.dagre'
+* dagre: no arrow heads displayed in saved rendered image
 * when loading, menus flash briefly as unformatted <ul>s before turning into menus
 * first ie is initially too tall and has extraneous scroll bar
 * defer loading of code until used for graphics output-handlers (e.g., plotly)

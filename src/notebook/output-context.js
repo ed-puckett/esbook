@@ -274,11 +274,12 @@ export function create_output_context(ie, output_data_collection) {
             }, leave_scroll_position_alone);
         },
 
-        async create_svg_output_data(type, svg, leave_scroll_position_alone=false) {
+        async create_svg_output_data(type, svg, leave_scroll_position_alone=false, css_selector=undefined) {
             // Save an image of the rendered canvas.  This will be used if this
             // notebook is saved and then loaded again later.
-            const css = svg_image_util.get_all_css_with_selector_prefix('svg.dagre');//!!! 'svg.dagre' should not be hard-coded here
-            const svg_string = svg_image_util.getSVGString(svg, css);
+            const css = css_selector ? svg_image_util.get_all_css_with_selector_prefix(css_selector) : undefined;
+            const svg_string = svg_image_util.getSVGString(svg, css)
+                  .replaceAll(`url(${location}#`, 'url(#');  // workaround to get dagreD3 arrowheads to work (image uri must not have external references)
             const width  = svg.clientWidth;
             const height = svg.clientHeight;
             const image_format = 'image/svg+xml';
