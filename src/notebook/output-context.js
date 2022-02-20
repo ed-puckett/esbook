@@ -278,12 +278,20 @@ export function create_output_context(ie, output_data_collection) {
             // Save an image of the rendered canvas.  This will be used if this
             // notebook is saved and then loaded again later.
             const css = css_selector ? svg_image_util.get_all_css_with_selector_prefix(css_selector) : undefined;
-            const svg_string = svg_image_util.getSVGString(svg, css)
-                  .replaceAll(`url(${location}#`, 'url(#');  // workaround to get dagreD3 arrowheads to work (image uri must not have external references)
+            const svg_string = svg_image_util.getSVGString(svg, css);
+
+            // dagreD3 specifies arrowheads at the end or edges by referencing a path with an id.
+            // These references take the form: url(<location>#<id>).
+            // These fail when embedded in an image URI, therefore delete the <location> part.
+            const replacement_url = new URL(location);
+            replacement_url.hash = '';  // hash, if any, must be eliminated
+            // Note that we're just tacking the hash on the end here, but that should be ok.
+            const adjusted_svg_string = svg_string.replaceAll(`url(${replacement_url}#`, 'url(#');
+
             const width  = svg.clientWidth;
             const height = svg.clientHeight;
             const image_format = 'image/svg+xml';
-            const image_uri = `data:${image_format};utf8,${encodeURIComponent(svg_string)}`;
+            const image_uri = `data:${image_format};utf8,${encodeURIComponent(adjusted_svg_string)}`;
             // The width and height are necessary because when we load this later (using the svg data uri)
             // the image width and height will not be set (as opposed to a png data uri which encodes
             // the width and height in its content).
