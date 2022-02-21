@@ -201,6 +201,10 @@ export class EvalWorker {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
+        function next_tick() {
+            return new Promise(resolve => setTimeout(resolve));
+        }
+
         async function process_action(action) {
             if (self._stopped) {
                 throw new Error('error received after EvalWorker already stopped');
@@ -283,6 +287,7 @@ export class EvalWorker {
             global_export,
             is_stopped,
             delay_ms,
+            next_tick,
             process_action,
             process_error,
             println,

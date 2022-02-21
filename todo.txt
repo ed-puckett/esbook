@@ -5,17 +5,19 @@ coalesce "empty" changes to output (Change)
 provide "toast" messages + dialog to display past messages
 update theme-colors (dark/light modes)
 system dark/light mode switch is not detected (chromium bug on gnome/linux)
+sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse into output area?) (focus issues?)
+provide "clear" action for current output or all outputs
+set width on graphics output DIVs
 
 documentation: update and improve help
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: warning about executable content
 documentation: export, also ?s= parameter
+documentation: autoeval
+documentation: dialogs/ui
 
 review Content-Security-Policy
-set width on graphics output DIVs
-sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse?) (focus issues?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
-provide "clear" action for current output or all outputs
 provide fallback for file open/save interfaces (when on non-chromium browsers)
 provide recent file interface
 

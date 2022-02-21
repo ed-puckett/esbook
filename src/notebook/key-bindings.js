@@ -36,7 +36,7 @@ export const initial_command_bindings = {  // command_string->key_bindings_array
     'help':                 [ 'F1' ],
     'focus_menubar':        [ 'F10' ],
 
-    'open_last_recent':     [ 'Ctrl-Alt-Shift-R' ],//!!!
+    'open_last_recent':     [ 'Ctrl-Alt-Shift-O' ],//!!!
 };
 
 function _freeze_command_bindings(cb) {

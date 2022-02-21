@@ -34,7 +34,7 @@ const initial_menubar_collection = [
         { label: 'Save as...',    item: { command: 'save_as_notebook',     } },
         { label: 'Export...',     item: { command: 'export_notebook',      } },
         '---',
-        { label: 'Recents', id: 'recents', collection: [
+        { label: 'Recent notebooks', id: 'recents', collection: [
             // ...
         ] },
         '---',
