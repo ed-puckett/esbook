@@ -6,8 +6,6 @@ const {
     output_handlers,
 } = await import('./output-handlers.js');
 
-const svg_image_util = await import('./svg-image-util.js');
-
 export const ie_hide_input_css_class = 'hide-input';
 
 /** get current "hide input" state for the ie
@@ -31,6 +29,23 @@ export function ie_set_hide_input_state(ie, state) {
     } else {
         ie.classList.remove(ie_hide_input_css_class);
     }
+}
+
+function _get_svg_string( svg_node, stylesheet_text ) {
+    svg_node.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+
+    const style_element = document.createElement("style");
+    style_element.setAttribute("type","text/css");
+    style_element.innerText = stylesheet_text;
+    const ref_node = svg_node.hasChildNodes() ? svg_node.children[0] : null;
+    svg_node.insertBefore(style_element, ref_node);
+
+    const serializer = new XMLSerializer();
+    let svg_string = serializer.serializeToString(svg_node);
+    svg_string = svg_string.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink=');  // fix root xlink without namespace
+    svg_string = svg_string.replace(/NS\d+:href/g, 'xlink:href');  // Safari NS namespace fix
+
+    return svg_string;
 }
 
 export function create_output_context(ie, output_data_collection) {
@@ -274,11 +289,8 @@ export function create_output_context(ie, output_data_collection) {
             }, leave_scroll_position_alone);
         },
 
-        async create_svg_output_data(type, svg, leave_scroll_position_alone=false, css_selector=undefined) {
-            // Save an image of the rendered canvas.  This will be used if this
-            // notebook is saved and then loaded again later.
-            const css = css_selector ? svg_image_util.get_all_css_with_selector_prefix(css_selector) : undefined;
-            const svg_string = svg_image_util.getSVGString(svg, css);
+        async create_svg_output_data(type, svg, leave_scroll_position_alone=false, stylesheet_text=undefined) {
+            const svg_string = _get_svg_string(svg, stylesheet_text);
 
             // dagreD3 specifies arrowheads at the end or edges by referencing a path with an id.
             // These references take the form: url(<location>#<id>).

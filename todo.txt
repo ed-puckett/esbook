@@ -1,4 +1,3 @@
-exported dagre svg from an html-embedded server has arrowheads but default fill and stroke colors are transparent (style apparently not found and not embedded)
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
 call cleanup on change objects that are deleted
 coalesce "empty" changes to output (Change)
@@ -49,6 +48,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* exported dagre svg from an html-embedded server has arrowheads but default fill and stroke colors are transparent (style apparently not found and not embedded)
 * provide keyboard navigation into and out of input areas
 * menus: provide way to activate menu from keyboard (including TAB navigation to menu)
 * preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)

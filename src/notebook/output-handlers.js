@@ -319,7 +319,7 @@ class DagreOutputHandler extends _GraphicsOutputHandlerBase {
     // may throw an error
     // output_data: { type: 'dagre', image_format: string, image_format_quality: number, image_uri: string }
     async update_notebook(output_context, value) {
-        const { d3, dagreD3 } = await import('./output-handlers/dagre-d3.js');
+        const { d3, dagreD3, dagre_stylesheet_text  } = await import('./output-handlers/dagre-d3.js');
         const [ size_config, dagre_config ] = output_context.parse_graphics_args(value.args, 'usage: dagre([size_config], config)');
         // svg elements must be created with a special namespace
         // (otherwise, will get error when rendering: xxx.getBBox is not a function)
@@ -423,7 +423,7 @@ class DagreOutputHandler extends _GraphicsOutputHandlerBase {
         svg_d3.call(zoom.transform, d3.zoomIdentity.translate(left_margin, height_margin/2).scale(initial_scale));
         svg_d3.attr('height', (g_height*initial_scale + height_margin));
         // finally, render the data uri
-        return output_context.create_svg_output_data(this.type, svg, false, 'svg.dagre');
+        return output_context.create_svg_output_data(this.type, svg, false, dagre_stylesheet_text);
     }
 }
 
