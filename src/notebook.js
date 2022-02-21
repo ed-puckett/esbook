@@ -58,9 +58,7 @@ const {
 
 const {
     MenuCommandEvent,
-    build_menubar,
-    deactivate_menu,
-    activate_menubar,
+    MenuBar,
 } = await import('./notebook/menu.js');
 
 const {
@@ -318,13 +316,7 @@ class Notebook {
         );
         await load_cm_script('notebook/codemirror-md+mj-mode.js');
 
-        // build menubar
-        const {
-            menubar_container,
-            set_menu_enabled_state,
-        } = build_menubar(this.controls);
-        this.menubar = menubar_container;
-        this.set_menu_enabled_state = set_menu_enabled_state;
+        this.menubar = new MenuBar(this.controls);
     }
 
     _object_hasher(obj) {
@@ -517,7 +509,7 @@ class Notebook {
     }
 
     handle_command(command) {
-        deactivate_menu(this.menubar);  // just in case
+        this.menubar.deactivate();  // just in case
 
         switch (command) {
         case 'undo': {
@@ -620,8 +612,8 @@ class Notebook {
             open_help_window();
             break;
         }
-        case 'focus_menubar': {
-            activate_menubar(this.menubar);
+        case 'activate_menubar': {
+            this.menubar.activate();
             break;
         }
         case 'open_last_recent': {//!!!
@@ -668,13 +660,13 @@ class Notebook {
         const is_on_first_element = this.is_on_first_element();
         const is_on_last_element  = this.is_on_last_element();
         this.set_modified_status(is_modified);
-        this.set_menu_enabled_state('save', is_modified);
-        this.set_menu_enabled_state('undo', Change.can_perform_undo());
-        this.set_menu_enabled_state('redo', Change.can_perform_redo());
-        this.set_menu_enabled_state('focus_up_element', !is_on_first_element);
-        this.set_menu_enabled_state('move_up_element',  !is_on_first_element);
-        this.set_menu_enabled_state('focus_down_element', !is_on_last_element);
-        this.set_menu_enabled_state('move_down_element',  !is_on_last_element);
+        this.menubar.set_menu_enabled_state('save', is_modified);
+        this.menubar.set_menu_enabled_state('undo', Change.can_perform_undo());
+        this.menubar.set_menu_enabled_state('redo', Change.can_perform_redo());
+        this.menubar.set_menu_enabled_state('focus_up_element', !is_on_first_element);
+        this.menubar.set_menu_enabled_state('move_up_element',  !is_on_first_element);
+        this.menubar.set_menu_enabled_state('focus_down_element', !is_on_last_element);
+        this.menubar.set_menu_enabled_state('move_down_element',  !is_on_last_element);
     }
 
     set_notebook_unmodified() {

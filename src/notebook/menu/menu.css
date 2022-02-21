@@ -18,6 +18,7 @@
 
 #content .menubar .menuitem {
     list-style-type: none;
+    min-width: max-content;
 }
 
 #content .menuitem * {
