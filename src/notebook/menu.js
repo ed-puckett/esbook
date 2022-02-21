@@ -452,3 +452,17 @@ export function build_menubar(parent) {
         set_menu_enabled_state,
     };
 }
+
+export function activate_menubar(menubar) {
+    if (!(menubar instanceof Element) || !menubar.classList.contains('menubar')) {
+        throw new Error('menubar must be an Element with class "menubar"');
+    }
+    if (!menubar.querySelector('.selected')) {
+        // select the first menuitem of the menubar
+        const menubar_first_menuitem = menubar.querySelector('.menuitem');
+        if (menubar_first_menuitem) {
+            select_menuitem(menubar_first_menuitem);
+        }
+    }
+    setTimeout(() => menubar.focus());
+}

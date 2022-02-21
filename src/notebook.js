@@ -60,6 +60,7 @@ const {
     MenuCommandEvent,
     build_menubar,
     deactivate_menu,
+    activate_menubar,
 } = await import('./notebook/menu.js');
 
 const {
@@ -617,6 +618,10 @@ class Notebook {
         }
         case 'help': {
             open_help_window();
+            break;
+        }
+        case 'focus_menubar': {
+            activate_menubar(this.menubar);
             break;
         }
         case 'open_last_recent': {//!!!

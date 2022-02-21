@@ -19,8 +19,6 @@ provide "clear" action for current output or all outputs
 provide fallback for file open/save interfaces (when on non-chromium browsers)
 provide recent file interface
 
-provide keyboard navigation into and out of input areas
-menus: provide way to activate menu from keyboard (including TAB navigation to menu)
 delete_element should clear the element if there is only one element
 
 
@@ -49,6 +47,8 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* provide keyboard navigation into and out of input areas
+* menus: provide way to activate menu from keyboard (including TAB navigation to menu)
 * preview images in saved notebooks that have been opened should cause a line break before next element (set examples/many-ecas.esbook)
 * output-context.js: create_svg_output_data() hard-codes css selector 'svg.dagre'
 * dagre: no arrow heads displayed in saved rendered image

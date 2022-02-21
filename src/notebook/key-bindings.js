@@ -34,6 +34,7 @@ export const initial_command_bindings = {  // command_string->key_bindings_array
     'delete_element':       [ 'CmdOrCtrl+Alt+Backspace' ],
     'settings':             [ 'CmdOrCtrl+,' ],
     'help':                 [ 'F1' ],
+    'focus_menubar':        [ 'F10' ],
 
     'open_last_recent':     [ 'Ctrl-Alt-Shift-R' ],//!!!
 };
