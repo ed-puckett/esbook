@@ -1,13 +1,16 @@
+review Content-Security-Policy
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
 call cleanup on change objects that are deleted
-coalesce "empty" changes to output (Change)
 provide "toast" messages + dialog to display past messages
 update theme-colors (dark/light modes)
 system dark/light mode switch is not detected (chromium bug on gnome/linux)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse into output area?) (focus issues?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
-provide "clear" action for current output or all outputs
 set width on graphics output DIVs
+support dark mode in dagre css
+expose settings/theme-settings in eval
+provide print_markup() (or something) in eval
+things like matrices and square root are sometimes scaled wrong in TeX output
 
 documentation: update and improve help
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
@@ -16,16 +19,20 @@ documentation: export, also ?s= parameter
 documentation: autoeval
 documentation: dialogs/ui
 
-review Content-Security-Policy
-provide fallback for file open/save interfaces (when on non-chromium browsers)
-delete_element should clear the element if there is only one element
-recents: old entries are being filtered (isSameEntry() seems to always be returning true)
+allow empty notebooks and permit delete_element to remove the last element
+default element mode should be markup, with // on first line as mode switch sequence (switch to JavaScript)
 
 
 === THINK ABOUT ===
+manage memory used by Change (undo/redo)
+provide fallback for file open/save interfaces (when on non-chromium browsers)
+provide "clear" action for current output or all outputs
+is the use of innerHTML acceptable?
+change menuitems to use <a> or <button> (for accessibility concerns)
 settings update broadcast to other instances (polling?)
 provide options when doing export (e.g., clear outputs)
-more extensively support Change for output
+more extensively support Change (undo/redo) for output
+coalesce "empty" changes to output (Change)
 enable api to perform operations programmatically (e.g., eval-notebook)
 re-install @yaffle/expression when it is more "distributable"
 add Algebite and Mathjs
@@ -47,6 +54,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* recents: old entries are being filtered (isSameEntry() seems to always be returning true) (isSameEntry returns a promise)
 * recents: cannot access file name (need to store in IndexedDB storage along with FileSystemFileHandle?)
 * recents: when to rebuild recents (need to make sure we can access...)
 * provide recent file interface

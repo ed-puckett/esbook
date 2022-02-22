@@ -407,6 +407,7 @@ export class MenuBar {
     _build_menubar(parent, menubar_spec) {
         const menubar_container = create_child_element(parent, this.constructor.menu_element_tag_name, {
             class:    'active menubar',
+            role:     'navigation',
             tabindex: 0,
         }, true);
         menubar_spec.forEach(spec => this._build_menu(spec, menubar_container, true));

@@ -204,7 +204,7 @@ class HTMLOutputHandler extends OutputHandler {
             element.id = generate_object_id();
         }
         if (output_data.innerHTML) {
-            element.innerHTML = output_data.innerHTML;
+            element.innerHTML = clean_for_html(output_data.innerHTML);
         }
         return element;
     }
