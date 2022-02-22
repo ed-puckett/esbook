@@ -76,7 +76,8 @@ class FsInterface {
     /** Return stats for the file
      *  @param {File} file
      *  @return {object} stats: {
-     *              last_modified: number,  // the "last modified" time of the file in milliseconds since the UNIX epoch (January 1, 1970 at Midnight UTC)
+     *              lastModified:  number,  // the "last modified" time of the file in milliseconds since the UNIX epoch (January 1, 1970 at Midnight UTC)
+     *              last_modified: number,  // synonym for lastModified
      *              name:          string,  // name of file
      *              size:          number,  // size of file in bytes
      *              type:          string,  // MIME type of file contents
@@ -88,14 +89,14 @@ class FsInterface {
             lastModified: last_modified,
             name,
             size,
-            kind,
+            type,
         } = file;
         return {
             lastModified,
             last_modified,
             name,
             size,
-            kind,
+            type,
         };
     }
 

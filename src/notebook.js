@@ -392,6 +392,9 @@ class Notebook {
         this.notebook_file_stats  = stats;
 
         if (file_handle) {
+            if (!stats) {
+                throw new Error('file_handle given without stats');
+            }
             await add_to_recents({ file_handle, stats });
             await this.menubar.rebuild_recents();
         }

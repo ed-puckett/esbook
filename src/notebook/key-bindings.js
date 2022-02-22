@@ -35,8 +35,6 @@ export const initial_command_bindings = {  // command_string->key_bindings_array
     'settings':             [ 'CmdOrCtrl+,' ],
     'help':                 [ 'F1' ],
     'activate_menubar':     [ 'F10' ],
-
-    'open_last_recent':     [ 'Ctrl-Alt-Shift-O' ],//!!!
 };
 
 function _freeze_command_bindings(cb) {

@@ -167,7 +167,7 @@ export class MenuBar {
     }
 
     async rebuild_recents() {
-        //!!! we are assuming here that the menu is not selected and therefore are not being careful about display issues here...
+        //!!! we are assuming that the menu is not selected when this method is called and therefore not being careful about display issues...
         const recents_menuitem = this._menu_id_to_element['recents'];
         const recents_container = recents_menuitem.querySelector('.menu');
         recents_container.innerText = '';  // clear children

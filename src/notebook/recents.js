@@ -34,7 +34,15 @@ export async function add_to_recents(recent) {
         throw new Error('invalid recent object');
     }
     const recents = await get_recents();
-    const new_recents = [ recent, ...recents.filter(r => r.file_handle.isSameEntry(recent.file_handle)) ].slice(0, max_recents);
+    const new_recents = [ recent ];
+    for (const r of recents) {
+        if (new_recents.length >= max_recents) {
+            break;
+        }
+        if (! (await r.file_handle.isSameEntry(recent.file_handle))) {
+            new_recents.push(r);
+        }
+    }
     return storage_db.put(db_key_recents, new_recents);
 }
 

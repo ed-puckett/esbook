@@ -19,7 +19,7 @@ documentation: dialogs/ui
 review Content-Security-Policy
 provide fallback for file open/save interfaces (when on non-chromium browsers)
 delete_element should clear the element if there is only one element
-recents: duplicate entries are not being filtered
+recents: old entries are being filtered (isSameEntry() seems to always be returning true)
 
 
 === THINK ABOUT ===
