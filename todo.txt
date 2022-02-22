@@ -18,8 +18,8 @@ documentation: dialogs/ui
 
 review Content-Security-Policy
 provide fallback for file open/save interfaces (when on non-chromium browsers)
-provide recent file interface
 delete_element should clear the element if there is only one element
+recents: duplicate entries are not being filtered
 
 
 === THINK ABOUT ===
@@ -47,6 +47,9 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* recents: cannot access file name (need to store in IndexedDB storage along with FileSystemFileHandle?)
+* recents: when to rebuild recents (need to make sure we can access...)
+* provide recent file interface
 * exported dagre svg from an html-embedded server has arrowheads but default fill and stroke colors are transparent (style apparently not found and not embedded)
 * provide keyboard navigation into and out of input areas
 * menus: provide way to activate menu from keyboard (including TAB navigation to menu)

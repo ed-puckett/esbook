@@ -101,7 +101,6 @@ const {
 const {
     get_recents,
     add_to_recents,
-    clear_recents,
 } = await import('./notebook/recents.js');
 
 
@@ -316,7 +315,7 @@ class Notebook {
         );
         await load_cm_script('notebook/codemirror-md+mj-mode.js');
 
-        this.menubar = new MenuBar(this.controls);
+        this.menubar = await MenuBar.create(this.controls);
     }
 
     _object_hasher(obj) {
@@ -336,8 +335,8 @@ class Notebook {
 
     // called exactly once (by setup())
     init_event_handlers() {
-        KeyBindingCommandEvent.subscribe((event) => this.handle_command(event.command));
-        MenuCommandEvent.subscribe((event) => this.handle_command(event.command));
+        KeyBindingCommandEvent.subscribe(async (event) => this.handle_command(event.command));
+        MenuCommandEvent.subscribe(async (event) => this.handle_command(event.command));
 
         window.onbeforeunload = (event) => {
             // On Chromium, don't try any of the typical things like event.preventDefault()
@@ -388,12 +387,13 @@ class Notebook {
 
 
     // Set a new notebook source information and update things accordingly.
-    set_notebook_source(file_handle, stats=undefined) {
+    async set_notebook_source(file_handle, stats=undefined) {
         this.notebook_file_handle = file_handle;
         this.notebook_file_stats  = stats;
 
         if (file_handle) {
-            add_to_recents(file_handle);  //!!! not waiting for this async function...
+            await add_to_recents({ file_handle, stats });
+            await this.menubar.rebuild_recents();
         }
 
         let title = DEFAULT_TITLE;
@@ -508,7 +508,7 @@ class Notebook {
         }
     }
 
-    handle_command(command) {
+    async handle_command(command) {
         this.menubar.deactivate();  // just in case
 
         switch (command) {
@@ -521,26 +521,26 @@ class Notebook {
             break;
         }
         case 'clear_notebook': {
-            this.clear_notebook();  //!!! not waiting for this async function...
+            await this.clear_notebook();
             break;
         }
         case 'open_notebook': {
             const do_import = false;
-            this.open_notebook(do_import);  //!!! not waiting for this async function...
+            await this.open_notebook(do_import);
             break;
         }
         case 'import_notebook': {
             const do_import = true;
-            this.open_notebook(do_import);  //!!! not waiting for this async function...
+            await this.open_notebook(do_import);
             break;
         }
         case 'reopen_notebook': {
             if (!this.notebook_file_handle) {
-                this.clear_notebook();  //!!! not waiting for this async function...
+                await this.clear_notebook();
             } else {
                 const do_import = false;
                 const force     = false;
-                this.open_notebook_from_file_handle(this.notebook_file_handle, do_import, force);  //!!! not waiting for this async function...
+                await this.open_notebook_from_file_handle(this.notebook_file_handle, do_import, force);
             }
             break;
         }
@@ -613,20 +613,23 @@ class Notebook {
             break;
         }
         case 'activate_menubar': {
-            this.menubar.activate();
+            await this.menubar.activate(true);
             break;
         }
-        case 'open_last_recent': {//!!!
-            get_recents().then(recents => {
-                if (recents.length > 0) {
-                    this.open_notebook_from_file_handle(recents[0]);  //!!! not waiting for this async function...
-                } else {
-                    beep();
-                }
-            });
-        }
+
         default: {
-            console.warn('** command not handled:', command);
+            const open_recent_match = command.match(/^open_recent_([0-9]{1,3})$/);
+            if (open_recent_match) {
+                const index = parseInt(open_recent_match[1]);
+                const recents = await get_recents();
+                if (index >= recents.length) {
+                    beep();
+                } else {
+                    await this.open_notebook_from_file_handle(recents[index].file_handle);
+                }
+            } else {
+                console.warn('** command not handled:', command);
+            }
             break;
         }
         }
@@ -704,7 +707,7 @@ class Notebook {
 
         // reset state
         this.set_new_notebook_state();
-        this.set_notebook_source(undefined);
+        await this.set_notebook_source(undefined);
         this.current_ie = undefined;
         const ie = this.add_new_ie();  // add a single new interaction_element
         this.set_current_ie(ie);
@@ -726,12 +729,12 @@ class Notebook {
             if (do_import) {
                 const { text, stats } = await fs_interface.open_text(file_handle);
                 await this.import_nb_state(text);
-                this.set_notebook_source(undefined);
+                await this.set_notebook_source(undefined);
             } else {
                 const { contents, stats } = await fs_interface.open_json(file_handle);
                 const new_nb_state = this.contents_to_nb_state(contents);
                 await this.load_nb_state(new_nb_state);
-                this.set_notebook_source(file_handle, stats);
+                await this.set_notebook_source(file_handle, stats);
             }
             Change.update_for_open(this, do_import);
             if (!do_import) {
@@ -743,7 +746,7 @@ class Notebook {
 
         } catch (err) {
             console.error('open failed', err.stack);
-            this.set_notebook_source(undefined);  // reset potentially problematic source info
+            await this.set_notebook_source(undefined);  // reset potentially problematic source info
             await AlertDialog.run(`open failed: ${err.message}\n(initializing empty document)`);
             await this.clear_notebook(true);  // initialize empty notebook
         }
@@ -776,7 +779,7 @@ class Notebook {
 
         } catch (err) {
             console.error('open failed', err.stack);
-            this.set_notebook_source(undefined);  // reset potentially problematic source info
+            await this.set_notebook_source(undefined);  // reset potentially problematic source info
             await AlertDialog.run(`open failed: ${err.message}\n(initializing empty document)`);
             await this.clear_notebook(true);  // initialize empty notebook
         }
@@ -789,7 +792,7 @@ class Notebook {
             if (!this.notebook_file_handle || typeof last_fs_timestamp !== 'number') {
                 timestamp_mismatch = false;
             } else {
-                const stats = await fs_interface.get_fs_stats_for_file_handle(this.notebook_file_handle);//!!!
+                const stats = await fs_interface.get_fs_stats_for_file_handle(this.notebook_file_handle);
                 const current_fs_timestamp = stats.last_modified;
                 timestamp_mismatch = (current_fs_timestamp !== last_fs_timestamp);
             }
@@ -807,7 +810,7 @@ class Notebook {
             if (!interactive && this.notebook_file_handle) {
                 const file_handle = this.notebook_file_handle;
                 const stats = await fs_interface.save_json(file_handle, contents);
-                this.set_notebook_source(file_handle, stats);
+                await this.set_notebook_source(file_handle, stats);
             } else {
                 const save_dialog_types = [{
                     description: 'esbook files',
@@ -821,7 +824,7 @@ class Notebook {
                     return;
                 }
                 const stats = await fs_interface.save_json(file_handle, contents);  // may throw an error
-                this.set_notebook_source(file_handle, stats);
+                await this.set_notebook_source(file_handle, stats);
             }
             this.focus_to_current_ie();
             Change.update_for_save(this);
@@ -830,7 +833,7 @@ class Notebook {
 
         } catch (err) {
             console.error('save failed', err.stack);
-            this.set_notebook_source(undefined);  // reset potentially problematic source info
+            await this.set_notebook_source(undefined);  // reset potentially problematic source info
             await AlertDialog.run(`save failed: ${err.message}`);
         }
     }
@@ -885,7 +888,7 @@ ${contents_base64}
 
         } catch (err) {
             console.error('save failed', err.stack);
-            this.set_notebook_source(undefined);  // reset potentially problematic source info
+            await this.set_notebook_source(undefined);  // reset potentially problematic source info
             await AlertDialog.run(`save failed: ${err.message}`);
         }
     }

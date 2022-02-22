@@ -19,6 +19,10 @@ const {
     key_spec_to_glyphs,
 } = await import('./key-spec.js');
 
+const {
+    get_recents,
+} = await import('./recents.js');
+
 
 // === INITIAL MENUBAR SPECIFICATION ===
 
@@ -86,6 +90,9 @@ export class MenuBar {
     static menu_element_tag_name     = 'ul';
     static menuitem_element_tag_name = 'li';
 
+    static open_recent_command_prefix = 'open_recent_';  // + index (0-based)
+    static max_recents = 10;
+
     static find_previous_menuitem(menuitem) {
         let mi = menuitem.previousElementSibling;
         while (mi && (!mi.classList.contains('menuitem') || mi.classList.contains('disabled'))) {
@@ -102,7 +109,14 @@ export class MenuBar {
         return mi;
     }
 
-    constructor(parent, menubar_spec=default_menubar_spec) {
+    // call this static method, not the constructor directly
+    static async create(parent, menubar_spec=default_menubar_spec) {
+        const menubar = new this(parent, menubar_spec);
+        await menubar.rebuild_recents();
+        return menubar;
+    }
+
+    constructor(parent, menubar_spec) {
         if (! (parent instanceof Element)) {
             throw new Error('parent must be an instance of Element');
         }
@@ -112,18 +126,24 @@ export class MenuBar {
         this._menubar_container = this._build_menubar(parent, menubar_spec);
     }
 
-    activate() {
+    get element (){ return this._menubar_container; }
+
+    async activate(set_focus=false) {
         if (!(this._menubar_container instanceof Element) || !this._menubar_container.classList.contains('menubar')) {
             throw new Error('this._menubar_container must be an Element with class "menubar"');
         }
         if (!this._menubar_container.querySelector('.selected')) {
+            await this.rebuild_recents();
+
             // select the first menuitem of the menubar
             const menubar_first_menuitem = this._menubar_container.querySelector('.menuitem');
             if (menubar_first_menuitem) {
                 this._select_menuitem(menubar_first_menuitem);
             }
         }
-        setTimeout(() => this._menubar_container.focus());
+        if (set_focus) {
+            setTimeout(() => this._menubar_container.focus());
+        }
     }
 
     deactivate() {
@@ -143,6 +163,23 @@ export class MenuBar {
             element.classList.remove('disabled');
         } else {
             element.classList.add('disabled');
+        }
+    }
+
+    async rebuild_recents() {
+        //!!! we are assuming here that the menu is not selected and therefore are not being careful about display issues here...
+        const recents_menuitem = this._menu_id_to_element['recents'];
+        const recents_container = recents_menuitem.querySelector('.menu');
+        recents_container.innerText = '';  // clear children
+        const recents = await get_recents();
+        for (let i = 0; i < recents.length && i < this.constructor.max_recents; i++) {
+            const filename = recents[i].stats.name;
+            const command = `${this.constructor.open_recent_command_prefix}${i}`;
+
+            const menuitem = this._build_menuitem(filename);
+            this._add_item_menuitem_annotations_and_click_handler(menuitem, command);
+
+            recents_container.appendChild(menuitem);
         }
     }
 
@@ -235,7 +272,7 @@ export class MenuBar {
      *  @param {boolean} (optional) toplevel if the menu is the top-level "menubar" menu
      *         default value: false
      *  @return {Element} new menu Element
-     *  Also updates _menu_id_to_object_id and _object_id_to_menu_id.
+     *  Also updates this._menu_id_to_element
      */
     _build_menu(menu_spec, parent, toplevel=false) {
         if (! (parent instanceof Element)) {
@@ -272,31 +309,14 @@ export class MenuBar {
             throw new Error('id must be a non-empty string');
         }
 
-        const id = generate_object_id();
 
-        // both items and collections are a menuitem, but the
-        // collection also has children...
-        const element = create_element(this.constructor.menuitem_element_tag_name, {
-            id,
-            class: 'menuitem',
-        });
-        // add the label
-        create_child_element(element, 'div', {
-            class: 'menuitem-label',
-        }).innerText = label;
+        // both items and collections are menuitem elements, but the collection also has children...
+        const element = this._build_menuitem(label, toplevel);
 
-        element.addEventListener('mousemove', (event) => {
-            // don't pop open top-level menus unless one is already selected
-            // this means that the user must click the top-level menu to get things started
-            if (!toplevel || [ ...parent.children ].some(c => c.classList.contains('selected'))) {
-                if (!element.classList.contains('disabled')) {
-                    this._select_menuitem(element);
-                }
-            }
-        });
-
-        if (collection) {
-
+        if (item) {
+            this._add_item_menuitem_annotations_and_click_handler(element, item.command);
+        } else {
+            // collection
             element.classList.add('collection');
 
             const collection_element = create_child_element(element, this.constructor.menu_element_tag_name, {
@@ -322,28 +342,6 @@ export class MenuBar {
                     }
                 });
             }
-
-        } else {  // item
-
-            const command_bindings = get_command_bindings();
-            const kbd_bindings = command_bindings[item.command];
-            if (kbd_bindings) {
-                const kbd_container = create_child_element(element, 'div', {
-                    class: 'menuitem-annotation',
-                });
-                // create <kbd>...</kbd> elements
-                kbd_bindings.forEach(binding => {
-                    const binding_glyphs = key_spec_to_glyphs(binding);
-                    create_child_element(kbd_container, 'kbd').innerText = binding_glyphs;
-                });
-            }
-            element.addEventListener('click', (event) => {
-                this._deactivate_menu(element.closest('.menubar'));
-                MenuCommandEvent.dispatch_event(item.command);
-                event.stopPropagation();
-                event.preventDefault();
-            });
-
         }
 
         if (menu_id) {
@@ -356,6 +354,54 @@ export class MenuBar {
         }
 
         return element;
+    }
+
+    _build_menuitem(label, toplevel=false) {
+        // both items and collections are menuitem elements, but the collection also has children...
+        const id = generate_object_id();
+        const menuitem = create_element(this.constructor.menuitem_element_tag_name, {
+            id,
+            class: 'menuitem',
+        });
+
+        // add the label
+        create_child_element(menuitem, 'div', {
+            class: 'menuitem-label',
+        }).innerText = label;
+
+        menuitem.addEventListener('mousemove', (event) => {
+            // don't pop open top-level menus unless one is already selected
+            // this means that the user must click the top-level menu to get things started
+            if (!toplevel || [ ...menuitem.parentElement.children ].some(c => c.classList.contains('selected'))) {
+                if (!menuitem.classList.contains('disabled')) {
+                    this._select_menuitem(menuitem);
+                }
+            }
+        });
+        return menuitem;
+    }
+    _add_item_menuitem_annotations_and_click_handler(menuitem, command) {
+        if (command) {
+            const command_bindings = get_command_bindings();
+            const kbd_bindings = command_bindings[command];
+            if (kbd_bindings) {
+                const kbd_container = create_child_element(menuitem, 'div', {
+                    class: 'menuitem-annotation',
+                });
+                // create <kbd>...</kbd> elements
+                kbd_bindings.forEach(binding => {
+                    const binding_glyphs = key_spec_to_glyphs(binding);
+                    create_child_element(kbd_container, 'kbd').innerText = binding_glyphs;
+                });
+            }
+        }
+
+        menuitem.addEventListener('click', (event) => {
+            this._deactivate_menu(menuitem.closest('.menubar'));
+            MenuCommandEvent.dispatch_event(command);
+            event.stopPropagation();
+            event.preventDefault();
+        });
     }
 
     _build_menubar(parent, menubar_spec) {

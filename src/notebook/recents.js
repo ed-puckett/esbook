@@ -6,8 +6,14 @@ const {
 
 // === STORAGE ===
 
-function is_valid_recent(recent) {
-    return (recent instanceof FileSystemFileHandle);
+export const max_recents = 100;  // the maximum number of elements to store
+
+export function is_valid_recent(recent) {
+    return ( typeof recent === 'object' &&
+             recent.file_handle instanceof FileSystemFileHandle &&
+             typeof recent.stats === 'object' &&
+             typeof recent.stats.name === 'string'
+           );
 }
 
 // may throw an error
@@ -25,10 +31,10 @@ export async function get_recents() {
 // may throw an error
 export async function add_to_recents(recent) {
     if (!is_valid_recent(recent)) {
-        throw new Error('recent must be a FileSystemFileHandle object');
+        throw new Error('invalid recent object');
     }
     const recents = await get_recents();
-    const new_recents = [ recent, ...recents.filter(r => r.isSameEntry(recent)) ];
+    const new_recents = [ recent, ...recents.filter(r => r.file_handle.isSameEntry(recent.file_handle)) ].slice(0, max_recents);
     return storage_db.put(db_key_recents, new_recents);
 }
 
