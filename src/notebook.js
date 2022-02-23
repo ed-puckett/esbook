@@ -725,13 +725,18 @@ class Notebook {
         const is_on_first_element = this.is_on_first_element();
         const is_on_last_element  = this.is_on_last_element();
         this.set_modified_status(is_modified);
-        this.menubar.set_menu_enabled_state('save', is_modified);
-        this.menubar.set_menu_enabled_state('undo', Change.can_perform_undo());
-        this.menubar.set_menu_enabled_state('redo', Change.can_perform_redo());
-        this.menubar.set_menu_enabled_state('focus_up_element', !is_on_first_element);
-        this.menubar.set_menu_enabled_state('move_up_element',  !is_on_first_element);
-        this.menubar.set_menu_enabled_state('focus_down_element', !is_on_last_element);
-        this.menubar.set_menu_enabled_state('move_down_element',  !is_on_last_element);
+        this.menubar.set_menu_enabled_state('save',                 is_modified);
+        this.menubar.set_menu_enabled_state('undo',                 Change.can_perform_undo());
+        this.menubar.set_menu_enabled_state('redo',                 Change.can_perform_redo());
+        this.menubar.set_menu_enabled_state('eval_element',         !!this.current_ie);
+        this.menubar.set_menu_enabled_state('eval_stay_element',    !!this.current_ie);
+        this.menubar.set_menu_enabled_state('eval_notebook_before', !!this.current_ie);
+        this.menubar.set_menu_enabled_state('eval_notebook',        !!this.current_ie);
+        this.menubar.set_menu_enabled_state('focus_up_element',     this.current_ie && !is_on_first_element);
+        this.menubar.set_menu_enabled_state('move_up_element',      this.current_ie && !is_on_first_element);
+        this.menubar.set_menu_enabled_state('focus_down_element',   this.current_ie && !is_on_last_element);
+        this.menubar.set_menu_enabled_state('move_down_element',    this.current_ie && !is_on_last_element);
+        this.menubar.set_menu_enabled_state('delete_element',       !!this.current_ie);
     }
 
     set_notebook_unmodified() {

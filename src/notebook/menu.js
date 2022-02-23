@@ -51,10 +51,10 @@ const default_menubar_spec = [
     ] },
 
     { label: 'Element', collection: [
-        { label: 'Eval',          item: { command: 'eval_element',         } },
-        { label: 'Eval and stay', item: { command: 'eval_stay_element',    } },
-        { label: 'Eval before',   item: { command: 'eval_notebook_before', } },
-        { label: 'Eval notebook', item: { command: 'eval_notebook',        } },
+        { label: 'Eval',          item: { command: 'eval_element',         }, id: 'eval_element' },
+        { label: 'Eval and stay', item: { command: 'eval_stay_element',    }, id: 'eval_stay_element' },
+        { label: 'Eval before',   item: { command: 'eval_notebook_before', }, id: 'eval_notebook_before' },
+        { label: 'Eval notebook', item: { command: 'eval_notebook',        }, id: 'eval_notebook' },
         '---',
         { label: 'Focus up',      item: { command: 'focus_up_element',     }, id: 'focus_up_element' },
         { label: 'Focus down',    item: { command: 'focus_down_element',   }, id: 'focus_down_element' },
@@ -63,7 +63,7 @@ const default_menubar_spec = [
         { label: 'Move down',     item: { command: 'move_down_element',    }, id: 'move_down_element' },
         { label: 'Add before',    item: { command: 'add_before_element',   } },
         { label: 'Add after',     item: { command: 'add_after_element',    } },
-        { label: 'Delete',        item: { command: 'delete_element',       } },
+        { label: 'Delete',        item: { command: 'delete_element',       }, id: 'delete_element' },
     ] },
 
     { label: 'Help', collection: [
