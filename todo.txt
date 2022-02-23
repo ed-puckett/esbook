@@ -20,25 +20,27 @@ documentation: export, also ?s= parameter
 documentation: autoeval, autohide
 documentation: dialogs/ui
 
-allow empty notebooks and permit delete_element to remove the last element
+add demos (html-based)
+empty elements when not selected are almost invisible (just a 1 pixel blank space)
+evaluate ie with containing only '//' causes an error: Unexpected token ')'
 
 
 === THINK ABOUT ===
-manage memory used by Change (undo/redo)
+implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
+how to distribute?  create small server apps for each major platform?  how to maintain?
+manage memory used by undo/redo (Change)
 provide fallback for file open/save interfaces (when on non-chromium browsers)
 provide "clear" action for current output or all outputs
 is the use of innerHTML acceptable?
 change menuitems to use <a> or <button> (for accessibility concerns)
 settings update broadcast to other instances (polling?)
 provide options when doing export (e.g., clear outputs)
-more extensively support Change (undo/redo) for output
+more extensively support undo/redo (Change) for output
 coalesce "empty" changes to output (Change)
 enable api to perform operations programmatically (e.g., eval-notebook)
 re-install @yaffle/expression when it is more "distributable"
 add Algebite and Mathjs
 save to MIME format (multipart/mixed) to allow easy editing (issue: UTF-8) (see https://www.w3.org/Protocols/rfc1341/7_2_Multipart.html )
-implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
-keep "autoeval"?
 use "contenteditable" element instead of CodeMirror stuff?
 figure out what to do with nb_state
 figure out how to reload / re-initialize eval state
@@ -54,6 +56,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* allow empty notebooks and permit delete_element to remove the last element
 * default element mode should be markup, with // on first line as mode switch sequence (switch to JavaScript)
 * autohide: check when edit changes appear and also when loading
 * recents: old entries are being filtered (isSameEntry() seems to always be returning true) (isSameEntry returns a promise)

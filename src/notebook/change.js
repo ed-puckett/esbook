@@ -303,21 +303,19 @@ export class DeleteIEChange extends Change {
         if (!next_ie) {
             next_ie = this.ie.previousElementSibling;
         }
-        if (next_ie) {
-            const id = this.ie.id;
-            const order_index = this.notebook.nb_state.order.indexOf(id);
-            if (order_index === -1) {
-                throw new Error('unexpected: when deleting element, id not found in notebook state!');
-            }
-            this.notebook.nb_state.order.splice(order_index, 1);
-            delete this.notebook.nb_state.elements[id];
-            this.notebook.get_internal_state_for_ie_id(this.ie.id).cm.toTextArea();  // remove editor from textarea
-            this.notebook.remove_internal_state_for_ie_id(this.ie.id);
-            interaction_area.removeChild(this.ie);
-            if (this.ie === this.notebook.current_ie) {
-                this.notebook.current_ie = undefined;  // prevent attempted access
-                this.notebook.set_current_ie(next_ie);
-            }
+        const id = this.ie.id;
+        const order_index = this.notebook.nb_state.order.indexOf(id);
+        if (order_index === -1) {
+            throw new Error('unexpected: when deleting element, id not found in notebook state!');
+        }
+        this.notebook.nb_state.order.splice(order_index, 1);
+        delete this.notebook.nb_state.elements[id];
+        this.notebook.get_internal_state_for_ie_id(this.ie.id).cm.toTextArea();  // remove editor from textarea
+        this.notebook.remove_internal_state_for_ie_id(this.ie.id);
+        interaction_area.removeChild(this.ie);
+        if (this.ie === this.notebook.current_ie) {
+            this.notebook.current_ie = undefined;  // prevent attempted access
+            this.notebook.set_current_ie(next_ie);  // next_ie may be null or undefined
         }
     }
 }

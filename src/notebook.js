@@ -86,6 +86,7 @@ const {
     add_edit_change,
     perform_move_up_ie_change,
     perform_move_down_ie_change,
+    perform_add_new_ie_at_position_change,
     perform_add_new_before_ie_change,
     perform_add_new_after_ie_change,
     perform_delete_ie_change,
@@ -576,49 +577,93 @@ class Notebook {
             break;
         }
         case 'eval_element': {
-            this.ie_ops_eval_element(this.current_ie, false);
+            if (!this.current_ie) {
+                beep();
+            } else {
+                this.ie_ops_eval_element(this.current_ie, false);
+            }
             break;
         }
         case 'eval_stay_element': {
-            this.ie_ops_eval_element(this.current_ie, true);
+            if (!this.current_ie) {
+                beep();
+            } else {
+                this.ie_ops_eval_element(this.current_ie, true);
+            }
             break;
         }
         case 'eval_notebook': {
-            this.ie_ops_eval_notebook(this.current_ie, false);
+            if (!this.current_ie) {
+                beep();
+            } else {
+                this.ie_ops_eval_notebook(this.current_ie, false);
+            }
             break;
         }
         case 'eval_notebook_before': {
-            this.ie_ops_eval_notebook(this.current_ie, true);
+            if (!this.current_ie) {
+                beep();
+            } else {
+                this.ie_ops_eval_notebook(this.current_ie, true);
+            }
             break;
         }
         case 'focus_up_element': {
-            const ie_to_focus = this.current_ie.previousElementSibling || this.current_ie;
-            this.set_current_ie(ie_to_focus);
+            const ie_to_focus = this.current_ie?.previousElementSibling ?? this.current_ie;
+            if (!ie_to_focus) {
+                beep();
+            } else {
+                this.set_current_ie(ie_to_focus);
+            }
             break;
         }
         case 'focus_down_element': {
-            const ie_to_focus = this.current_ie.nextElementSibling || this.current_ie;
-            this.set_current_ie(ie_to_focus);
+            const ie_to_focus = this.current_ie?.nextElementSibling ?? this.current_ie;
+            if (!ie_to_focus) {
+                beep();
+            } else {
+                this.set_current_ie(ie_to_focus);
+            }
             break;
         }
         case 'move_up_element': {
-            perform_move_up_ie_change(this, this.current_ie.id);
+            if (!this.current_ie) {
+                beep();
+            } else {
+                perform_move_up_ie_change(this, this.current_ie.id);
+            }
             break;
         }
         case 'move_down_element': {
-            perform_move_down_ie_change(this, this.current_ie.id);
+            if (!this.current_ie) {
+                beep();
+            } else {
+                perform_move_down_ie_change(this, this.current_ie.id);
+            }
             break;
         }
         case 'add_before_element': {
-            perform_add_new_before_ie_change(this, this.current_ie.id);
+            if (!this.current_ie) {
+                perform_add_new_ie_at_position_change(this, 0);
+            } else {
+                perform_add_new_before_ie_change(this, this.current_ie.id);
+            }
             break;
         }
         case 'add_after_element': {
-            perform_add_new_after_ie_change(this, this.current_ie.id);
+            if (!this.current_ie) {
+                perform_add_new_ie_at_position_change(this, 0);
+            } else {
+                perform_add_new_after_ie_change(this, this.current_ie.id);
+            }
             break;
         }
         case 'delete_element': {
-            perform_delete_ie_change(this, this.current_ie);
+            if (!this.current_ie) {
+                beep();
+            } else {
+                perform_delete_ie_change(this, this.current_ie);
+            }
             break;
         }
         case 'settings': {
@@ -822,7 +867,9 @@ class Notebook {
                     return;
                 }
             }
-            this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
+            if (this.current_ie) {
+                this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
+            }
             const contents = this.nb_state_to_contents(this.nb_state);
             if (!interactive && this.notebook_file_handle) {
                 const file_handle = this.notebook_file_handle;
@@ -857,7 +904,9 @@ class Notebook {
 
     async export_notebook() {
         try {
-            this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
+            if (this.current_ie) {
+                this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
+            }
             const contents = this.nb_state_to_contents(this.nb_state);
             const save_dialog_options = {
                 description: 'esbook files',
@@ -943,7 +992,7 @@ ${contents_base64}
              new_nb_state.nb_version !== this.constructor.nb_version ||
              !Array.isArray(new_nb_state.order) ||
              typeof new_nb_state.elements !== 'object' ||
-             new_nb_state.order.length < 1 ||
+             new_nb_state.order.length < 0 ||
              new_nb_state.order.length !== Object.keys(new_nb_state.elements).length ) {
             throw new Error('unknown notebook state format');
         }
@@ -999,9 +1048,12 @@ ${contents_base64}
                     }
                 }
             }
-            this.set_current_ie(this.interaction_area.querySelector('.interaction_element'));
-            // make sure "selected" cursor is correct
-            this.set_ie_selection_state(this.current_ie, true);
+            const first_ie = this.interaction_area.querySelector('.interaction_element');
+            this.set_current_ie(first_ie ?? undefined);
+            if (this.current_ie) {
+                // make sure "selected" cursor is correct
+                this.set_ie_selection_state(this.current_ie, true);
+            }
             // typeset
             await this.typeset_notebook();
             // set focus
@@ -1032,6 +1084,7 @@ ${contents_base64}
         }
         // load the text into an empty notebook
         await this.clear_notebook(true);
+        // this.current_ie will be set now
         this.set_input_text_for_ie_id(this.current_ie.id, text);
         this.update_nb_state(this.current_ie);  // make sure new text is present in this.nb_state
     }
@@ -1051,7 +1104,9 @@ ${contents_base64}
     }
 
     focus_to_current_ie() {
-        this.set_input_focus_for_ie_id(this.current_ie.id);
+        if (this.current_ie) {
+            this.set_input_focus_for_ie_id(this.current_ie.id);
+        }
     }
 
     // if !append_to_end, the new interaction_element is inserted before reference_ie.
@@ -1165,25 +1220,36 @@ ${contents_base64}
     }
 
     is_on_first_element() {
-        const order = this.nb_state.order;
-        const ie_position = order.indexOf(this.current_ie.id);
-        return (ie_position <= 0);
+        if (!this.current_ie) {
+            return false;
+        } else {
+            const order = this.nb_state.order;
+            const ie_position = order.indexOf(this.current_ie.id);
+            return (ie_position <= 0);
+        }
     }
     is_on_last_element() {
-        const order = this.nb_state.order;
-        const ie_position = order.indexOf(this.current_ie.id);
-        return (ie_position >= order.length-1);
+        if (!this.current_ie) {
+            return false;
+        } else {
+            const order = this.nb_state.order;
+            const ie_position = order.indexOf(this.current_ie.id);
+            return (ie_position >= order.length-1);
+        }
     }
 
+    // ie may be null or undefined
     set_current_ie(ie, leave_focus_alone=false) {
         if (ie !== this.current_ie) {
             if (this.current_ie) {
                 this.update_nb_state(this.current_ie);
                 this.set_ie_selection_state(this.current_ie, false);
             }
-            this.current_ie = ie;
-            this.update_nb_state(this.current_ie);
-            this.set_ie_selection_state(this.current_ie, true);
+            this.current_ie = ie;  // ie may be null or undefined
+            if (this.current_ie) {
+                this.update_nb_state(this.current_ie);
+                this.set_ie_selection_state(this.current_ie, true);
+            }
         }
         if (!leave_focus_alone) {
             this.focus_to_current_ie();
