@@ -35,9 +35,12 @@
 // mathematics interfaces, and various graphics functions and other
 // functions to manipluate the output.  Also included are:
 //
-//     import_lib:    import other libraries from the lib/ directory
-//     global_export: export new "global" properties
-//     is_stopped:    determine if the evaluation has been stopped
+//     settings:       current settings
+//     theme_settings: current theme_settings
+//     import_lib:     import other libraries from the lib/ directory
+//     global_export:  export new "global" properties
+//     is_stopped:     determine if the evaluation has been stopped
+//     delay_ms:       return a Promise that resolves after a specified delay
 //
 // These all continue to be available even after the evaluation has
 // returned if there are any async actions still active.
@@ -57,6 +60,14 @@ const {
 const {
     sprintf,
 } = await import('../sprintf.js');
+
+const {
+    get_settings,
+} = await import('./settings.js');
+
+const {
+    get_theme_settings,
+} = await import('./theme-settings.js');
 
 
 const nerdamer_script_url = new URL('../../node_modules/nerdamer/all.min.js', import.meta.url);
@@ -284,6 +295,8 @@ export class EvalWorker {
             factor:   nerdamer.factor.bind(nerdamer),
             simplify: nerdamer.simplify.bind(nerdamer),
             expand:   nerdamer.expand.bind(nerdamer),
+            settings:       get_settings(),
+            theme_settings: get_theme_settings(),
             import_lib,
             global_export,
             is_stopped,

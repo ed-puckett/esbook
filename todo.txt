@@ -8,10 +8,9 @@ sometimes input cell does not respond to keyboard shortcuts after focus is reset
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 set width on graphics output DIVs
 support dark mode in dagre css
-expose settings/theme-settings in eval
 provide print_markup() (or something) in eval
-things like matrices and square root are sometimes scaled wrong in TeX output
 provide settings to enable autoeval (default false) prompt?
+cannot use keyboard navigation in menu when screen reader is on (focus does not move)
 
 documentation: update and improve help
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
@@ -19,8 +18,9 @@ documentation: warning about executable content
 documentation: export, also ?s= parameter
 documentation: autoeval, autohide
 documentation: dialogs/ui
-
 add demos (html-based)
+
+things like matrices and square root are sometimes scaled wrong in TeX output
 
 
 === THINK ABOUT ===
@@ -54,6 +54,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* expose settings/theme-settings in eval
 * empty elements when not selected are almost invisible (just a 1 pixel blank space)
 * evaluate ie with containing only '//' causes an error: Unexpected token ')'
 * allow empty notebooks and permit delete_element to remove the last element
