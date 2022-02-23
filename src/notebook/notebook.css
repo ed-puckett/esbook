@@ -151,16 +151,9 @@ body {
     outline: 1px solid var(--color-ie-input-outline-selected);
 }
 
-.interaction_element.hide-input .input,
-.interaction_element.mdmj:not(.selected) .input {
+.interaction_element.autohide:not(.selected) .input {
     /* hide inputs of ie elements with .hide-input class */
     /* automatically hide markdown/MathJax inputs when not selected */
-    display: none;
-}
-
-.interaction_element.hide-input:only-child .selected_indicator {
-    /* hide the selected indicator of an ie if it is the only ie and have .hide-input set */
-    /* this is to support creation of "dialog" notebooks */
     display: none;
 }
 

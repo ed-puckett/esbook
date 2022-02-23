@@ -6,32 +6,7 @@ const {
     output_handlers,
 } = await import('./output-handlers.js');
 
-export const ie_hide_input_css_class = 'hide-input';
-
-/** get current "hide input" state for the ie
- *  @param {HTMLElement} interaction element ie
- *  @return {boolean}
- */
-export function ie_get_hide_input_state(ie) {
-    return ie.classList.contains(ie_hide_input_css_class);
-}
-
-/** set current "hide input" state for the ie
- *  @param {HTMLElement} interaction element ie
- *  @param {boolean} new "hide input" state for the ie
- */
-export function ie_set_hide_input_state(ie, state) {
-    if (typeof state !== 'boolean') {
-        throw new Error('state must be specified as true or false');
-    }
-    if (state) {
-        ie.classList.add(ie_hide_input_css_class);
-    } else {
-        ie.classList.remove(ie_hide_input_css_class);
-    }
-}
-
-function _get_svg_string( svg_node, stylesheet_text ) {
+function _get_svg_string(svg_node, stylesheet_text) {
     svg_node.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
 
     const style_element = document.createElement("style");
@@ -58,19 +33,6 @@ export function create_output_context(ie, output_data_collection) {
     const output_element_collection = ie.querySelector('.output');
 
     return {
-        /** get current "hide input" state for the ie
-         *  @return {boolean}
-         */
-        get_hide_input_state() {
-            return ie_get_hide_input_state(ie);
-        },
-        /** set current "hide input" state for the ie
-         *  @param {boolean} new "hide input" state for the ie
-         */
-        set_hide_input_state(state) {
-            ie_set_hide_input_state(ie, state);
-        },
-
         async output_handler_update_notebook(type, value) {
             const handler = output_handlers[type];
             if (!handler) {

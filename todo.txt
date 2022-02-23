@@ -1,6 +1,6 @@
 review Content-Security-Policy
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
-call cleanup on change objects that are deleted
+call cleanup on change objects that are deleted by being trimmed from undo/redo
 provide "toast" messages + dialog to display past messages
 update theme-colors (dark/light modes)
 system dark/light mode switch is not detected (chromium bug on gnome/linux)
@@ -11,16 +11,18 @@ support dark mode in dagre css
 expose settings/theme-settings in eval
 provide print_markup() (or something) in eval
 things like matrices and square root are sometimes scaled wrong in TeX output
+provide settings to enable autoeval (default false) prompt?
 
 documentation: update and improve help
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: warning about executable content
 documentation: export, also ?s= parameter
-documentation: autoeval
+documentation: autoeval, autohide
 documentation: dialogs/ui
 
 allow empty notebooks and permit delete_element to remove the last element
 default element mode should be markup, with // on first line as mode switch sequence (switch to JavaScript)
+autohide: check when edit changes appear and also when loading
 
 
 === THINK ABOUT ===

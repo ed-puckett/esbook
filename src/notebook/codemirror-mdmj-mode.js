@@ -21,7 +21,7 @@
 
     const mode_change_token_style = 'bracket';
 
-    CodeMirror.defineMode('md+mj', function (config, parser_config) {
+    CodeMirror.defineMode('mdmj', function (config, parser_config) {
         const modes = {
             [MARKDOWN]: CodeMirror.getMode(config, {
                 name: 'markdown',
@@ -31,7 +31,7 @@
             }),
         };
 
-        // This is the implementation of the token() function for the md+mj
+        // This is the implementation of the token() function for the mdmj
         // mode, and also performs state transitions between the inner modes
         // of that mode.
         function token(stream, state) {
@@ -111,5 +111,5 @@
         };
     });
 
-    CodeMirror.defineMIME('application/x-md+mj', 'md+mj');
+    CodeMirror.defineMIME('application/x-mdmj', 'mdmj');
 });

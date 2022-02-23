@@ -69,7 +69,7 @@ const {
     marked,
     MathJax,
     is_MathJax_v2,
-} = await import('./md+mj.js');
+} = await import('./mdmj.js');
 
 const {
     TEXT_ELEMENT_CLASS,
@@ -173,19 +173,32 @@ class Notebook {
 
     static sym_eval_state = Symbol.for('eval_state');
 
-    // if present, then the input following is markdown+MathJax
-    static _input_mdmj_header_sequence = '%';  // if this sequence occurs on first line after optional whitespace, then md+mj mode
-    static _input_mdmj_header_re = new RegExp(`^\\s*${this._input_mdmj_header_sequence}.*\$`, 'mi');
+    // CSS class for ie when in mdmj mode
+    static _ie_autohide_css_class = 'autohide';
 
-    // CSS class for ie when in md+mj mode
-    static _ie_mdmj_mode_css_class = 'mdmj';
-
-    // If this keyword appears in a JavaScript comment on the first line
-    // of the first interaction element, and the input is not in md+mj
-    // mode, then that first cell will be automatically evaluated
-    // when loading the notebook.
-    static _input_autoeval_initial_comment_keyword = 'autoeval';
-    static _input_autoeval_initial_comment_re      = new RegExp(`^\\s*//\\s*${this._input_autoeval_initial_comment_keyword}(\\W.*$|$)`, 'i');
+    static detect_ie_modes(first_line) {
+        // eliminate subsequent lines, if any
+        const newline_pos = first_line.indexOf('\n');
+        if (newline_pos >= 0) {
+            first_line = first_line.substring(0, newline_pos);
+        }
+        const result = {};
+        const parts = first_line.trim().split(/\s+/);
+        if (parts[0] !== '//') {
+            result.mdmj = true;
+        } else {
+            result.javascript = true;
+            for (let i = 1; i < parts.length; i++) {
+                const token = parts[i].toLowerCase();
+                switch (token) {
+                case 'autoeval':
+                case 'autohide':
+                    result[token] = true;
+                }
+            }
+        }
+        return result;
+    }
 
     // async setup/initialization (to be called immediately after construction)
     async setup() {
@@ -313,7 +326,7 @@ class Notebook {
                 '../node_modules/codemirror/addon/edit/matchbrackets.js',
             ].map(load_cm_script)
         );
-        await load_cm_script('notebook/codemirror-md+mj-mode.js');
+        await load_cm_script('notebook/codemirror-mdmj-mode.js');
 
         this.menubar = await MenuBar.create(this.controls);
     }
@@ -400,7 +413,7 @@ class Notebook {
         }
 
         let title = DEFAULT_TITLE;
-        if (stats) {
+        if (stats?.name) {
             title = stats.name;
         }
         document.title = title;
@@ -1020,15 +1033,12 @@ ${contents_base64}
         const first_ie_id = this.nb_state.order[0];
         if (first_ie_id) {
             const cm = this.get_internal_state_for_ie_id(first_ie_id).cm;
-            const first_line_trimmed = cm.getLine(0).trim();
-            const mdmj_mode = first_line_trimmed.startsWith(this.constructor._input_mdmj_header_sequence);
-            if (!mdmj_mode) {
-                const should_autoeval = first_line_trimmed.match(this.constructor._input_autoeval_initial_comment_re);
-                if (should_autoeval) {
-                    const first_ie = document.getElementById(first_ie_id);
-                    const stay = true;
-                    await this.ie_ops_eval_element(first_ie, stay);
-                }
+            const first_line = cm.getLine(0);
+            const detected_modes = this.constructor.detect_ie_modes(first_line);
+            if (mode.autoeval) {
+                const first_ie = document.getElementById(first_ie_id);
+                const stay = true;
+                await this.ie_ops_eval_element(first_ie, stay);
             }
         }
     }
@@ -1098,28 +1108,28 @@ ${contents_base64}
         const cm = CodeMirror.fromTextArea(input_textarea, {
             viewportMargin: Infinity,  // this plus setting height style to "auto" makes the editor auto-resize
             matchBrackets: true,
-            mode: 'javascript',  //!!! switch based on buffer format  // defined in codemirror-md+mj-mode.js
+            mode: 'javascript',  // switch based on buffer format
         });
         this.update_cm_from_settings(cm, ie);
         ie.querySelector('.CodeMirror').classList.add('input');
         const internal_state = this.get_internal_state_for_ie_id(ie.id);
         internal_state.cm = cm;
+        const update_ie_mode = () => {  // use arrow function to preserve "this"
+            const detected_modes = this.constructor.detect_ie_modes(cm.getLine(0));
+            this.set_ie_autohide_state(ie, detected_modes.autohide);
+            if (detected_modes.javascript) {
+                cm.setOption('mode', 'javascript');
+            } else {
+                cm.setOption('mode', 'mdmj');
+            }
+        };
+        update_ie_mode();  // update now, will also update during changes
         cm.on('changes', (instance_cm, changes) => {
             add_edit_change(this, ie.id, changes);
             // check for mode update:
             if (changes.some(c => (c.from.line === 0 || c.to.line === 0))) {
                 // change affected first line; check if mode changed
-                const mdmj_mode = cm.getLine(0).trim().startsWith(this.constructor._input_mdmj_header_sequence);
-                if (!!internal_state.mdmj_mode !== !!mdmj_mode) {
-                    internal_state.mdmj_mode = mdmj_mode;
-                    if (mdmj_mode) {
-                        ie.classList.add(this.constructor._ie_mdmj_mode_css_class);
-                        cm.setOption('mode', 'md+mj');
-                    } else {
-                        ie.classList.remove(this.constructor._ie_mdmj_mode_css_class);
-                        cm.setOption('mode', 'javascript');
-                    }
-                }
+                update_ie_mode();
             }
         });
         return cm;
@@ -1180,6 +1190,14 @@ ${contents_base64}
             cl.add('selected');
         } else {
             cl.remove('selected');
+        }
+    }
+
+    set_ie_autohide_state(ie, state) {
+        if (state) {
+            ie.classList.add(this.constructor._ie_autohide_css_class);
+        } else {
+            ie.classList.remove(this.constructor._ie_autohide_css_class);
         }
     }
 
@@ -1283,13 +1301,13 @@ ${contents_base64}
     // returns the new active EvalWorker instance or undefined if none
     async evaluate_input_text(output_context, input_text) {
         let is_expression, text;
-        const mdmj_header_match = input_text.match(this.constructor._input_mdmj_header_re);
-        if (mdmj_header_match) {
-            is_expression = false;
-            text = escape_for_html(input_text.substring(mdmj_header_match[0].length + 1));
-        } else {
+        const detected_modes = this.constructor.detect_ie_modes(input_text);
+        if (detected_modes.javascript) {
             is_expression = true;
             text = input_text;
+        } else {
+            is_expression = false;
+            text = escape_for_html(input_text);
         }
         if (text.length > 0) {
             if (is_expression) {
