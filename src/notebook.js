@@ -186,6 +186,7 @@ class Notebook {
         const parts = first_line.trim().split(/\s+/);
         if (parts[0] !== '//') {
             result.mdmj = true;
+            result.autohide = true;
         } else {
             result.javascript = true;
             for (let i = 1; i < parts.length; i++) {
@@ -1024,6 +1025,12 @@ ${contents_base64}
 
     // may throw an error
     async import_nb_state(text) {
+        // check if it is necessary to add initial javascript comment to trigger javascript mode
+        const detected_modes = this.constructor.detect_ie_modes(text);
+        if (!detected_modes.javascript) {
+            text = '//\n' + text;
+        }
+        // load the text into an empty notebook
         await this.clear_notebook(true);
         this.set_input_text_for_ie_id(this.current_ie.id, text);
         this.update_nb_state(this.current_ie);  // make sure new text is present in this.nb_state
@@ -1035,7 +1042,7 @@ ${contents_base64}
             const cm = this.get_internal_state_for_ie_id(first_ie_id).cm;
             const first_line = cm.getLine(0);
             const detected_modes = this.constructor.detect_ie_modes(first_line);
-            if (mode.autoeval) {
+            if (detected_modes.autoeval) {
                 const first_ie = document.getElementById(first_ie_id);
                 const stay = true;
                 await this.ie_ops_eval_element(first_ie, stay);
