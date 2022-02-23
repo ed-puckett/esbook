@@ -127,7 +127,8 @@ body {
     grid-area: selected_indicator;
     margin: 0.25rem 0 0 0;
     border-radius: calc(var(--selected-indicator-width) / 2);
-    background: transparent;
+    background: #00000028;
+    min-height: 1px;  /* leave something to see if the element is completely empty */
 }
 
 .interaction_element.selected .selected_indicator {

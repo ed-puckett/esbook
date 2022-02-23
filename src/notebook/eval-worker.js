@@ -163,7 +163,8 @@ export class EvalWorker {
 
         // evaluate the expression:
         const eval_fn_this = self.eval_state;
-        const eval_fn_body = `with (this.eval_context) { ${self.expression} }`;  // note: "this" will be self.eval_state
+        // add \n after self.expression in eval_fn_body to protect from a final line containing a comment without a newline
+        const eval_fn_body = `with (this.eval_context) { ${self.expression}\n }`;  // note: "this" will be self.eval_state
         const eval_fn = new AsyncFunction(...eval_fn_params, eval_fn_body);
         try {
             const result = await eval_fn.apply(eval_fn_this, eval_fn_args);
