@@ -11,16 +11,21 @@ support dark mode in dagre css
 provide print_markup() (or something) in eval
 provide settings to enable autoeval (default false) prompt?
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
+canceling Save leads to another prompt and also clears file_handle and stats in notebook
 
 documentation: update and improve help
-documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: warning about executable content
+documentation: document eval context
+documentation: document output context
+documentation: document output handlers
+documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
+documentation: indicators (modified, running)
 documentation: export, also ?s= parameter
-documentation: autoeval, autohide
+documentation: initial comment; autoeval, autohide
 documentation: dialogs/ui
-add demos (html-based)
+documentation: add demos (html-based)
 
-things like matrices and square root are sometimes scaled wrong in TeX output
+things like matrices and square root are sometimes scaled wrong in TeX output, e.g., return _('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)')
 
 
 === THINK ABOUT ===

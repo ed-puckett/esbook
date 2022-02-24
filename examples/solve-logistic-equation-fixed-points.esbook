@@ -4,15 +4,45 @@
     "elements": [
         {
             "id": "id-91cd99d0-6e07-41bf-a578-059a771990db",
-            "input": "//\nconst f1 = 'r*x*(1 - x)';\nconst e1 = `${f1} = x`;\nconst r1 = _.solveEquations(e1);\n\nglobal_export({ f1, e1, r1 });\n\nfor (const e of r1) {\n    printf('$$%s$$\\n', _(simplify(expand(e))).toTeX());\n}",
+            "input": "//\nconst f1 = 'r*x*(1 - x)';\nconst e1 = `${f1} = x`;\nconst r1 = _.solveEquations(e1);\n\nglobal_export({ f1, e1, r1 });\n\nfor (const e of r1) {\n    print_tex(_(simplify(expand(e))));\n}",
             "output": [
                 {
                     "type": "text",
-                    "text": "$$-\\frac{-\\sqrt{r^{2}-2 \\cdot r+1}+r-1}{2 \\cdot r}$$\n"
+                    "text": "$$-\\frac{-\\sqrt{r^{2}-2 \\cdot r+1}+r-1}{2 \\cdot r}$$"
                 },
                 {
                     "type": "text",
-                    "text": "$$\\frac{\\sqrt{r^{2}-2 \\cdot r+1}+r-1}{2 \\cdot r}$$\n"
+                    "text": "$$\\frac{\\sqrt{r^{2}-2 \\cdot r+1}+r-1}{2 \\cdot r}$$"
+                }
+            ]
+        },
+        {
+            "id": "id-b0caed2c-7661-4fb0-83ac-2171de18a600",
+            "input": "//\nreturn expand(_('sqrt(r^2 - 2*r + 1)'))",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "$$\\sqrt{r^{2}-2 \\cdot r+1}$$"
+                }
+            ]
+        },
+        {
+            "id": "id-b05cd94d-a232-45f4-a49a-9a0ac7fcaced",
+            "input": "//\nreturn expand(_('sqrt((r-1)^2)'));",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "$$\\left|r-1\\right|$$"
+                }
+            ]
+        },
+        {
+            "id": "id-9fe487e0-b6d1-4afa-aedb-336dbc1965bc",
+            "input": "//\nreturn simplify(expand(_('sqrt(r^2 - 2*r + 1)')))",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "$$\\sqrt{r^{2}-2 \\cdot r+1}$$"
                 }
             ]
         },
@@ -50,6 +80,36 @@
         },
         {
             "id": "id-dde4616b-2fc3-4ba3-97d7-60e6e503a53e",
+            "input": "//\nreturn JSON.stringify(_('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)').toTeX())",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "\"\\\\frac{-\\\\frac{e^{x}}{2 \\\\cdot \\\\sqrt{-\\\\frac{1}{2 \\\\cdot x^{\\\\frac{3}{2}}}}}+\\\\frac{e^{x}}{2 \\\\cdot x^{\\\\frac{1}{2}}}+\\\\frac{e^{x}}{4 \\\\cdot x^{\\\\frac{3}{2}}}+\\\\sqrt{\\\\frac{1}{2 \\\\cdot x^{\\\\frac{1}{2}}}} \\\\cdot e^{x}}{x}-\\\\frac{-\\\\frac{e^{x}}{2 \\\\cdot \\\\sqrt{-\\\\frac{1}{2 \\\\cdot x^{\\\\frac{3}{2}}}}}+\\\\sqrt{\\\\frac{1}{2 \\\\cdot x^{\\\\frac{1}{2}}}} \\\\cdot e^{x}}{x^{2}}\""
+                }
+            ]
+        },
+        {
+            "id": "id-da854d4f-2b7b-48a1-bf01-749c84193fad",
+            "input": "$$\n-\\frac{e^{x}}{2 \\cdot \\sqrt{-\\frac{1}{2 \\cdot x^{\\frac{3}{2}}}}}\n$$\n",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "$$\n-\\frac{e^{x}}{2 \\cdot \\sqrt{-\\frac{1}{2 \\cdot x^{\\frac{3}{2}}}}}\n$$\n"
+                }
+            ]
+        },
+        {
+            "id": "id-af573963-469a-4cfb-993a-2d6d32e7eae1",
+            "input": "$$ -\\frac{e^{x}}{2 \\cdot \\sqrt{-\\frac{1}{2 \\cdot x^{\\frac{3}{2}}}}} $$\n",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "$$ -\\frac{e^{x}}{2 \\cdot \\sqrt{-\\frac{1}{2 \\cdot x^{\\frac{3}{2}}}}} $$\n"
+                }
+            ]
+        },
+        {
+            "id": "id-a2e7ae90-f137-458f-9a29-b539020daa27",
             "input": "",
             "output": []
         }
