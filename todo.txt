@@ -26,6 +26,7 @@ documentation: dialogs/ui
 documentation: add demos (html-based)
 
 things like matrices and square root are sometimes scaled wrong in TeX output, e.g., return _('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)')
+after an eval_notebook, sometimes the modified indicator indicates modified when in fact it is not (see canvas2d-demo.esbook)
 
 
 === THINK ABOUT ===

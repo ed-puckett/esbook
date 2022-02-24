@@ -184,12 +184,10 @@ class Notebook {
             first_line = first_line.substring(0, newline_pos);
         }
         const result = {};
-        const parts = first_line.trim().split(/\s+/);
-        if (parts[0] !== '//') {
-            result.mdmj = true;
-            result.autohide = true;
-        } else {
+        const trimmed = first_line.trim();
+        if (trimmed.startsWith('//')) {
             result.javascript = true;
+            const parts = trimmed.split(/\s+/);
             for (let i = 1; i < parts.length; i++) {
                 const token = parts[i].toLowerCase();
                 switch (token) {
@@ -198,6 +196,9 @@ class Notebook {
                     result[token] = true;
                 }
             }
+        } else {
+            result.mdmj = true;
+            result.autohide = true;
         }
         return result;
     }
@@ -1376,24 +1377,32 @@ ${contents_base64}
     }
 
     // may throw an error
-    // returns the new active EvalWorker instance or undefined if none
+    // Note: due to the conversion of mdmj to an expression,
+    // an EvalWorker instance is always returned.
     async evaluate_input_text(output_context, input_text) {
-        let is_expression, text;
+        let text = input_text;
         const detected_modes = this.constructor.detect_ie_modes(input_text);
-        if (detected_modes.javascript) {
-            is_expression = true;
-            text = input_text;
-        } else {
-            is_expression = false;
-            text = escape_for_html(input_text);
+        if (detected_modes.mdmj) {
+            // transform input_text so that, when evaluated, it appears
+            // within a tagged template literal string (tag``) where
+            // the tag is given by an anonymous tag function.
+            // This enables ${} substitutions in the markup.
+            text = `return ((statics, ...dynamics) => {
+                const parts = [];
+                for (let i = 0; i < statics.length; i++) {
+                    parts.push(statics.raw[i]);
+                    if (i < dynamics.length) {
+                        parts.push(dynamics[i]);
+                    }
+                }
+                return parts.join('');
+            })\`${escape_for_html(input_text)}\``;
         }
+        // note that we are going to evaluate text, even if input_text was mdmj
+        // because in that case input_text has been converted to an expression
+        // to be evaluated.
         if (text.length > 0) {
-            if (is_expression) {
-                return EvalWorker.eval(this.get_eval_state(), output_context, text);
-            } else {  // markdown
-                await output_handlers.text.update_notebook(output_context, text);
-                return undefined;  // indicate: no EvalWorker instance
-            }
+            return EvalWorker.eval(this.get_eval_state(), output_context, text);
         }
     }
 
