@@ -22,14 +22,15 @@ documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: indicators (modified, running)
 documentation: export, also ?s= parameter
 documentation: initial comment; autoeval, autohide
+documentation: mdmj: autohide, template literal, must escape ` and ${
 documentation: dialogs/ui
 documentation: add demos (html-based)
 
 things like matrices and square root are sometimes scaled wrong in TeX output, e.g., return _('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)') (also, exponents are large)
-after an eval_notebook, sometimes the modified indicator indicates modified when in fact it is not (see canvas2d-demo.esbook)
 
 
 === THINK ABOUT ===
+save fails silently when there is a permissions error (showSaveFilePicker returns undefined for permissions error and also for user cancel)
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 how to distribute?  create small server apps for each major platform?  how to maintain?
 manage memory used by undo/redo (Change)
@@ -60,6 +61,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* after an eval_notebook, sometimes the modified indicator indicates modified when in fact it is not (see canvas2d-demo.esbook)
 * expose settings/theme-settings in eval
 * empty elements when not selected are almost invisible (just a 1 pixel blank space)
 * evaluate ie with containing only '//' causes an error: Unexpected token ')'

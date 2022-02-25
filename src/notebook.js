@@ -719,6 +719,10 @@ class Notebook {
                 }
             }
         }
+        // update the modified status of the notebook in case an intermediate result
+        // set it to modified but, when done, the notebook was not modified overall
+        // from its starting state.
+        this.notebook_modified();
     }
 
     update_global_view_properties() {
@@ -812,11 +816,12 @@ class Notebook {
             }
             this.update_global_view_properties();
 
-        } catch (err) {
-            console.error('open failed', err.stack);
-            await this.set_notebook_source(undefined);  // reset potentially problematic source info
-            await AlertDialog.run(`open failed: ${err.message}\n(initializing empty document)`);
-            await this.clear_notebook(true);  // initialize empty notebook
+        } catch (error) {
+            if (! (error instanceof AbortError)) {
+                console.error('open failed', error.stack);
+                await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+                await this.clear_notebook(true);  // initialize empty notebook
+            }
         }
     }
 
@@ -845,11 +850,12 @@ class Notebook {
                 await this.open_notebook_from_file_handle(file_handle, do_import, true);
             }
 
-        } catch (err) {
-            console.error('open failed', err.stack);
-            await this.set_notebook_source(undefined);  // reset potentially problematic source info
-            await AlertDialog.run(`open failed: ${err.message}\n(initializing empty document)`);
-            await this.clear_notebook(true);  // initialize empty notebook
+        } catch (error) {
+            if (! (error instanceof AbortError)) {
+                console.error('open failed', error.stack);
+                await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+                await this.clear_notebook(true);  // initialize empty notebook
+            }
         }
     }
 
@@ -901,10 +907,12 @@ class Notebook {
             this.set_notebook_unmodified();
             this.update_global_view_properties();
 
-        } catch (err) {
-            console.error('save failed', err.stack);
-            await this.set_notebook_source(undefined);  // reset potentially problematic source info
-            await AlertDialog.run(`save failed: ${err.message}`);
+        } catch (error) {
+            if (! (error instanceof AbortError)) {
+//!!! necessary?                await this.set_notebook_source(undefined);  // reset potentially problematic source info
+                console.error('save failed', error.stack);
+                await AlertDialog.run(`save failed: ${error.message}`);
+            }
         }
     }
 
@@ -958,10 +966,11 @@ ${contents_base64}
             await fs_interface.save_text(file_handle, page_contents);  // may throw an error
             this.update_global_view_properties();
 
-        } catch (err) {
-            console.error('save failed', err.stack);
-            await this.set_notebook_source(undefined);  // reset potentially problematic source info
-            await AlertDialog.run(`save failed: ${err.message}`);
+        } catch (error) {
+            if (! (error instanceof AbortError)) {
+                console.error('export failed', error.stack);
+                await AlertDialog.run(`save failed: ${error.message}`);
+            }
         }
     }
 
