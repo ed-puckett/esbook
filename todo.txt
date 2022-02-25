@@ -11,7 +11,6 @@ support dark mode in dagre css
 provide print_markup() (or something) in eval
 provide settings to enable autoeval (default false) prompt?
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
-canceling Save leads to another prompt and also clears file_handle and stats in notebook
 
 documentation: update and improve help
 documentation: warning about executable content
@@ -25,8 +24,6 @@ documentation: initial comment; autoeval, autohide
 documentation: mdmj: autohide, template literal, must escape ` and ${
 documentation: dialogs/ui
 documentation: add demos (html-based)
-
-things like matrices and square root are sometimes scaled wrong in TeX output, e.g., return _('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)') (also, exponents are large)
 
 
 === THINK ABOUT ===
@@ -61,6 +58,8 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* things like matrices and square root are sometimes scaled wrong in TeX output, e.g., return _('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)') (also, exponents are large)
+* canceling Save leads to another prompt and also clears file_handle and stats in notebook
 * after an eval_notebook, sometimes the modified indicator indicates modified when in fact it is not (see canvas2d-demo.esbook)
 * expose settings/theme-settings in eval
 * empty elements when not selected are almost invisible (just a 1 pixel blank space)

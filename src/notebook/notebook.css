@@ -177,6 +177,9 @@ body {
     font-family: monospace;
     display: inline;
 }
+.output .mjx-math {
+    font-family: none;  /* prevent math formatting issues when monospace is set */
+}
 .output > .text-content > p {
     margin-block-start: 0;
     margin-block-end: 0;

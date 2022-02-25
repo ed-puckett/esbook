@@ -17,11 +17,18 @@ const mathjax_static_config_js = `
 globalThis.MathJax = {
     jax: [ "input/TeX", "input/MathML", "input/AsciiMath", "output/CommonHTML" ],
     extensions: [ "tex2jax.js", "mml2jax.js", "MathMenu.js", "MathZoom.js", /*"AssistiveMML.js",*/ "a11y/accessibility-menu.js" ],
-    "HTML-CSS": { scale: 100, matchFontHeight: false },
-    CommonHTML: { matchFontHeight: false },
-    SVG: { matchFontHeight: false },
+    "HTML-CSS": {
+        xscale: 100,
+        matchFontHeight: false,
+    },
+    CommonHTML: {
+        matchFontHeight: false,
+    },
+    SVG: {
+        matchFontHeight: false,
+    },
     TeX: {
-        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"],
     },
     tex2jax: {
         inlineMath: [ ['$','$'] ],

@@ -1405,7 +1405,7 @@ ${contents_base64}
                     }
                 }
                 return parts.join('');
-            })\`${escape_for_html(input_text)}\``;
+            })\`${(input_text)}\``;
         }
         // note that we are going to evaluate text, even if input_text was mdmj
         // because in that case input_text has been converted to an expression
