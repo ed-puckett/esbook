@@ -4,7 +4,7 @@
     "elements": [
         {
             "id": "id-91cd99d0-6e07-41bf-a578-059a771990db",
-            "input": "//\nconst f1 = 'r*x*(1 - x)';\nconst e1 = `${f1} = x`;\nconst r1 = _.solveEquations(e1);\n\nglobal_export({ f1, e1, r1 });\n\nfor (const e of r1) {\n    print_tex(_(simplify(expand(e))));\n}",
+            "input": "//\nconst f1 = 'r*x*(1 - x)';\nconst e1 = `${f1} = x`;\nconst r1 = _.solveEquations(e1);\n\nvars({ f1, e1, r1 });\n\nfor (const e of r1) {\n    print_tex(_(simplify(expand(e))));\n}",
             "output": [
                 {
                     "type": "text",
@@ -48,7 +48,7 @@
         },
         {
             "id": "id-2b6a1531-634c-4af3-ab27-39f2cce909a1",
-            "input": "//\nconst f2 = simplify(expand(_('r*x*(1-x)').sub('x', 'r*x*(1-x)')));\nconst e2 = `${f2} = x`;\nconst r2 = _.solveEquations(e2);\n\nglobal_export({ f2, e2, r2 });\n\nfor (const e of r2) {\n    printf('$$%s$$\\n', _(simplify(expand(e))).toTeX());\n}",
+            "input": "//\nconst f2 = simplify(expand(_('r*x*(1-x)').sub('x', 'r*x*(1-x)')));\nconst e2 = `${f2} = x`;\nconst r2 = _.solveEquations(e2);\n\nvars({ f2, e2, r2 });\n\nfor (const e of r2) {\n    printf('$$%s$$\\n', _(simplify(expand(e))).toTeX());\n}",
             "output": [
                 {
                     "type": "text",

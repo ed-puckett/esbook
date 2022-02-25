@@ -32,10 +32,12 @@ properties are available directly for evaluation within any
 interaction element, without the need to prefix them with any parent
 object.  In this sense, this.eval_context acts like a global
 environment for the notebook without the need to modify globalThis.</p>
-<p>global_export(...objects) assigns new properties to this.eval_context.
+<p>vars(...objects) assigns new properties to this.eval_context.
 Those properties then become available &quot;globally&quot;.  Note that the
 &quot;global&quot; objects are available from any interaction element, that
-is until the notebook is opened to a new file or is cleared.</p>
+is until the notebook is opened to a new file or is cleared.
+The return value is undefined; this makes ${vars(...)} in a
+template literal (and in markup) not insert anything into the output.</p>
 <p>Other properties set on the &quot;this&quot; object, like the &quot;global&quot;
 properties, persist until the notebook is opened to a new file or
 is cleared.  However, those properties must be prefixed by &quot;this.&quot;
@@ -54,7 +56,7 @@ functions to manipluate the output.  Also included are:</p>
 <pre><code>settings:       current settings
 theme_settings: current theme_settings
 import_lib:     import other libraries from the lib/ directory
-global_export:  export new &quot;global&quot; properties
+vars:           export new &quot;global&quot; properties
 is_stopped:     determine if the evaluation has been stopped
 delay_ms:       return a Promise that resolves after a specified delay
 </code></pre>

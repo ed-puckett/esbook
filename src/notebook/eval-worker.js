@@ -11,10 +11,12 @@
 // object.  In this sense, this.eval_context acts like a global
 // environment for the notebook without the need to modify globalThis.
 //
-// global_export(...objects) assigns new properties to this.eval_context.
+// vars(...objects) assigns new properties to this.eval_context.
 // Those properties then become available "globally".  Note that the
 // "global" objects are available from any interaction element, that
 // is until the notebook is opened to a new file or is cleared.
+// The return value is undefined; this makes ${vars(...)} in a
+// template literal (and in markup) not insert anything into the output.
 //
 // Other properties set on the "this" object, like the "global"
 // properties, persist until the notebook is opened to a new file or
@@ -38,7 +40,7 @@
 //     settings:       current settings
 //     theme_settings: current theme_settings
 //     import_lib:     import other libraries from the lib/ directory
-//     global_export:  export new "global" properties
+//     vars:           export new "global" properties
 //     is_stopped:     determine if the evaluation has been stopped
 //     delay_ms:       return a Promise that resolves after a specified delay
 //
@@ -201,8 +203,9 @@ export class EvalWorker {
             return import(new URL(lib_path, lib_dir_url));
         }
 
-        function global_export(...objects) {
-            return Object.assign(self.eval_state.eval_context, ...objects);
+        function vars(...objects) {
+            Object.assign(self.eval_state.eval_context, ...objects);
+            return undefined;
         }
 
         function is_stopped() {
@@ -298,7 +301,7 @@ export class EvalWorker {
             settings:       get_settings(),
             theme_settings: get_theme_settings(),
             import_lib,
-            global_export,
+            vars,
             is_stopped,
             delay_ms,
             next_tick,
