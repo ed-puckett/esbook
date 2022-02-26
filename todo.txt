@@ -1,6 +1,6 @@
 review Content-Security-Policy
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
-call cleanup on change objects that are deleted by being trimmed from undo/redo
+call cleanup on change objects that are deleted by being trimmed by new edits
 provide "toast" messages + dialog to display past messages
 update theme-colors (dark/light modes)
 system dark/light mode switch is not detected (chromium bug on gnome/linux)
@@ -8,9 +8,10 @@ sometimes input cell does not respond to keyboard shortcuts after focus is reset
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 set width on graphics output DIVs
 support dark mode in dagre css
-provide print_markup() (or something) in eval
 provide settings to enable autoeval (default false) prompt?
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
+nerdamer matrices are rendered with simple vertical bars
+mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
 
 documentation: update and improve help
 documentation: warning about executable content
@@ -27,6 +28,7 @@ documentation: add demos (html-based)
 
 
 === THINK ABOUT ===
+provide print_markup() (or something) in eval
 save fails silently when there is a permissions error (showSaveFilePicker returns undefined for permissions error and also for user cancel)
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
 how to distribute?  create small server apps for each major platform?  how to maintain?

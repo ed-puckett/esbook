@@ -15,8 +15,23 @@ const mathjax_static_config_js = `
 // See: Davide Cervone comment in https://groups.google.com/g/mathjax-users/c/5h-NNba8pN4?pli=1 re: "matchFontHeight: false" setting
 //      (this is to eliminate the "font-size: 121%" css setting on MathJax blocks).
 globalThis.MathJax = {
-    jax: [ "input/TeX", "input/MathML", "input/AsciiMath", "output/CommonHTML" ],
-    extensions: [ "tex2jax.js", "mml2jax.js", "MathMenu.js", "MathZoom.js", /*"AssistiveMML.js",*/ "a11y/accessibility-menu.js" ],
+    jax: [
+        "input/TeX",
+        "input/MathML",
+        "input/AsciiMath",
+        "output/CommonHTML",
+    ],
+    extensions: [
+        "tex2jax.js",
+        "mml2jax.js",
+        "MathMenu.js",
+        "MathZoom.js",
+        "TeX/AMSmath.js",
+        "TeX/AMSsymbols.js",
+        "TeX/AMScd.js",
+        //"AssistiveMML.js",
+        "a11y/accessibility-menu.js",
+    ],
     "HTML-CSS": {
         xscale: 100,
         matchFontHeight: false,
@@ -26,9 +41,6 @@ globalThis.MathJax = {
     },
     SVG: {
         matchFontHeight: false,
-    },
-    TeX: {
-        extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"],
     },
     tex2jax: {
         inlineMath: [ ['$','$'] ],
