@@ -7,27 +7,48 @@ system dark/light mode switch is not detected (chromium bug on gnome/linux)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse into output area?) (focus issues?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 set width on graphics output DIVs
-support dark mode in dagre css
+support dark mode in dagre css (also: Plotly)
 provide settings to enable autoeval (default false) prompt?
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
 nerdamer matrices are rendered with simple vertical bars
 mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
+mathjax: latex equation numbers, labels, etc need to be reset (if used)
 
-documentation: update and improve help
+documentation: separate help from README.md
 documentation: warning about executable content
-documentation: document eval context
+documentation: interaction elements: input, output/graphics, selected_indicator
+documentation: interaction elements: focus, move, add
+documentation: evaluation: mdmj (template literal model), javascript (async function model)
+documentation: using vars() in mdmj
+documentation: mdmj: autohide, template literal, must escape ` and ${
+documentation: async evaluation (mdmj and javascript)
+documentation: document eval context (plus vars())
+documentation: evaluation: definitions need to be progressive within the notebook
 documentation: document output context
 documentation: document output handlers
+documentation: graphics are stored as images in saved notebooks
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
 documentation: indicators (modified, running)
-documentation: export, also ?s= parameter
+documentation: various actions (menu and key-bindings)
+documentation: key bindings; menu glyphs for modifiers
+documentation: settings
+documentation: import (javascript)
+documentation: export, also ?s= parameter on exported html
+documentation: open/save dialogs (plus confirmations)
+documentation: alerts, confirmation and close warnings
 documentation: initial comment; autoeval, autohide
-documentation: mdmj: autohide, template literal, must escape ` and ${
-documentation: dialogs/ui
+documentation: creating dialogs and ui
 documentation: add demos (html-based)
+documentation: browser support
+documentation: local server
 
 
 === THINK ABOUT ===
+options for printing (e.g., show autohide elements)
+installer
+"unevaluated" status for an ie (with an associated indicator)
+add support for web workers
+support configurable key bindings
 provide print_markup() (or something) in eval
 save fails silently when there is a permissions error (showSaveFilePicker returns undefined for permissions error and also for user cancel)
 implement auto-hide for autoeval ie and dynamically change when its input element is modified (maybe not?)
