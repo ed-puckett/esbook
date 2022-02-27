@@ -215,6 +215,9 @@ body {
     #interaction_area .input {
         border: 1px solid black;
     }
+    #controls {
+        display: none;
+    }
 }
 
 @media not print {

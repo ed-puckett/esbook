@@ -12,6 +12,7 @@ provide settings to enable autoeval (default false) prompt?
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
 nerdamer matrices are rendered with simple vertical bars
 mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
+provide "clear" action for current output or all outputs
 mathjax: latex equation numbers, labels, etc need to be reset (if used)
 
 documentation: separate help from README.md
@@ -55,7 +56,6 @@ implement auto-hide for autoeval ie and dynamically change when its input elemen
 how to distribute?  create small server apps for each major platform?  how to maintain?
 manage memory used by undo/redo (Change)
 provide fallback for file open/save interfaces (when on non-chromium browsers)
-provide "clear" action for current output or all outputs
 is the use of innerHTML acceptable?
 change menuitems to use <a> or <button> (for accessibility concerns)
 settings update broadcast to other instances (polling?)
