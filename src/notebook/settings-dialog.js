@@ -56,6 +56,26 @@ const sections = [{
     },
 }, {
     section: {
+        name: 'TeX Options',
+        settings: [{
+            id: 'tex_options_displayIndent',
+            label: 'Display indent',
+            type: 'text',
+            settings_path: [ 'tex_options', 'displayIndent' ],
+        }, {
+            id: 'tex_options_displayAlign',
+            label: 'Display align',
+            type: 'select',
+            options: [
+                { value: 'left',   label: 'left'   },
+                { value: 'center', label: 'center' },
+                { value: 'right',  label: 'right'  },
+            ],
+            settings_path: [ 'tex_options', 'displayAlign' ],
+        }],
+    },
+}, {
+    section: {
         name: 'Theme Colors',
         settings: [{
             id: 'theme_colors',

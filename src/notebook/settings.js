@@ -29,6 +29,11 @@ const initial_settings = {
         indentWithTabs: false,
         keyMap:         'default',
     },
+    tex_options: {
+        displayIndent: '0em',
+        displayAlign:  'left',
+    },
+    theme_colors: 'system',
 };
 
 // may throw an error if the settings value is corrupt or circular

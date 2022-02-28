@@ -47,8 +47,8 @@ globalThis.MathJax = {
         processEscapes: true,
     },
     showMathMenu: true,
-    //displayAlign: 'left',
-    //displayIndent: '2em',
+    displayAlign: 'left',
+    displayIndent: '0em',
     skipStartupTypeset: true,  // typeset must be performed explicitly
     ${mathjax_static_config_identifying_property}: true,  // used to detect when MathJax has replaced this initialization object with itself
 };

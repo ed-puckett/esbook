@@ -1416,6 +1416,9 @@ ${contents_base64}
     }
 
     async typeset_notebook(single_ie=undefined) {
+        MathJax.Hub.config.displayIndent = settings.tex_options.displayIndent ?? '0em';
+        MathJax.Hub.config.displayAlign  = settings.tex_options.displayAlign  ?? 'left';
+
         const ie_update_list = single_ie ? [single_ie] : this.nb_state.order.map(id => document.getElementById(id));
         if (is_MathJax_v2) {
             const tasks = [];

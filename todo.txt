@@ -2,19 +2,19 @@ review Content-Security-Policy
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
 call cleanup on change objects that are deleted by being trimmed by new edits
 provide "toast" messages + dialog to display past messages
-update theme-colors (dark/light modes)
+update theme-colors (for dark/light modes, etc)
 system dark/light mode switch is not detected (chromium bug on gnome/linux)
+support dark mode in dagre css (also: Plotly)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse into output area?) (focus issues?)
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 set width on graphics output DIVs
-support dark mode in dagre css (also: Plotly)
-provide settings to enable autoeval (default false) prompt?
-cannot use keyboard navigation in menu when screen reader is on (focus does not move)
-nerdamer matrices are rendered with simple vertical bars
-mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
+provide settings to only enable autoeval with prompt (default false)
+nerdamer matrices are rendered with simple vertical bars (vmatrix seems to be hard-coded instead of bmatrix)
 provide "clear" action for current output or all outputs
-mathjax: latex equation numbers, labels, etc need to be reset (if used)
+cannot use keyboard navigation in menu when screen reader is on (focus does not move)
+change menuitems to use <a> or <button> (for accessibility concerns)
 
+documentation: recommend: avoid latex equation numbers, labels, etc (use \tag{...} instead)
 documentation: separate help from README.md
 documentation: warning about executable content
 documentation: interaction elements: input, output/graphics, selected_indicator
@@ -45,6 +45,8 @@ documentation: local server
 
 
 === THINK ABOUT ===
+mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
+mathjax: latex equation numbers, labels, etc need to be reset (if used)
 options for printing (e.g., show autohide elements)
 installer
 "unevaluated" status for an ie (with an associated indicator)
@@ -57,7 +59,6 @@ how to distribute?  create small server apps for each major platform?  how to ma
 manage memory used by undo/redo (Change)
 provide fallback for file open/save interfaces (when on non-chromium browsers)
 is the use of innerHTML acceptable?
-change menuitems to use <a> or <button> (for accessibility concerns)
 settings update broadcast to other instances (polling?)
 provide options when doing export (e.g., clear outputs)
 more extensively support undo/redo (Change) for output
