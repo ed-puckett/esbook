@@ -13,6 +13,7 @@ nerdamer matrices are rendered with simple vertical bars (vmatrix seems to be ha
 provide "clear" action for current output or all outputs
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
 change menuitems to use <a> or <button> (for accessibility concerns)
+need better validation in settings dialog (e.g., displayIndent)
 
 documentation: recommend: avoid latex equation numbers, labels, etc (use \tag{...} instead)
 documentation: separate help from README.md
@@ -45,6 +46,7 @@ documentation: local server
 
 
 === THINK ABOUT ===
+allow MathJax configuration per document
 mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
 mathjax: latex equation numbers, labels, etc need to be reset (if used)
 options for printing (e.g., show autohide elements)

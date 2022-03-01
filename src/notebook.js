@@ -1416,6 +1416,7 @@ ${contents_base64}
     }
 
     async typeset_notebook(single_ie=undefined) {
+        //!!! These settings may need to be modified when switching to MathJax version 3
         MathJax.Hub.config.displayIndent = settings.tex_options.displayIndent ?? '0em';
         MathJax.Hub.config.displayAlign  = settings.tex_options.displayAlign  ?? 'left';
 
