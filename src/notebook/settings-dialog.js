@@ -58,11 +58,6 @@ const sections = [{
     section: {
         name: 'TeX Options',
         settings: [{
-            id: 'tex_options_displayIndent',
-            label: 'Display indent',
-            type: 'text',
-            settings_path: [ 'tex_options', 'displayIndent' ],
-        }, {
             id: 'tex_options_displayAlign',
             label: 'Display align',
             type: 'select',
@@ -72,6 +67,11 @@ const sections = [{
                 { value: 'right',  label: 'right'  },
             ],
             settings_path: [ 'tex_options', 'displayAlign' ],
+        }, {
+            id: 'tex_options_displayIndent',
+            label: 'Display indent',
+            type: 'text',
+            settings_path: [ 'tex_options', 'displayIndent' ],
         }],
     },
 }, {

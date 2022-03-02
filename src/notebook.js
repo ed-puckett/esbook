@@ -437,6 +437,53 @@ class Notebook {
         };
     }
 
+    validate_formatting_options(formatting_options) {
+        if (typeof formatting_options !== 'object') {
+            return false;
+        }
+        const keys = Object.keys(formatting_options);
+        if (!keys.every(k => ['displayAlign', 'displayIndent'].includes(k))) {
+            return false;
+        }
+        if ('displayAlign' in formatting_options) {
+            if (typeof formatting_options.displayAlign !== 'string') {
+                return false;
+            }
+            if (! ['left', 'center', 'right'].includes(formatting_options.displayAlign)) {
+                return false;
+            }
+        }
+        if ('displayIndent' in formatting_options) {
+            if (typeof formatting_options.displayIndent !== 'string') {
+                return false;
+            }
+            const amount_str = formatting_options.displayIndent.slice(0, -2).trim();
+            const amount = Number.parseFloat(amount_str);
+            if (isNaN(amount) || amount < 0 || `${amount}` !== amount_str) {
+                return false;
+            }
+            const units = formatting_options.displayIndent.slice(-2);
+            if (! ['pt', 'pc', 'in', 'cm', 'mm', 'em', 'ex', 'mu'].includes(units)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    set_formatting_options_for_ie_id(ie_id, formatting_options) {
+        if (!this.validate_formatting_options(formatting_options)) {
+            throw new Error('invalid formatting options');
+        }
+        let stored_options = this.nb_state.elements[ie_id].formatting_options;
+        if (!stored_options) {
+            stored_options = {};
+            this.nb_state.elements[ie_id].formatting_options = stored_options;
+        }
+        Object.assign(stored_options, formatting_options);
+    }
+    get_formatting_options_for_ie_id(ie_id) {
+        return this.nb_state.elements[ie_id].formatting_options;
+    }
+
     reset_eval_state() {
         this.internal_nb_state[this.constructor.sym_eval_state] = {};
     }
@@ -817,11 +864,9 @@ class Notebook {
             this.update_global_view_properties();
 
         } catch (error) {
-            if (! (error instanceof AbortError)) {
-                console.error('open failed', error.stack);
-                await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
-                await this.clear_notebook(true);  // initialize empty notebook
-            }
+            console.error('open failed', error.stack);
+            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+            await this.clear_notebook(true);  // initialize empty notebook
         }
     }
 
@@ -851,11 +896,9 @@ class Notebook {
             }
 
         } catch (error) {
-            if (! (error instanceof AbortError)) {
-                console.error('open failed', error.stack);
-                await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
-                await this.clear_notebook(true);  // initialize empty notebook
-            }
+            console.error('open failed', error.stack);
+            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+            await this.clear_notebook(true);  // initialize empty notebook
         }
     }
 
@@ -908,11 +951,9 @@ class Notebook {
             this.update_global_view_properties();
 
         } catch (error) {
-            if (! (error instanceof AbortError)) {
-//!!! necessary?                await this.set_notebook_source(undefined);  // reset potentially problematic source info
-                console.error('save failed', error.stack);
-                await AlertDialog.run(`save failed: ${error.message}`);
-            }
+//!!! necessary?            await this.set_notebook_source(undefined);  // reset potentially problematic source info
+            console.error('save failed', error.stack);
+            await AlertDialog.run(`save failed: ${error.message}`);
         }
     }
 
@@ -967,10 +1008,8 @@ ${contents_base64}
             this.update_global_view_properties();
 
         } catch (error) {
-            if (! (error instanceof AbortError)) {
-                console.error('export failed', error.stack);
-                await AlertDialog.run(`save failed: ${error.message}`);
-            }
+            console.error('export failed', error.stack);
+            await AlertDialog.run(`save failed: ${error.message}`);
         }
     }
 
@@ -1021,6 +1060,7 @@ ${contents_base64}
             if ( e.id !== id ||
                  typeof e.input !== 'string' ||
                  !Array.isArray(e.output) ||
+                 (e.formatting_options && !this.validate_formatting_options(e.formatting_options)) ||
                  !e.output.every(output_data => {
                      return ( typeof output_data === 'object' &&
                               output_handlers[output_data?.type]?.validate_output_data(output_data) );
@@ -1061,6 +1101,9 @@ ${contents_base64}
                     if (static_output_element) {
                         output_element_collection.appendChild(static_output_element);
                     }
+                }
+                if (new_nb_data.formatting_options) {
+                    nb_data.formatting_options = new_nb_data.formatting_options;
                 }
             }
             const first_ie = this.interaction_area.querySelector('.interaction_element');
@@ -1347,7 +1390,7 @@ ${contents_base64}
             try {
 
                 const input_text = this.get_input_text_for_ie_id(ie.id);
-                const eval_worker = await this.evaluate_input_text(output_context, input_text);
+                const eval_worker = await this.evaluate_input_text(ie.id, output_context, input_text);
                 if (eval_worker) {
                     this.set_eval_worker_for_ie_id(ie.id, eval_worker);
                 }
@@ -1388,7 +1431,7 @@ ${contents_base64}
     // may throw an error
     // Note: due to the conversion of mdmj to an expression,
     // an EvalWorker instance is always returned.
-    async evaluate_input_text(output_context, input_text) {
+    async evaluate_input_text(ie_id, output_context, input_text) {
         let text = input_text;
         const detected_modes = this.constructor.detect_ie_modes(input_text);
         if (detected_modes.mdmj) {
@@ -1411,37 +1454,46 @@ ${contents_base64}
         // because in that case input_text has been converted to an expression
         // to be evaluated.
         if (text.length > 0) {
-            return EvalWorker.eval(this.get_eval_state(), output_context, text);
+            // create set_formatting_options() function
+            const set_formatting_options = ((formatting_options) => {
+                this.set_formatting_options_for_ie_id(ie_id, formatting_options);
+            }).bind(null);  // don't expose "this"
+
+            // establish initial setting in case it is not set by the evaluation
+            const formatting_options = this.get_formatting_options_for_ie_id(ie_id) ?? {};
+            const displayAlign  = formatting_options.displayAlign  ?? settings.tex_options.displayAlign  ?? 'left';
+            const displayIndent = formatting_options.displayIndent ?? settings.tex_options.displayIndent ?? '0em';
+            set_formatting_options({ displayAlign, displayIndent });
+
+            // evaluate
+            return EvalWorker.eval(this.get_eval_state(), set_formatting_options, output_context, text);
         }
     }
 
     async typeset_notebook(single_ie=undefined) {
-        //!!! These settings may need to be modified when switching to MathJax version 3
-        MathJax.Hub.config.displayIndent = settings.tex_options.displayIndent ?? '0em';
-        MathJax.Hub.config.displayAlign  = settings.tex_options.displayAlign  ?? 'left';
-
         const ie_update_list = single_ie ? [single_ie] : this.nb_state.order.map(id => document.getElementById(id));
         if (is_MathJax_v2) {
-            const tasks = [];
-            if (single_ie) {
-                // typeset one element of notebook
-                tasks.push(['Typeset', MathJax.Hub, single_ie]);
-                tasks.push([this.process_markdown.bind(this), single_ie]);
-            } else {
-                // typeset entire notebook
-                tasks.push(['Typeset', MathJax.Hub]);
-                tasks.push(() => {
-                    for (const ie of ie_update_list) {
-                        this.process_markdown(ie);
-                    }
-                });
+            for (const ie of ie_update_list) {
+                const formatting_options = this.get_formatting_options_for_ie_id(ie.id) ?? {};
+                const displayAlign  = formatting_options.displayAlign  ?? settings.tex_options.displayAlign  ?? 'left';
+                const displayIndent = formatting_options.displayIndent ?? settings.tex_options.displayIndent ?? '0em';
+                MathJax.Hub.config.displayAlign  = displayAlign;
+                MathJax.Hub.config.displayIndent = displayIndent;
+
+                const tasks = [];
+                tasks.push(['Typeset', MathJax.Hub, ie]);
+                tasks.push([this.process_markdown.bind(this), ie]);
+
+                let set_completed;
+                const done_promise = new Promise(resolve => { set_completed = resolve; });
+                tasks.push(set_completed);
+
+                MathJax.Hub.Queue(...tasks);
+                await done_promise;
             }
-            let set_completed;
-            const done_promise = new Promise(resolve => { set_completed = resolve; });
-            tasks.push(set_completed);
-            MathJax.Hub.Queue(...tasks);
-            await done_promise;
         } else {  // MathJax version 3
+            //!!! this needs to be revamped to support ie-by-ie formatting, update displayAlign/displayIndent, etc
+            throw new Error('THIS NEEDS TO BE UPDATED FOR MATHJAX V3!!!');
             await MathJax.typesetPromise();
             // process markdown *after* MathJax processing...
             for (const ie of ie_update_list) {

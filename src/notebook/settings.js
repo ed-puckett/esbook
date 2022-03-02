@@ -30,8 +30,8 @@ const initial_settings = {
         keyMap:         'default',
     },
     tex_options: {
-        displayIndent: '0em',
         displayAlign:  'left',
+        displayIndent: '0em',
     },
     theme_colors: 'system',
 };

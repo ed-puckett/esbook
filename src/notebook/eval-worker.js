@@ -37,12 +37,13 @@
 // mathematics interfaces, and various graphics functions and other
 // functions to manipluate the output.  Also included are:
 //
-//     settings:       current settings
-//     theme_settings: current theme_settings
-//     import_lib:     import other libraries from the lib/ directory
-//     vars:           export new "global" properties
-//     is_stopped:     determine if the evaluation has been stopped
-//     delay_ms:       return a Promise that resolves after a specified delay
+//     settings:               current settings
+//     theme_settings:         current theme_settings
+//     set_formatting_options: set displayAlign and displayIndent
+//     import_lib:             import other libraries from the lib/ directory
+//     vars:                   export new "global" properties
+//     is_stopped:             determine if the evaluation has been stopped
+//     delay_ms:               return a Promise that resolves after a specified delay
 //
 // These all continue to be available even after the evaluation has
 // returned if there are any async actions still active.
@@ -117,11 +118,11 @@ export class EvalWorker {
      *                    return of the _run method does not necessarily
      *                    mean that the instance is "done".
      */
-    static async eval(eval_state, output_context, expression) {
-        return new EvalWorker(eval_state, output_context, expression)._run();
+    static async eval(eval_state, set_formatting_options, output_context, expression) {
+        return new EvalWorker(eval_state, set_formatting_options, output_context, expression)._run();
     }
 
-    constructor(eval_state, output_context, expression) {
+    constructor(eval_state, set_formatting_options, output_context, expression) {
         Object.defineProperties(this, {
             id: {
                 value: generate_uuid(),
@@ -129,6 +130,10 @@ export class EvalWorker {
             },
             eval_state: {
                 value: eval_state,
+                enumerable: true,
+            },
+            set_formatting_options: {
+                value: set_formatting_options,
                 enumerable: true,
             },
             output_context: {
@@ -300,6 +305,7 @@ export class EvalWorker {
             expand:   nerdamer.expand.bind(nerdamer),
             settings:       get_settings(),
             theme_settings: get_theme_settings(),
+            set_formatting_options: this.set_formatting_options,
             import_lib,
             vars,
             is_stopped,
