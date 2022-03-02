@@ -749,6 +749,10 @@ class Notebook {
         if (this.get_input_text_for_ie_id(ie.id).trim()) {  // if there is anything to evaluate...
             await this.evaluate_ie(ie, stay);
         }
+        // update the modified status of the notebook in case an intermediate result
+        // set it to modified but, when done, the notebook was not modified overall
+        // from its starting state.
+        this.notebook_modified();
     }
 
     async ie_ops_eval_notebook(ie, only_before_current_element=false) {
