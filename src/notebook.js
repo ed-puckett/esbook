@@ -324,6 +324,7 @@ class Notebook {
                 '../node_modules/codemirror/mode/markdown/markdown.js',
                 '../node_modules/codemirror/mode/stex/stex.js',
                 '../node_modules/codemirror/mode/javascript/javascript.js',
+                '../node_modules/codemirror/keymap/emacs.js',
                 '../node_modules/codemirror/keymap/sublime.js',
                 '../node_modules/codemirror/keymap/vim.js',
                 '../node_modules/codemirror/addon/dialog/dialog.js',

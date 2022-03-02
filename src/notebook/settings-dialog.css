@@ -12,8 +12,8 @@ body {
     --color-bg-control: var(--color-bg-tool-active1-awake0);
     --color-fg-control: var(--color-c0-tool-active1-awake0);
 
-    --color-bg-warning: var(--color-bg-page-alert1);
-    --color-fg-warning: var(--color-c0-page-alert1);
+    --color-bg-error:   var(--color-bg-page-alert2);
+    --color-fg-error:   var(--color-c1-page-alert2);
 }
 
 body {
@@ -27,7 +27,7 @@ body {
 
 [data-section] {
     position: relative;
-    width: max-content;
+    min-width: max-content;
     margin: 2rem 0 0 1rem;
     padding: 1rem;
     height: max-content;
@@ -87,5 +87,18 @@ body {
     margin-block-end: 0;
 }
 .show-emacs-warning .emacs-warning {
+    display: block;
+}
+
+.error-message {
+    display: none;
+    margin: 2rem 0 0 1rem;
+    padding: 0.5rem;
+    border-radius: 5pt;
+    background-color: var(--color-bg-error);
+    color: var(--color-fg-error);
+    height: fit-content;
+}
+.error-message.active {
     display: block;
 }

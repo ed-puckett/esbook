@@ -53,7 +53,7 @@ export class SettingsUpdatedEvent extends define_subscribable('settings-updated'
 const numeric_re = /^([+-]?[0-9]+[.][0-9]*[Ee][+-]?[0-9]+|[+-]?[.][0-9]+[Ee][+-]?[0-9]+|[+-]?[0-9]+[Ee][+-]?[0-9]+|[+-]?[0-9]+[.][0-9]*|[+-]?[.][0-9]+|[+-]?[0-9]+)$/;
 
 /** validate test_value for being numeric
- *  @param {string|number} test_value string (or number) to be tested 
+ *  @param {string|number} test_value string (or number) to be tested
  *  @param {Object|undefined} options an object that may contain values for any of the following flags:
  *             require_integer
  *             reject_negative

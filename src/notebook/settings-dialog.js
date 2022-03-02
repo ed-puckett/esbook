@@ -16,7 +16,15 @@ const {
     SettingsUpdatedEvent,
     get_settings,
     update_settings,
+    analyze_editor_options_indentUnit,
+    analyze_editor_options_tabSize,
+    analyze_formatting_options_align,
+    analyze_formatting_options_indent,
 } = await import('./settings.js');
+
+const {
+    beep,
+} = await import('../beep.js');
 
 const sections = [{
     section: {
@@ -26,11 +34,13 @@ const sections = [{
             label: 'Indent',
             type: 'text',
             settings_path: [ 'editor_options', 'indentUnit' ],
+            analyze: (value) => analyze_editor_options_indentUnit(value, 'Indent'),
         }, {
             id: 'editor_options_tabSize',
             label: 'Tab size',
             type: 'text',
             settings_path: [ 'editor_options', 'tabSize' ],
+            analyze: (value) => analyze_editor_options_tabSize(value, 'Tab size'),
         }, {
             id: 'editor_options_indentWithTabs',
             label: 'Indent with tabs',
@@ -49,12 +59,6 @@ const sections = [{
             settings_path: [ 'editor_options', 'keyMap' ],
         }],
     },
-    warnings: {
-        'emacs-warning': [
-            'Some menu keyboard accelerators are overridden when emacs mode is active.  For example, Ctrl-W, Ctrl-Q, Ctrl-S and others are used for editing commands.  Some of these overridden menu commands are available under emacs key bindings (see Help for details).',
-            'Also, when typing in an editor control while in emacs mode, you can press the Alt key to activate the menus and then the normal menu keyboard accelerators will work.'
-        ],
-    },
 }, {
     section: {
         name: 'Formatting Options',
@@ -68,11 +72,13 @@ const sections = [{
                 { value: 'right',  label: 'right'  },
             ],
             settings_path: [ 'formatting_options', 'align' ],
+            analyze: (value) => analyze_formatting_options_align(value, 'Align'),
         }, {
             id: 'formatting_options_indent',
             label: 'Indentation',
             type: 'text',
             settings_path: [ 'formatting_options', 'indent' ],
+            analyze: (value) => analyze_formatting_options_indent(value, 'Indentation'),
         }],
     },
 }, {
@@ -123,13 +129,15 @@ export class SettingsDialog extends Dialog {
         // can find it if it already exists.
         this._dialog_element.classList.add(this.constructor.settings_dialog_css_class);
 
-        for (const { section, warnings } of sections) {
+        for (const { section } of sections) {
             const { name, settings } = section;
             const section_div = create_child_element(this._dialog_element, 'div', { class: 'section' });
 
             const named_section_div = create_child_element(section_div, 'div', { 'data-section': name });
+            const error_div = create_child_element(section_div, 'div', { class: `error-message` });
+
             for (const setting of settings) {
-                const { id, label, type, settings_path, options } = setting;
+                const { id, label, type, settings_path, options, analyze } = setting;
                 const setting_div = create_child_element(named_section_div, 'div', { 'data-setting': undefined });
                 let control;
                 if (type === 'select') {
@@ -150,27 +158,44 @@ export class SettingsDialog extends Dialog {
                     control.value = get_obj_path(current_settings, settings_path);
                 }
 
-                control.addEventListener('change', (event) => {
+                const update_handler = async (event) => {
                     const current_settings = get_settings();
+
+                    const handle_error = async (error_message) => {
+                        error_div.classList.add('active');
+                        error_div.innerText = error_message;
+                        const existing_control = document.getElementById(control.id);
+                        if (!this._completed && existing_control) {
+                            existing_control.focus();
+                            existing_control.select();
+                            await beep();
+                        } else {
+                            await AlertDialog.run(`settings update failed: ${error_message}`);
+                        }
+                    };
+
                     if (type === 'checkbox') {
                         set_obj_path(current_settings, settings_path, control.checked);
                     } else {
+                        if (analyze) {
+                            const complaint = analyze(control.value)
+                            if (complaint) {
+                                await handle_error(complaint);
+                                return;
+                            }
+                        }
                         set_obj_path(current_settings, settings_path, control.value);
                     }
-                    update_settings(current_settings)
-                        .catch(error => {
-                            AlertDialog.run(`settings update failed: ${error}`);
-                        });
-                });
-            }
-
-            if (warnings) {
-                for (const warning_class in warnings) {
-                    const warning_div = create_child_element(section_div, 'div', { class: `warning ${warning_class}` });
-                    for (const warning_text of warnings[warning_class]) {
-                        create_child_element(warning_div, 'p').innerText = warning_text;
+                    try {
+                        await update_settings(current_settings)
+                        error_div.classList.remove('active');
+                    } catch (error) {
+                        await handle_error(error.message);
                     }
-                }
+                };
+
+                control.addEventListener('change', update_handler);
+                control.addEventListener('blur',   update_handler);
             }
         }
 

@@ -12,10 +12,10 @@ provide settings to only enable autoeval with prompt (default false)
 nerdamer matrices are rendered with simple vertical bars (vmatrix seems to be hard-coded instead of bmatrix)
 provide "clear" action for current output or all outputs
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
-change menuitems to use <a> or <button> (for accessibility concerns)
 effects of set_formatting_options in an ie may not participate in undo/redo -- see: notebook.js: evaluate_ie(): add_ie_output_change(this, ie.id)
+settings dialog and validation, while working, is a little rough around the edges
+change menuitems to use <a> or <button> (for accessibility concerns)
 theme-settings / settings are sort of mixed together
-need better validation in settings dialog (e.g., displayIndent)
 
 documentation: recommend: only the last formatting() call in an ie is used
 documentation: recommend: avoid latex equation numbers, labels, etc (use \tag{...} instead)
@@ -86,6 +86,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* need better validation in settings dialog (e.g., displayIndent)
 * allow MathJax formatting configuration per document
 * things like matrices and square root are sometimes scaled wrong in TeX output, e.g., return _('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)') (also, exponents are large)
 * canceling Save leads to another prompt and also clears file_handle and stats in notebook

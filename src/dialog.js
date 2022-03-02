@@ -65,6 +65,7 @@ export class Dialog {
     }
 
     constructor() {
+        this._completed = false;
         this._promise = new OpenPromise();
         this._promise.promise.finally(() => {
             try {
@@ -109,6 +110,7 @@ export class Dialog {
 
     // to be called when dialog is complete
     _complete(result) {
+        this._completed = true;
         this._promise.resolve(result);
     }
 
