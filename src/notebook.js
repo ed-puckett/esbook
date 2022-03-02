@@ -448,7 +448,6 @@ class Notebook {
             throw new Error(complaint);
         }
         this.nb_state.elements[ie_id].formatting_options = JSON.parse(JSON.stringify(formatting_options));  // make a copy
-        Object.assign(stored_options, formatting_options);
     }
     get_formatting_options_for_ie_id(ie_id) {
         return this.nb_state.elements[ie_id].formatting_options;
