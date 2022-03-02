@@ -1,7 +1,8 @@
 // === CONSTANTS ===
 
 const NB_TYPE    = 'esbook';
-const NB_VERSION = '1.0.0';
+const NB_VERSION = '2.0.0';
+const COMPATIBLE_NB_VERSION_RES = [ /^[1-2][.][0-9]+[.][0-9]+$/ ]
 
 const DEFAULT_SAVE_PATH = 'new-notebook.esbook';
 
@@ -167,6 +168,8 @@ export const notebook_ready = new Promise((resolve, reject) => {
 class Notebook {
     static nb_type    = NB_TYPE;
     static nb_version = NB_VERSION;
+
+    static compatible_nb_version_res = COMPATIBLE_NB_VERSION_RES;
 
     static default_save_path = DEFAULT_SAVE_PATH;
 
@@ -1013,7 +1016,7 @@ ${contents_base64}
              typeof new_nb_state.nb_type    !== 'string' ||
              typeof new_nb_state.nb_version !== 'string' ||
              new_nb_state.nb_type    !== this.constructor.nb_type ||
-             new_nb_state.nb_version !== this.constructor.nb_version ||
+             this.constructor.compatible_nb_version_res.every(re => !new_nb_state.nb_version.match(re)) ||
              !Array.isArray(new_nb_state.order) ||
              typeof new_nb_state.elements !== 'object' ||
              new_nb_state.order.length < 0 ||
@@ -1044,8 +1047,9 @@ ${contents_base64}
         const prior_state = { current_ie: this.current_ie, nb_state: this.nb_state };  // save in order to restore if there is an error
         this.current_ie = undefined;
         this.set_new_notebook_state();
-        this.nb_state.nb_type    = new_nb_state.nb_type;
-        this.nb_state.nb_version = new_nb_state.nb_version;
+        // we accepted the notebook format in the validation above, so set current type and version:
+        this.nb_state.nb_type    = this.constructor.nb_type;
+        this.nb_state.nb_version = this.constructor.nb_version;
 
         // load the new state
         try {
@@ -1427,7 +1431,7 @@ ${contents_base64}
                 this.set_formatting_options_for_ie_id(ie_id, formatting_options);
             }).bind(null);  // don't expose "this"
 
-            // establish initial setting in case it is not set by the evaluation
+            // establish initial formatting_options in case it is not set by the evaluation
             formatting(settings.formatting_options);
 
             // evaluate
