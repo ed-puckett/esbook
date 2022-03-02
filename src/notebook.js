@@ -45,6 +45,7 @@ const { SettingsDialog } = await import('./notebook/settings-dialog.js');
 const {
     get_settings,
     SettingsUpdatedEvent,
+    analyze_formatting_options,
 } = await import('./notebook/settings.js');
 
 const {
@@ -437,47 +438,12 @@ class Notebook {
         };
     }
 
-    validate_formatting_options(formatting_options) {
-        if (typeof formatting_options !== 'object') {
-            return false;
-        }
-        const keys = Object.keys(formatting_options);
-        if (!keys.every(k => ['displayAlign', 'displayIndent'].includes(k))) {
-            return false;
-        }
-        if ('displayAlign' in formatting_options) {
-            if (typeof formatting_options.displayAlign !== 'string') {
-                return false;
-            }
-            if (! ['left', 'center', 'right'].includes(formatting_options.displayAlign)) {
-                return false;
-            }
-        }
-        if ('displayIndent' in formatting_options) {
-            if (typeof formatting_options.displayIndent !== 'string') {
-                return false;
-            }
-            const amount_str = formatting_options.displayIndent.slice(0, -2).trim();
-            const amount = Number.parseFloat(amount_str);
-            if (isNaN(amount) || amount < 0 || `${amount}` !== amount_str) {
-                return false;
-            }
-            const units = formatting_options.displayIndent.slice(-2);
-            if (! ['pt', 'pc', 'in', 'cm', 'mm', 'em', 'ex', 'mu'].includes(units)) {
-                return false;
-            }
-        }
-        return true;
-    }
     set_formatting_options_for_ie_id(ie_id, formatting_options) {
-        if (!this.validate_formatting_options(formatting_options)) {
-            throw new Error('invalid formatting options');
+        const complaint = analyze_formatting_options(formatting_options);
+        if (complaint) {
+            throw new Error(complaint);
         }
-        let stored_options = this.nb_state.elements[ie_id].formatting_options;
-        if (!stored_options) {
-            stored_options = {};
-            this.nb_state.elements[ie_id].formatting_options = stored_options;
-        }
+        this.nb_state.elements[ie_id].formatting_options = JSON.parse(JSON.stringify(formatting_options));  // make a copy
         Object.assign(stored_options, formatting_options);
     }
     get_formatting_options_for_ie_id(ie_id) {
@@ -1064,7 +1030,7 @@ ${contents_base64}
             if ( e.id !== id ||
                  typeof e.input !== 'string' ||
                  !Array.isArray(e.output) ||
-                 (e.formatting_options && !this.validate_formatting_options(e.formatting_options)) ||
+                 (e.formatting_options && analyze_formatting_options(e.formatting_options)) ||
                  !e.output.every(output_data => {
                      return ( typeof output_data === 'object' &&
                               output_handlers[output_data?.type]?.validate_output_data(output_data) );
@@ -1106,9 +1072,7 @@ ${contents_base64}
                         output_element_collection.appendChild(static_output_element);
                     }
                 }
-                if (new_nb_data.formatting_options) {
-                    nb_data.formatting_options = new_nb_data.formatting_options;
-                }
+                nb_data.formatting_options = new_nb_data.formatting_options ?? settings.formatting_options;
             }
             const first_ie = this.interaction_area.querySelector('.interaction_element');
             this.set_current_ie(first_ie ?? undefined);
@@ -1458,19 +1422,16 @@ ${contents_base64}
         // because in that case input_text has been converted to an expression
         // to be evaluated.
         if (text.length > 0) {
-            // create set_formatting_options() function
-            const set_formatting_options = ((formatting_options) => {
+            // create formatting() function
+            const formatting = ((formatting_options) => {
                 this.set_formatting_options_for_ie_id(ie_id, formatting_options);
             }).bind(null);  // don't expose "this"
 
             // establish initial setting in case it is not set by the evaluation
-            const formatting_options = this.get_formatting_options_for_ie_id(ie_id) ?? {};
-            const displayAlign  = formatting_options.displayAlign  ?? settings.tex_options.displayAlign  ?? 'left';
-            const displayIndent = formatting_options.displayIndent ?? settings.tex_options.displayIndent ?? '0em';
-            set_formatting_options({ displayAlign, displayIndent });
+            formatting(settings.formatting_options);
 
             // evaluate
-            return EvalWorker.eval(this.get_eval_state(), set_formatting_options, output_context, text);
+            return EvalWorker.eval(this.get_eval_state(), formatting, output_context, text);
         }
     }
 
@@ -1478,11 +1439,9 @@ ${contents_base64}
         const ie_update_list = single_ie ? [single_ie] : this.nb_state.order.map(id => document.getElementById(id));
         if (is_MathJax_v2) {
             for (const ie of ie_update_list) {
-                const formatting_options = this.get_formatting_options_for_ie_id(ie.id) ?? {};
-                const displayAlign  = formatting_options.displayAlign  ?? settings.tex_options.displayAlign  ?? 'left';
-                const displayIndent = formatting_options.displayIndent ?? settings.tex_options.displayIndent ?? '0em';
-                MathJax.Hub.config.displayAlign  = displayAlign;
-                MathJax.Hub.config.displayIndent = displayIndent;
+                const formatting_options = this.get_formatting_options_for_ie_id(ie.id);
+                MathJax.Hub.config.displayAlign  = formatting_options.align;   // ok if undefined, will use MathJax default
+                MathJax.Hub.config.displayIndent = formatting_options.indent;  // ok if undefined, will use MathJax default
 
                 const tasks = [];
                 tasks.push(['Typeset', MathJax.Hub, ie]);

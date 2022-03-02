@@ -63,13 +63,13 @@ manipulation of the output of the interaction element), various
 mathematics interfaces, and various graphics functions and other
 functions to manipluate the output.  Also included are:
 
-    settings:               current settings
-    theme_settings:         current theme_settings
-    set_formatting_options: set displayAlign and displayIndent
-    import_lib:             import other libraries from the lib/ directory
-    vars:                   export new "global" properties
-    is_stopped:             determine if the evaluation has been stopped
-    delay_ms:               return a Promise that resolves after a specified delay
+    settings:       current settings
+    theme_settings: current theme_settings
+    formatting:     set formatting { displayAlign, displayIndent }
+    import_lib:     import other libraries from the lib/ directory
+    vars:           export new "global" properties
+    is_stopped:     determine if the evaluation has been stopped
+    delay_ms:       return a Promise that resolves after a specified delay
 
 These all continue to be available even after the evaluation has
 returned if there are any async actions still active.

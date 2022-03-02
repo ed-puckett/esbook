@@ -5,6 +5,7 @@ const {
 
 const {
     Dialog,
+    AlertDialog,
     create_control_element,
     create_select_element,
     get_obj_path,
@@ -56,22 +57,22 @@ const sections = [{
     },
 }, {
     section: {
-        name: 'TeX Options',
+        name: 'Formatting Options',
         settings: [{
-            id: 'tex_options_displayAlign',
-            label: 'Display align',
+            id: 'formatting_options_align',
+            label: 'Horizontal alignment',
             type: 'select',
             options: [
                 { value: 'left',   label: 'left'   },
                 { value: 'center', label: 'center' },
                 { value: 'right',  label: 'right'  },
             ],
-            settings_path: [ 'tex_options', 'displayAlign' ],
+            settings_path: [ 'formatting_options', 'align' ],
         }, {
-            id: 'tex_options_displayIndent',
-            label: 'Display indent',
+            id: 'formatting_options_indent',
+            label: 'Indentation',
             type: 'text',
-            settings_path: [ 'tex_options', 'displayIndent' ],
+            settings_path: [ 'formatting_options', 'indent' ],
         }],
     },
 }, {
@@ -156,7 +157,10 @@ export class SettingsDialog extends Dialog {
                     } else {
                         set_obj_path(current_settings, settings_path, control.value);
                     }
-                    update_settings(current_settings);
+                    update_settings(current_settings)
+                        .catch(error => {
+                            AlertDialog.run(`settings update failed: ${error}`);
+                        });
                 });
             }
 
