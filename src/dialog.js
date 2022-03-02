@@ -164,6 +164,7 @@ export class Dialog {
     }
 
     _adjust_event_blocker() {
+return;//!!! now handled with z-order...
         const blocker_element = document.getElementById(this.constructor.blocker_element_id);
         const dialog_elements = document.querySelectorAll('#content #ui .dialog');
         const last_dialog_element = dialog_elements[dialog_elements.length-1];  // undefined if dialog_elements is empty

@@ -3,29 +3,21 @@
  */
 
 body {
-    --color-bg-body:    var(--color-bg-page-major);
-    --color-fg-body:    var(--color-c0-page-major);
+    --color-bg-settings-dialog-section: var(--color-bg-page-minor);
+    --color-fg-settings-dialog-section: var(--color-c0-page-minor);
 
-    --color-bg-section: var(--color-bg-page-minor);
-    --color-fg-section: var(--color-c0-page-minor);
+    --color-bg-settings-dialog-control: var(--color-bg-tool-active1-awake0);
+    --color-fg-settings-dialog-control: var(--color-c0-tool-active1-awake0);
 
-    --color-bg-control: var(--color-bg-tool-active1-awake0);
-    --color-fg-control: var(--color-c0-tool-active1-awake0);
-
-    --color-bg-error:   var(--color-bg-page-alert2);
-    --color-fg-error:   var(--color-c1-page-alert2);
+    --color-bg-settings-dialog-error:   var(--color-bg-page-alert2);
+    --color-fg-settings-dialog-error:   var(--color-c1-page-alert2);
 }
 
-body {
-    color: var(--color-fg-body);
-    background: var(--color-bg-body);
-}
-
-.section {
+.settings-dialog .section {
     display: flex;
 }
 
-[data-section] {
+.settings-dialog [data-section] {
     position: relative;
     min-width: max-content;
     margin: 2rem 0 0 1rem;
@@ -33,11 +25,11 @@ body {
     height: max-content;
     border: 1px solid black;
     border-radius: 8px;
-    color: var(--color-fg-section);
-    background: var(--color-bg-section);
+    color: var(--color-fg-settings-dialog-section);
+    background: var(--color-bg-settings-dialog-section);
 }
 
-[data-section]::before {
+.settings-dialog [data-section]::before {
     position: absolute;
     content: attr(data-section);
     left: 0.8rem;
@@ -45,12 +37,12 @@ body {
     padding: 0 1rem;
     border: 1px solid #aaa;
     border-radius: 4px;
-    color: var(--color-fg-section);
-    background: var(--color-bg-section);
+    color: var(--color-fg-settings-dialog-section);
+    background: var(--color-bg-settings-dialog-section);
     font-style: italic;
 }
 
-[data-section] [data-setting] label {
+.settings-dialog [data-section] [data-setting] label {
     display: inline-block;
     width: 9rem;
     text-align: right;
@@ -58,18 +50,18 @@ body {
     font-size: small;
 }
 
-[data-section] [data-setting] input,
-[data-section] [data-setting] select {
-    color: var(--color-fg-control);
-    background: var(--color-bg-control);
+.settings-dialog [data-section] [data-setting] input,
+.settings-dialog [data-section] [data-setting] select {
+    color: var(--color-fg-settings-dialog-control);
+    background: var(--color-bg-settings-dialog-control);
     margin: 0.25rem;
 }
 
-[data-section] [data-setting] input[type="text"] {
+.settings-dialog [data-section] [data-setting] input[type="text"] {
     width: 5rem;
 }
 
-.warning {
+.settings-dialog .warning {
     display: none;
     width: 18rem;
     margin: 2rem 0 0 1rem;
@@ -77,28 +69,28 @@ body {
     height: max-content;
     border: 1px solid black;
     border-radius: 8px;
-    color: var(--color-fg-warning);
-    background: var(--color-bg-warning);
+    color: var(--color-fg-settings-dialog-warning);
+    background: var(--color-bg-settings-dialog-warning);
 }
-.warning p:first-child {
+.settings-dialog .warning p:first-child {
     margin-block-start: 0;
 }
-.warning p:last-child {
+.settings-dialog .warning p:last-child {
     margin-block-end: 0;
 }
-.show-emacs-warning .emacs-warning {
+.settings-dialog .show-emacs-warning .emacs-warning {
     display: block;
 }
 
-.error-message {
+.settings-dialog .error-message {
     display: none;
     margin: 2rem 0 0 1rem;
     padding: 0.5rem;
     border-radius: 5pt;
-    background-color: var(--color-bg-error);
-    color: var(--color-fg-error);
+    background-color: var(--color-bg-settings-dialog-error);
+    color: var(--color-fg-settings-dialog-error);
     height: fit-content;
 }
-.error-message.active {
+.settings-dialog .error-message.active {
     display: block;
 }

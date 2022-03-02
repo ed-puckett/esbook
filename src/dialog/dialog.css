@@ -20,37 +20,39 @@
  * </div>
  */
 
-#content #ui .dialog {
+.dialog {
     display: block;
     padding: 0.5rem 0 0.5rem 0.75rem;
     border: 7px double darkorange;
     background-color: cornsilk;
+    position: relative;  /* required to make z-index work */
+    z-index: 1000;
 }
 
-#content #ui .dialog .dialog_text {
+.dialog .dialog_text {
     margin: 0.5rem 0.5rem 0.5rem 0;
 }
 
-#content #ui .dialog button {
+.dialog button {
     margin: 0.5rem 0.5rem 0.5rem 0;
 }
 
-#content #ui .dialog .dialog_decline {
+.dialog .dialog_decline {
     display: inline;
 }
 
-#content #ui .dialog .dialog_accept {
+.dialog .dialog_accept {
     display: inline;
 }
 
-#content #ui #dialog_event_blocker {
+#dialog_event_blocker {
     display: none;
     position: absolute;
     width:  100%;
     height: 100%;
-    background-color: #80808080;
-    z-index: 999999999;
+    background-color: #ccc8;
+    z-index: 999;
 }
-#content #ui .dialog ~ #dialog_event_blocker {
+.dialog ~ #dialog_event_blocker {
     display: block;
 }
