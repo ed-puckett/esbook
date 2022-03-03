@@ -100,7 +100,7 @@ export function validate_numeric(test_value, options) {
  */
 export function analyze_contained(test_value, collection, name) {
     if (! collection.includes(test_value)) {
-        return `${name ?? 'value'} must be one of: ${collection.map(o => (typeof o === 'string') ? `"${o}"` : o.toString()).join(', ')}`;
+        return `${name ?? 'value'} must be one of: ${collection.join(', ')}`;
     }
     return undefined;
 }
@@ -126,9 +126,9 @@ export function analyze_editor_options_indentWithTabs(value, name) {
     }
     return undefined;
 }
+export const valid_editor_options_keyMap_values = ['default', 'emacs', 'sublime', 'vim'];
 export function analyze_editor_options_keyMap(value, name) {
-    const valid = ['default', 'emacs', 'sublime', 'vim'];
-    return analyze_contained(value, valid, (name ?? 'keyMap'));
+    return analyze_contained(value, valid_editor_options_keyMap_values, (name ?? 'keyMap'));
 }
 
 export function analyze_editor_options(editor_options, name) {
@@ -166,24 +166,24 @@ export function analyze_editor_options(editor_options, name) {
     return undefined;
 }
 
+export const valid_formatting_options_align_values = ['left', 'center', 'right'];
 /** analyze/validate a formatting_options align property
  *  @param {string} value
  *  @return {string|undefined} returns a complaint string if invalid, or undefined if valid
  */
 export function analyze_formatting_options_align(value, name) {
-    const valid_alignments = ['left', 'center', 'right'];
-    return analyze_contained(value, valid_alignments, (name ?? 'align'));
+    return analyze_contained(value, valid_formatting_options_align_values, (name ?? 'align'));
 }
+export const valid_formatting_options_indent_units = ['pt', 'pc', 'in', 'cm', 'mm', 'em', 'ex', 'mu'];
 /** analyze/validate a formatting_options indent property
  *  @param {string} value
  *  @return {string|undefined} returns a complaint string if invalid, or undefined if valid
  */
 export function analyze_formatting_options_indent(value, name) {
-    const valid_units = ['pt', 'pc', 'in', 'cm', 'mm', 'em', 'ex', 'mu'];
-    if (!valid_units.every(s => (s.length === 2))) {
+    if (!valid_formatting_options_indent_units.every(s => (s.length === 2))) {
         throw new Error('unexpected: valid units contains a string whose length is not 2');
     }
-    const complaint = `${name ?? 'indent'} must be a string containing a non-negative number followed by one of: "${valid_units.join('", "')}"`;
+    const complaint = `${name ?? 'indent'} must be a string containing a non-negative number followed by one of: ${valid_formatting_options_indent_units.join(', ')}`;
     if (typeof value !== 'string') {
         return complaint;
     }
@@ -192,7 +192,7 @@ export function analyze_formatting_options_indent(value, name) {
     const amount_str = value.slice(0, -2);
     const units      = value.slice(-2);
     if ( !validate_numeric(amount_str, { reject_negative: true }) ||
-         !valid_units.includes(units) ) {
+         !valid_formatting_options_indent_units.includes(units) ) {
         return complaint;
     }
     return undefined;
@@ -224,9 +224,9 @@ export function analyze_formatting_options(formatting_options, name) {
     return undefined;
 }
 
+export const valid_theme_colors_values = ['system', 'dark', 'light'];
 export function analyze_theme_colors(value, name) {
-    const valid = ['system', 'dark', 'light'];
-    return analyze_contained(value, valid, (name ?? 'theme_colors'));
+    return analyze_contained(value, valid_theme_colors_values, (name ?? 'theme_colors'));
 }
 
 export function analyze_settings(settings, name) {

@@ -18,8 +18,14 @@ const {
     update_settings,
     analyze_editor_options_indentUnit,
     analyze_editor_options_tabSize,
+    analyze_editor_options_indentWithTabs,
+    valid_editor_options_keyMap_values,
+    analyze_editor_options_keyMap,
+    valid_formatting_options_align_values,
     analyze_formatting_options_align,
     analyze_formatting_options_indent,
+    valid_theme_colors_values,
+    analyze_theme_colors,
 } = await import('./settings.js');
 
 const {
@@ -46,31 +52,24 @@ const sections = [{
             label: 'Indent with tabs',
             type: 'checkbox',
             settings_path: [ 'editor_options', 'indentWithTabs' ],
+            analyze: (value) => analyze_editor_options_indentWithTabs(value, 'Indent with tabs'),
         }, {
             id: 'editor_options_keyMap',
-            label: 'Keymap',
+            label: 'Key map',
             type: 'select',
-            options: [
-                { value: 'default', label: 'default' },
-                { value: 'emacs',   label: 'emacs'   },
-                { value: 'sublime', label: 'sublime' },
-                { value: 'vim',     label: 'vim'     },
-            ],
+            options: valid_editor_options_keyMap_values.map(value => ({ value, label: value })),
             settings_path: [ 'editor_options', 'keyMap' ],
+            analyze: (value) => valid_formatting_options_align_values(value, 'Key map'),
         }],
     },
 }, {
     section: {
-        name: 'Formatting Options',
+        name: 'TeX Formatting',
         settings: [{
             id: 'formatting_options_align',
             label: 'Horizontal alignment',
             type: 'select',
-            options: [
-                { value: 'left',   label: 'left'   },
-                { value: 'center', label: 'center' },
-                { value: 'right',  label: 'right'  },
-            ],
+            options: valid_formatting_options_align_values.map(value => ({ value, label: value })),
             settings_path: [ 'formatting_options', 'align' ],
             analyze: (value) => analyze_formatting_options_align(value, 'Align'),
         }, {
@@ -88,12 +87,9 @@ const sections = [{
             id: 'theme_colors',
             label: 'Theme colors',
             type: 'select',
-            options: [
-                { value: 'system', label: 'System' },
-                { value: 'dark',   label: 'Dark'   },
-                { value: 'light',  label: 'Light'  },
-            ],
+            options: valid_theme_colors_values.map(value =>({ value, label: value })),
             settings_path: [ 'theme_colors' ],
+            analyze: (value) => analyze_theme_colors(value, 'Theme colors'),
         }],
     },
 }];

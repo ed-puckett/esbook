@@ -1411,6 +1411,11 @@ ${contents_base64}
             // within a tagged template literal string (tag``) where
             // the tag is given by an anonymous tag function.
             // This enables ${} substitutions in the markup.
+            // ---------------------------------------------
+            // Note: injection attacks are possible!
+            // Example: `+alert('hi')+`
+            // However, note that you can execute code anyway....
+            // Worse issues?
             text = `return ((statics, ...dynamics) => {
                 const parts = [];
                 for (let i = 0; i < statics.length; i++) {
@@ -1420,7 +1425,7 @@ ${contents_base64}
                     }
                 }
                 return parts.join('');
-            })\`${(input_text)}\``;
+            })\`${input_text}\``;
         }
         // note that we are going to evaluate text, even if input_text was mdmj
         // because in that case input_text has been converted to an expression
