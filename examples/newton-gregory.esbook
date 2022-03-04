@@ -1,0 +1,43 @@
+{
+    "nb_type": "esbook",
+    "nb_version": "2.0.0",
+    "elements": [
+        {
+            "id": "id-e8b2d2cc-4e3f-4f68-913f-18b410da3687",
+            "input": "## Newton-Gregory Forward Difference Interpolation",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "## Newton-Gregory Forward Difference Interpolation\n$\\def\\comb#1#2{\\begin{pmatrix}#1 \\cr #2\\end{pmatrix}}$"
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-754c31c0-0f27-41bc-9636-c16886821d89",
+            "input": "${formatting({ align: 'left', indent: '2em' })}\n$\n\\def\\D{\\Delta}\n\\def\\iddots{{\\kern3mu\\raise1mu{.}\\kern3mu\\raise6mu{.}\\kern3mu\\raise12mu{.}}}\n$\n$$\n\\begin{array}{ccccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3)       & \\dots   & f(n-2)     &            & f(n-1) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &            & \\dots   &            & \\D^1_{n-2} &        \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            & \\D^2_2     & \\dots   & \\D^2_{n-3} &            &        \\\\\n     &        &         & \\ddots &            & \\ddots     &            & \\iddots &            &            &        \\\\\n     &        &         &        & \\D^{n-2}_0 &            & \\D^{n-2}_1 &         &            &            &        \\\\\n     &        &         &        &            & \\D^{n-1}_0 &            &         &            &            &        \\\\\n\\end{array}\n$$\n$$\n\\begin{align}\n\\Delta^0_j &= f(j) \\\\\n\\Delta^i_j &= \\sum_{k=0}^{i}{(-1)^{i+j}{k \\choose i}f(k)}; & i \\gt 0 \\\\\nC_i        &= \\Delta^i_0 \\\\\n\\end{align}\n$$\n$$\n\\begin{align}\n{x \\choose n} &= \\frac{x^{\\underline{n}}}{n!} = \\frac{\\prod_{i=0}^n{(x-i)}}{n!}\n\\end{align}\n$$\n$$\n\\begin{align}\nf_{(i)}(x) = \\sum_{k=0}^i C_k {x \\choose i}\n\\end{align}\n$$",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "\n$\n\\def\\D{\\Delta}\n\\def\\iddots{{\\kern3mu\\raise1mu{.}\\kern3mu\\raise6mu{.}\\kern3mu\\raise12mu{.}}}\n$\n$$\n\\begin{array}{ccccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3)       & \\dots   & f(n-2)     &            & f(n-1) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &            & \\dots   &            & \\D^1_{n-2} &        \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            & \\D^2_2     & \\dots   & \\D^2_{n-3} &            &        \\\\\n     &        &         & \\ddots &            & \\ddots     &            & \\iddots &            &            &        \\\\\n     &        &         &        & \\D^{n-2}_0 &            & \\D^{n-2}_1 &         &            &            &        \\\\\n     &        &         &        &            & \\D^{n-1}_0 &            &         &            &            &        \\\\\n\\end{array}\n$$\n$$\n\\begin{align}\n\\Delta^0_j &= f(j) \\\\\n\\Delta^i_j &= \\sum_{k=0}^{i}{(-1)^{i+j}{k \\choose i}f(k)}; & i \\gt 0 \\\\\nC_i        &= \\Delta^i_0 \\\\\n\\end{align}\n$$\n$$\n\\begin{align}\n{x \\choose n} &= \\frac{x^{\\underline{n}}}{n!} = \\frac{\\prod_{i=0}^n{(x-i)}}{n!}\n\\end{align}\n$$\n$$\n\\begin{align}\nf_{(i)}(x) = \\sum_{k=0}^i C_k {x \\choose i}\n\\end{align}\n$$"
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "2em"
+            }
+        },
+        {
+            "id": "id-8c921f7a-6b52-49f7-bebe-ba8a6fcb84f6",
+            "input": "",
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        }
+    ]
+}
