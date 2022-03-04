@@ -59,7 +59,7 @@ const sections = [{
             type: 'select',
             options: valid_editor_options_keyMap_values.map(value => ({ value, label: value })),
             settings_path: [ 'editor_options', 'keyMap' ],
-            analyze: (value) => valid_formatting_options_align_values(value, 'Key map'),
+            analyze: (value) => analyze_editor_options_keyMap(value, 'Key map'),
         }],
     },
 }, {
@@ -82,10 +82,10 @@ const sections = [{
     },
 }, {
     section: {
-        name: 'Theme Colors',
+        name: 'Appearance',
         settings: [{
             id: 'theme_colors',
-            label: 'Theme colors',
+            label: 'Theme',
             type: 'select',
             options: valid_theme_colors_values.map(value =>({ value, label: value })),
             settings_path: [ 'theme_colors' ],
@@ -163,25 +163,25 @@ export class SettingsDialog extends Dialog {
                         const existing_control = document.getElementById(control.id);
                         if (!this._completed && existing_control) {
                             existing_control.focus();
-                            existing_control.select();
+                            if (existing_control instanceof HTMLInputElement && existing_control.type === 'text') {
+                                existing_control.select();
+                            }
                             await beep();
                         } else {
                             await AlertDialog.run(`settings update failed: ${error_message}`);
                         }
                     };
 
-                    if (type === 'checkbox') {
-                        set_obj_path(current_settings, settings_path, control.checked);
-                    } else {
-                        if (analyze) {
-                            const complaint = analyze(control.value)
-                            if (complaint) {
-                                await handle_error(complaint);
-                                return;
-                            }
+                    const value = (type === 'checkbox') ? control.checked : control.value;
+                    if (analyze) {
+                        const complaint = analyze(value)
+                        if (complaint) {
+                            await handle_error(complaint);
+                            return;
                         }
-                        set_obj_path(current_settings, settings_path, control.value);
                     }
+                    set_obj_path(current_settings, settings_path, value);
+
                     try {
                         await update_settings(current_settings)
                         error_div.classList.remove('active');

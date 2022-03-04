@@ -34,7 +34,7 @@ export const initial_command_bindings = {  // command_string->key_bindings_array
     'delete_element':       [ 'CmdOrCtrl+Alt+Backspace' ],
     'settings':             [ 'CmdOrCtrl+,' ],
     'help':                 [ 'F1' ],
-    'activate_menubar':     [ 'F10' ],
+    'activate_menubar':     [ 'F10', 'Alt+M' ],
 };
 
 function _freeze_command_bindings(cb) {

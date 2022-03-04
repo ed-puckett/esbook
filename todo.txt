@@ -1,3 +1,4 @@
+"Typesetting math: 100%" is shown on printout (e.g., examples/solve-logistic-equation-fixed-points.esbook)
 #dialog_event_blocker is not deflecting focus
 review Content-Security-Policy
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
@@ -9,20 +10,21 @@ support dark mode in dagre css (also: Plotly)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse into output area?) (focus issues?)
 set width on graphics output DIVs
 provide settings to only enable autoeval with prompt (default false)
-nerdamer matrices are rendered with simple vertical bars (vmatrix seems to be hard-coded instead of bmatrix)
+test autoeval
+nerdamer matrices are rendered with simple vertical bars (TeX vmatrix seems to be hard-coded instead of bmatrix)
 provide "clear" action for current output or all outputs
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
 effects of set_formatting_options in an ie may not participate in undo/redo -- see: notebook.js: evaluate_ie(): add_ie_output_change(this, ie.id)
 settings dialog and validation, while working, is a little rough around the edges
+dialogs: don't let keyboard focus "fall off the edge" down to the obstructed notebook
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 change menuitems to use <a> or <button> (for accessibility concerns)
-theme-settings / settings are sort of mixed together
-review possiblility of injection vulnerabilities for javascript and mdmj; mdmj example: `+alert('hi')&&`gotcha!
 
-documentation: recommend: only the last formatting() call in an ie is used
+documentation: document: only the last formatting() call in an ie has effect
 documentation: recommend: avoid latex equation numbers, labels, etc (use \tag{...} instead)
 documentation: separate help from README.md
 documentation: warning about executable content
+documentation: discuss possiblility of injection vulnerabilities
 documentation: interaction elements: input, output/graphics, selected_indicator
 documentation: interaction elements: focus, move, add
 documentation: evaluation: mdmj (template literal model), javascript (async function model)
@@ -51,6 +53,7 @@ documentation: local server
 
 
 === THINK ABOUT ===
+review possiblility of injection vulnerabilities for javascript and mdmj; mdmj example: `+alert('hi')&&`gotcha!
 mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
 mathjax: latex equation numbers, labels, etc need to be reset (if used)
 options for printing (e.g., show autohide elements)
@@ -88,6 +91,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* theme-settings / settings are sort of mixed together
 * need better validation in settings dialog (e.g., displayIndent)
 * allow MathJax formatting configuration per document
 * things like matrices and square root are sometimes scaled wrong in TeX output, e.g., return _('diff((e^x*sqrt(x)-e^x/(2*sqrt(x)))/x, x)') (also, exponents are large)

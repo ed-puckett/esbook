@@ -48,6 +48,7 @@ body {
     text-align: right;
     font-family: sans-serif;
     font-size: small;
+    user-select: none;
 }
 
 .settings-dialog [data-section] [data-setting] input,
