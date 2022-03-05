@@ -4,11 +4,11 @@
     "elements": [
         {
             "id": "id-e8b2d2cc-4e3f-4f68-913f-18b410da3687",
-            "input": "## Newton-Gregory Forward Difference Interpolation and Extrapolation",
+            "input": "## Newton-Gregory Forward Difference Interpolation and Extrapolation\n\nSee https://www.youtube.com/watch?v=4AuV93LOPcE&t=357s\n\"Why don't they teach Newton's calculus of 'What comes next?'\"",
             "output": [
                 {
                     "type": "text",
-                    "text": "## Newton-Gregory Forward Difference Interpolation and Extrapolation"
+                    "text": "## Newton-Gregory Forward Difference Interpolation and Extrapolation\n\nSee https://www.youtube.com/watch?v=4AuV93LOPcE&t=357s\n\"Why don't they teach Newton's calculus of 'What comes next?'\""
                 }
             ],
             "formatting_options": {
@@ -18,11 +18,11 @@
         },
         {
             "id": "id-754c31c0-0f27-41bc-9636-c16886821d89",
-            "input": "${formatting({ align: 'left', indent: '2em' })}\n$\n\\def\\D{\\Delta}\n\\def\\iddots{{\\kern3mu\\raise1mu{.}\\kern3mu\\raise6mu{.}\\kern3mu\\raise12mu{.}}}\n$\nLet $n,i,j \\in \\mathbb Z$, $n > 0$, $0 \\le i,j \\le n-1$.\n$ $\nGiven a function $f:\\mathbb R \\rightarrow \\mathbb R$ and $n$ observations $f(0), f(1), ..., f(n-1)$, define the forward differences $\\D^i_j$ as follows:\n$$\n\\begin{array}{ccccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3)       & \\dots   & f(n-2)     &            & f(n-1) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &            & \\dots   &            & \\D^1_{n-2} &        \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            & \\D^2_2     & \\dots   & \\D^2_{n-3} &            &        \\\\\n     &        &         & \\ddots &            & \\ddots     &            & \\iddots &            &            &        \\\\\n     &        &         &        & \\D^{n-2}_0 &            & \\D^{n-2}_1 &         &            &            &        \\\\\n     &        &         &        &            & \\D^{n-1}_0 &            &         &            &            &        \\\\\n\\end{array}\n$$\nwhere each $\\D^i_j$ if the result of subtracting its left parent from its right parent.\n\nExpanding downward, it can be seen that each $\\D^i_j$ can be computed directly from the observed values as follows:\n$$\n\\begin{align}\n\\D^i_j &= \\sum_{k=0}^{i}{(-1)^{i-k}{i \\choose k}f(j+k)} \\\\\n\\end{align}\n$$\nNote that $\\D^0_j = f(j)$.\n$ $\nNow, with $C_i = \\Delta^i_0$, $f$ may be approximated by a family of functions $f_{(i)}$:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i C_k {x \\choose k} \\tag{Newton-Gregory Formula}\n\\end{align}\n$$\n---\nGiven:\n$$\n\\begin{align}\n{n \\choose k} &= \\frac{n!}{k!(n-k)!} \\\\\n              &= \\frac{n^{\\underline{k}}}{k!}         \\tag{falling factorial formulation} \\\\\n              &= \\frac{1}{k!}\\prod_{i=0}^{k-1}{(n-i)} \\tag{expansion of falling factorial} \\\\\n\\end{align}\n$$\nwe can see how to compute $f_{(i)}(x)$ for $x \\in \\mathbb R$.",
+            "input": "${formatting({ align: 'left', indent: '2em' })}\n$\n\\def\\D{\\Delta}\n\\def\\iddots{{\\kern3mu\\raise1mu{.}\\kern3mu\\raise6mu{.}\\kern3mu\\raise12mu{.}}}\n$\n\n---\n\nLet $n,i,j \\in \\mathbb Z$, $n > 0$, $0 \\le i,j \\le n-1$.\n$ $\nGiven a function $f:\\mathbb R \\rightarrow \\mathbb R$ and $n$ observations $f(0), f(1), ..., f(n-1)$, define the forward differences $\\D^i_j$ as follows:\n$$\n\\begin{array}{ccccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3)       & \\dots   & f(n-2)     &            & f(n-1) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &            & \\dots   &            & \\D^1_{n-2} &        \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            & \\D^2_2     & \\dots   & \\D^2_{n-3} &            &        \\\\\n     &        &         & \\ddots &            & \\ddots     &            & \\iddots &            &            &        \\\\\n     &        &         &        & \\D^{n-2}_0 &            & \\D^{n-2}_1 &         &            &            &        \\\\\n     &        &         &        &            & \\D^{n-1}_0 &            &         &            &            &        \\\\\n\\end{array}\n$$\nwhere each $\\D^i_j$ if the result of subtracting its left parent from its right parent.\n\nExpanding downward, it can be seen that each $\\D^i_j$ can be computed directly from the observed values as follows:\n$$\n\\begin{align}\n\\D^i_j &= \\sum_{k=0}^{i}{(-1)^{i-k}{i \\choose k}f(j+k)} \\tag{direct calculation}\\\\\n\\end{align}\n$$\nNote that $\\D^0_j = f(j)$.\n$ $\nNow, with $C_i = \\Delta^i_0$, $f$ may be approximated by a family of functions $f_{(i)}$:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i C_k {x \\choose k} \\tag{Newton-Gregory Formula}\n\\end{align}\n$$\n---\nGiven:\n$$\n\\begin{align}\n{n \\choose k} &= \\frac{n!}{k!(n-k)!} \\\\\n              &= \\frac{n^{\\underline{k}}}{k!}         \\tag{falling factorial formulation} \\\\\n              &= \\frac{1}{k!}\\prod_{i=0}^{k-1}{(n-i)} \\tag{expansion of falling factorial} \\\\\n\\end{align}\n$$\nwe can see how to compute $f_{(i)}(x)$ for $x \\in \\mathbb R$ and also for $x$ symbolically.",
             "output": [
                 {
                     "type": "text",
-                    "text": "\n$\n\\def\\D{\\Delta}\n\\def\\iddots{{\\kern3mu\\raise1mu{.}\\kern3mu\\raise6mu{.}\\kern3mu\\raise12mu{.}}}\n$\nLet $n,i,j \\in \\mathbb Z$, $n > 0$, $0 \\le i,j \\le n-1$.\n$ $\nGiven a function $f:\\mathbb R \\rightarrow \\mathbb R$ and $n$ observations $f(0), f(1), ..., f(n-1)$, define the forward differences $\\D^i_j$ as follows:\n$$\n\\begin{array}{ccccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3)       & \\dots   & f(n-2)     &            & f(n-1) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &            & \\dots   &            & \\D^1_{n-2} &        \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            & \\D^2_2     & \\dots   & \\D^2_{n-3} &            &        \\\\\n     &        &         & \\ddots &            & \\ddots     &            & \\iddots &            &            &        \\\\\n     &        &         &        & \\D^{n-2}_0 &            & \\D^{n-2}_1 &         &            &            &        \\\\\n     &        &         &        &            & \\D^{n-1}_0 &            &         &            &            &        \\\\\n\\end{array}\n$$\nwhere each $\\D^i_j$ if the result of subtracting its left parent from its right parent.\n\nExpanding downward, it can be seen that each $\\D^i_j$ can be computed directly from the observed values as follows:\n$$\n\\begin{align}\n\\D^i_j &= \\sum_{k=0}^{i}{(-1)^{i-k}{i \\choose k}f(j+k)} \\\\\n\\end{align}\n$$\nNote that $\\D^0_j = f(j)$.\n$ $\nNow, with $C_i = \\Delta^i_0$, $f$ may be approximated by a family of functions $f_{(i)}$:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i C_k {x \\choose k} \\tag{Newton-Gregory Formula}\n\\end{align}\n$$\n---\nGiven:\n$$\n\\begin{align}\n{n \\choose k} &= \\frac{n!}{k!(n-k)!} \\\\\n              &= \\frac{n^{\\underline{k}}}{k!}         \\tag{falling factorial formulation} \\\\\n              &= \\frac{1}{k!}\\prod_{i=0}^{k-1}{(n-i)} \\tag{expansion of falling factorial} \\\\\n\\end{align}\n$$\nwe can see how to compute $f_{(i)}(x)$ for $x \\in \\mathbb R$."
+                    "text": "\n$\n\\def\\D{\\Delta}\n\\def\\iddots{{\\kern3mu\\raise1mu{.}\\kern3mu\\raise6mu{.}\\kern3mu\\raise12mu{.}}}\n$\n\n---\n\nLet $n,i,j \\in \\mathbb Z$, $n > 0$, $0 \\le i,j \\le n-1$.\n$ $\nGiven a function $f:\\mathbb R \\rightarrow \\mathbb R$ and $n$ observations $f(0), f(1), ..., f(n-1)$, define the forward differences $\\D^i_j$ as follows:\n$$\n\\begin{array}{ccccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3)       & \\dots   & f(n-2)     &            & f(n-1) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &            & \\dots   &            & \\D^1_{n-2} &        \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            & \\D^2_2     & \\dots   & \\D^2_{n-3} &            &        \\\\\n     &        &         & \\ddots &            & \\ddots     &            & \\iddots &            &            &        \\\\\n     &        &         &        & \\D^{n-2}_0 &            & \\D^{n-2}_1 &         &            &            &        \\\\\n     &        &         &        &            & \\D^{n-1}_0 &            &         &            &            &        \\\\\n\\end{array}\n$$\nwhere each $\\D^i_j$ if the result of subtracting its left parent from its right parent.\n\nExpanding downward, it can be seen that each $\\D^i_j$ can be computed directly from the observed values as follows:\n$$\n\\begin{align}\n\\D^i_j &= \\sum_{k=0}^{i}{(-1)^{i-k}{i \\choose k}f(j+k)} \\tag{direct calculation}\\\\\n\\end{align}\n$$\nNote that $\\D^0_j = f(j)$.\n$ $\nNow, with $C_i = \\Delta^i_0$, $f$ may be approximated by a family of functions $f_{(i)}$:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i C_k {x \\choose k} \\tag{Newton-Gregory Formula}\n\\end{align}\n$$\n---\nGiven:\n$$\n\\begin{align}\n{n \\choose k} &= \\frac{n!}{k!(n-k)!} \\\\\n              &= \\frac{n^{\\underline{k}}}{k!}         \\tag{falling factorial formulation} \\\\\n              &= \\frac{1}{k!}\\prod_{i=0}^{k-1}{(n-i)} \\tag{expansion of falling factorial} \\\\\n\\end{align}\n$$\nwe can see how to compute $f_{(i)}(x)$ for $x \\in \\mathbb R$ and also for $x$ symbolically."
                 }
             ],
             "formatting_options": {
@@ -32,11 +32,19 @@
         },
         {
             "id": "id-8c921f7a-6b52-49f7-bebe-ba8a6fcb84f6",
-            "input": "//\nconst observations = [1, 1, 2, 4, 8, 16, 31];\nconst n = observations.length;\n\nvars({ observations, n });\n\n_.clearVars();\n_.setFunction('choose', ['n', 'm'], 'n!/m!/(n-m)!');\n\nfor (let j = 0; j < n; j++) {\n    _.setVar(`f_j${j}`,    observations[j]);\n    _.setVar(`d_i0_j${j}`, `f_j${j}`);\n}\n_.setVar('observations', `vector(${observations.join(', ')})`);\n\nfor (let i = 1; i < n; i++) {\n    for (let j = 0; j < n-i; j++) {\n        _.setVar(`d_i${i}_j${j}`, `d_i${i-1}_j${j+1} - d_i${i-1}_j${j}`);\n    }\n}\n\nawait println('### Results for computing differences top-to-bottom:');\nfor (let i = 0; i < n; i++) {\n    await printf('%2d:', i);\n    for (let s = 0; s < i; s++) await printf('   ');\n    for (let j = 0; j < n-i; j++) {\n        await printf(' %5s', _(`d_i${i}_j${j}`));\n    }\n    await println();\n}\n\nawait println('$ $');\nawait println('$ $');\n\nawait println('**Comparing computed differences with the values from the direct equation**');\nlet wrong_results = false;\nfor (let i = 0; i < n; i++) {\n    for (let j = 0; j < n-i; j++) {\n        const computed = _(`d_i${i}_j${j}`).toString();\n        const direct = _.simplify(_(`sum((-1)^(${i}-k)*choose(${i}, k)*vecget(observations, ${j}+k), k, 0, ${i})`)).toString();\n        if (direct !== computed) {\n            wrong_results = true;\n            await printf('>>> wrong: i=%d, j=%d, computed=%s, direct=%s\\n', i, j, computed, direct);\n        }\n    }\n}\nif (!wrong_results) {\n    await println('$\\\\rightarrow$ all results matched computed values');\n}\n\n// set Ci values\nfor (let i = 0; i < n; i++) {\n    _.setVar(`C_i${i}`, `d_i${i}_j0`);\n}\n_.setVar('C', `vector(${observations.map((_, i) => `C_i${i}`).join(', ')})`);",
+            "input": "// Try out the sequence from the Mathologer video\n\nconst observations = [1, 1, 2, 4, 8, 16, 31];  // the sequence given in the Mathologer video\n// Actually, in the sequence above, f(0) is added and defined as 1; 0 points subdividing a circle gives the whole circle....\n\n_.clearVars();\n_.setFunction('choose', ['n', 'm'], 'n!/m!/(n-m)!');\n\nfor (let j = 0; j < observations.length; j++) {\n    _.setVar(`f_j${j}`,    observations[j]);\n    _.setVar(`d_i0_j${j}`, `f_j${j}`);\n}\n_.setVar('observations', `vector(${observations.join(', ')})`);\n\nfor (let i = 1; i < observations.length; i++) {\n    for (let j = 0; j < observations.length-i; j++) {\n        _.setVar(`d_i${i}_j${j}`, `d_i${i-1}_j${j+1} - d_i${i-1}_j${j}`);\n    }\n}\n\nawait println('### Results for computing differences top-to-bottom:');\nfor (let i = 0; i < observations.length; i++) {\n    await printf('%2d:', i);\n    for (let s = 0; s < i; s++) await printf('   ');\n    for (let j = 0; j < observations.length-i; j++) {\n        await printf(' %5s', _(`d_i${i}_j${j}`));\n    }\n    await println();\n}\n\nawait html('br');\n\nawait println('**Comparing computed differences with the values from the direct computation equation**');\nlet wrong_results = false;\nfor (let i = 0; i < observations.length; i++) {\n    for (let j = 0; j < observations.length-i; j++) {\n        const computed = _(`d_i${i}_j${j}`).toString();\n        const direct = _.simplify(_(`sum((-1)^(${i}-k)*choose(${i}, k)*vecget(observations, ${j}+k), k, 0, ${i})`)).toString();\n        if (direct !== computed) {\n            wrong_results = true;\n            await printf('>>> wrong: i=%d, j=%d, computed=%s, direct=%s\\n', i, j, computed, direct);\n        }\n    }\n}\nif (!wrong_results) {\n    await println('$\\\\rightarrow$ all direct results matched computed values');\n}\n\n// set Ci values\nfor (let i = 0; i < observations.length; i++) {\n    _.setVar(`C_i${i}`, `d_i${i}_j0`);\n}\n_.setVar('C', `vector(${observations.map((_, i) => `C_i${i}`).join(', ')})`);",
             "output": [
                 {
                     "type": "text",
-                    "text": "### Results for computing differences top-to-bottom:\n 0:     1     1     2     4     8    16    31\n 1:        0     1     2     4     8    15\n 2:           1     1     2     4     7\n 3:              0     1     2     3\n 4:                 1     1     1\n 5:                    0     0\n 6:                       0\n$ $\n$ $\n**Comparing computed differences with the values from the direct equation**\n$\\rightarrow$ all results matched computed values\n"
+                    "text": "### Results for computing differences top-to-bottom:\n 0:     1     1     2     4     8    16    31\n 1:        0     1     2     4     8    15\n 2:           1     1     2     4     7\n 3:              0     1     2     3\n 4:                 1     1     1\n 5:                    0     0\n 6:                       0\n"
+                },
+                {
+                    "type": "html",
+                    "tag": "br"
+                },
+                {
+                    "type": "text",
+                    "text": "**Comparing computed differences with the values from the direct computation equation**\n$\\rightarrow$ all direct results matched computed values\n"
                 }
             ],
             "formatting_options": {
@@ -46,11 +54,53 @@
         },
         {
             "id": "id-3bc80d07-8bc0-484b-91a4-6eabb49b99aa",
-            "input": "//\n_.setFunction('ff', ['i', 'x'], `sum(vecget(C, k) * product(x-kk, kk, 0, k-1) / k!, k, 0, i)`);\nfor (let i = 0; i < observations.length; i++) {\n    await printf('ff(%d, x): ', i);\n    for (let x = 0; x < observations.length+8; x++) {\n        await printf('  %2d:%3s', x,_.simplify(_.expand(`ff(${i}, ${x})`)));\n    }\n    await println();\n}",
+            "input": "// Check the direct computation\n\n_.setFunction('ff', ['i', 'x'], `sum(vecget(C, k) * product(x-kk, kk, 0, k-1) / k!, k, 0, i)`);\nconst n = +_('size(observations)');\nfor (let i = 0; i < n; i++) {\n    await printf('ff(%d, x): ', i);\n    for (let x = 0; x < n+8; x++) {\n        await printf('  %2d:%-3s', x, _.simplify(_.expand(`ff(${i}, ${x})`)));\n    }\n    await println();\n}",
             "output": [
                 {
                     "type": "text",
-                    "text": "ff(0, x):    0:  1   1:  1   2:  1   3:  1   4:  1   5:  1   6:  1   7:  1   8:  1   9:  1  10:  1  11:  1  12:  1  13:  1  14:  1\nff(1, x):    0:  1   1:  1   2:  1   3:  1   4:  1   5:  1   6:  1   7:  1   8:  1   9:  1  10:  1  11:  1  12:  1  13:  1  14:  1\nff(2, x):    0:  1   1:  1   2:  2   3:  4   4:  7   5: 11   6: 16   7: 22   8: 29   9: 37  10: 46  11: 56  12: 67  13: 79  14: 92\nff(3, x):    0:  1   1:  1   2:  2   3:  4   4:  7   5: 11   6: 16   7: 22   8: 29   9: 37  10: 46  11: 56  12: 67  13: 79  14: 92\nff(4, x):    0:  1   1:  1   2:  2   3:  4   4:  8   5: 16   6: 31   7: 57   8: 99   9:163  10:256  11:386  12:562  13:794  14:1093\nff(5, x):    0:  1   1:  1   2:  2   3:  4   4:  8   5: 16   6: 31   7: 57   8: 99   9:163  10:256  11:386  12:562  13:794  14:1093\nff(6, x):    0:  1   1:  1   2:  2   3:  4   4:  8   5: 16   6: 31   7: 57   8: 99   9:163  10:256  11:386  12:562  13:794  14:1093\n"
+                    "text": "ff(0, x):    0:1     1:1     2:1     3:1     4:1     5:1     6:1     7:1     8:1     9:1    10:1    11:1    12:1    13:1    14:1  \nff(1, x):    0:1     1:1     2:1     3:1     4:1     5:1     6:1     7:1     8:1     9:1    10:1    11:1    12:1    13:1    14:1  \nff(2, x):    0:1     1:1     2:2     3:4     4:7     5:11    6:16    7:22    8:29    9:37   10:46   11:56   12:67   13:79   14:92 \nff(3, x):    0:1     1:1     2:2     3:4     4:7     5:11    6:16    7:22    8:29    9:37   10:46   11:56   12:67   13:79   14:92 \nff(4, x):    0:1     1:1     2:2     3:4     4:8     5:16    6:31    7:57    8:99    9:163  10:256  11:386  12:562  13:794  14:1093\nff(5, x):    0:1     1:1     2:2     3:4     4:8     5:16    6:31    7:57    8:99    9:163  10:256  11:386  12:562  13:794  14:1093\nff(6, x):    0:1     1:1     2:2     3:4     4:8     5:16    6:31    7:57    8:99    9:163  10:256  11:386  12:562  13:794  14:1093\n"
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-632b7b0b-0fe9-42e2-a0ab-d7ebc2f3c786",
+            "input": "See https://oeis.org/A000127\n\"Maximal number of regions obtained by joining n points around a circle by straight lines. Also number of regions in 4-space formed by n-1 hyperplanes.\"\n1, 2, 4, 8, 16, 31, 57, 99, 163, 256, 386, 562, 794, 1093, 1471, 1941, 2517, 3214, 4048, ...",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "See https://oeis.org/A000127\n\"Maximal number of regions obtained by joining n points around a circle by straight lines. Also number of regions in 4-space formed by n-1 hyperplanes.\"\n1, 2, 4, 8, 16, 31, 57, 99, 163, 256, 386, 562, 794, 1093, 1471, 1941, 2517, 3214, 4048, ..."
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-17b5408e-ae45-42e1-8e21-3c940a8492fa",
+            "input": "## Generalization",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "## Generalization"
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-55943619-10e4-4e09-becc-306a1f52636f",
+            "input": "//\n\nfunction define_sequence_from_observations(observations) {\n    if (!Array.isArray(observations) || observations.length <= 0) {\n        throw new Error('observations must be an array with at least one element');\n    }\n    _.clearVars();\n    _.setFunction('choose', ['n', 'm'], 'n!/m!/(n-m)!');\n    \n    _.setVar('observations', `vector(${observations.join(', ')})`);\n    \n    _.setFunction('delta', ['i', 'j'], `sum((-1)^(i-kx)*choose(i, kx)*vecget(observations, j+kx), kx, 0, i)`);\n    _.setFunction('C', ['i'], 'delta(i, 0)');\n    _.setFunction('ff', ['i', 'x'], `sum(C(k) * product(x-kk, kk, 0, k-1) / k!, k, 0, i)`);\n    _.setFunction('ff', ['i', 'x'], `sum(C(k) * product(x-kk, kk, 0, k-1) / k!, k, 0, i)`);\n}\n\ndefine_sequence_from_observations([1, 1, 2, 4, 8, 16, 31]);\nreturn _.simplify('ff(4, 14)');",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "$$1093$$"
                 }
             ],
             "formatting_options": {
