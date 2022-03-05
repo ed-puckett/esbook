@@ -20,7 +20,6 @@ dialogs: don't let keyboard focus "fall off the edge" down to the obstructed not
 review setting of focus overall (many places use setTimeout() to defer setting of focus, somewhat kludgey)
 change menuitems to use <a> or <button> (for accessibility concerns)
 text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
-invalid/incomplete sprintf arguments cause Uncaught TypeError that is not displayed
 
 documentation: document: only the last formatting() call in an ie has effect
 documentation: recommend: avoid latex equation numbers, labels, etc (use \tag{...} instead)
@@ -93,6 +92,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* invalid/incomplete sprintf arguments cause Uncaught TypeError that is not displayed
 * theme-settings / settings are sort of mixed together
 * need better validation in settings dialog (e.g., displayIndent)
 * allow MathJax formatting configuration per document

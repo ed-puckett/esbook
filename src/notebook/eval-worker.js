@@ -186,17 +186,9 @@ export class EvalWorker {
         // add \n after self.expression in eval_fn_body to protect from a final line containing a comment without a newline
         const eval_fn_body = `with (this.eval_context) { ${self.expression}\n }`;  // note: "this" will be self.eval_state
         const eval_fn = new AsyncFunction(...eval_fn_params, eval_fn_body);
-        try {
-            const result = await eval_fn.apply(eval_fn_this, eval_fn_args);
-            if (typeof result !== 'undefined') {
-                await ephemeral_eval_context.process_action(transform_text_result(result));  // action: { type: 'text', text, is_tex, inline_tex }
-            }
-        } catch (err) {
-            try {
-                await ephemeral_eval_context.process_error(err);
-            } catch (err2) {
-                console.error('unexpected: second-level error occurred', err2);
-            }
+        const result = await eval_fn.apply(eval_fn_this, eval_fn_args);
+        if (typeof result !== 'undefined') {
+            await ephemeral_eval_context.process_action(transform_text_result(result));  // action: { type: 'text', text, is_tex, inline_tex }
         }
 
         return self;
@@ -231,7 +223,15 @@ export class EvalWorker {
             if (self._stopped) {
                 throw new Error('error received after EvalWorker already stopped');
             } else {
-                return self.output_context.output_handler_update_notebook(action.type, action);
+                try {
+                    return await self.output_context.output_handler_update_notebook(action.type, action);
+                } catch (error) {
+                    try {
+                        await process_error(error);
+                    } catch (error2) {
+                        console.error('unexpected: second-level error occurred', error2);
+                    }
+                }
             }
         }
 
@@ -249,8 +249,12 @@ export class EvalWorker {
         }
 
         async function printf(format, ...args) {
-            format = (typeof format === 'undefined') ? '' : format.toString();
-            return process_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
+            try {
+                format = (typeof format === 'undefined') ? '' : format.toString();
+                return await process_action(transform_text_result(sprintf(format, ...args)));  // action: { type: 'text', text, is_tex, inline_tex }
+            } catch (error) {
+                await process_error(error);
+            }
         }
 
         async function print_tex(...args) {
