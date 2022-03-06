@@ -1,3 +1,4 @@
+nerdamer: nested functions using sum or product are not alpha-renamed properly and they fail strangely
 "Typesetting math: 100%" is shown on printout (e.g., examples/solve-logistic-equation-fixed-points.esbook)
 #dialog_event_blocker is not deflecting focus
 review Content-Security-Policy
