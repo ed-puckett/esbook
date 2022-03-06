@@ -237,19 +237,25 @@ export function analyze_settings(settings, name) {
     if (!keys.every(k => ['editor_options', 'formatting_options', 'theme_colors'].includes(k))) {
         return `${name ?? 'settings'} may only have the keys "editor_options", "formatting_options" and "theme_colors"`;
     }
-    if ('editor_options' in settings) {
+    if (! ('editor_options' in settings)) {
+        return `${name ?? 'settings'} must contain an editor_options property`;
+    } else {
         const complaint = analyze_editor_options(settings.editor_options);
         if (complaint) {
             return complaint;
         }
     }
-    if ('formatting_options' in settings) {
+    if (! ('formatting_options' in settings)) {
+        return `${name ?? 'settings'} must contain an formmating_options property`;
+    } else {
         const complaint = analyze_formatting_options(settings.formatting_options);
         if (complaint) {
             return complaint;
         }
     }
-    if ('theme_colors' in settings) {
+    if (! ('theme_colors' in settings)) {
+        return `${name ?? 'settings'} must contain an theme_colors property`;
+    } else {
         const complaint = analyze_theme_colors(settings.theme_colors);
         if (complaint) {
             return complaint;
