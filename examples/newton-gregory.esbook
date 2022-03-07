@@ -222,11 +222,11 @@
         },
         {
             "id": "id-c76940cc-486c-4c82-80f2-4090d6631fa4",
-            "input": "### Surprise!\n\nIt seems that:\n$$\n...\n$$\n",
+            "input": "### Surprise!\n\nIt appears that:\n$$\n\\begin{align}\nf_{(i)}(x) &\\stackrel{?}{=} \\sum_{k=0}^i \\frac{f(k)}{i!} \\prod_{l=0 \\\\ l \\ne k}^i (-1)^{i-l} \\small{l \\choose i} (x - l)\n\\end{align}\n$$\n",
             "output": [
                 {
                     "type": "text",
-                    "text": "### Surprise!\n\nIt seems that:\n$$\n...\n$$\n"
+                    "text": "### Surprise!\n\nIt appears that:\n$$\n\\begin{align}\nf_{(i)}(x) &\\stackrel{?}{=} \\sum_{k=0}^i \\frac{f(k)}{i!} \\prod_{l=0 \\\\ l \\ne k}^i (-1)^{i-l} \\small{l \\choose i} (x - l)\n\\end{align}\n$$\n"
                 }
             ],
             "formatting_options": {
@@ -237,7 +237,11 @@
         {
             "id": "id-25068dbe-9e78-4035-bd24-10fa9b42588e",
             "input": "",
-            "output": []
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
         }
     ]
 }
