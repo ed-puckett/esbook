@@ -173,9 +173,10 @@ body {
 }
 
 .interaction_element .output > .text-content {
+    display: inline;
     white-space: pre-wrap;
     font-family: monospace;
-    display: inline;
+    font-size: 121%;
 }
 .interaction_element .output .mjx-math {
     font-family: none;  /* prevent math formatting issues when monospace is set */
