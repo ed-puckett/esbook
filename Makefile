@@ -57,6 +57,10 @@ kill-server:
 dev-server:
 	npx nodemon -w src -e js,mjs,html,css,ico,svg -x "bash -c 'make server' || exit 1"
 
+.PHONY: client
+client:
+	chromium --new-window http://127.0.0.1:$(SERVER_PORT)/src/index.html
+
 .PHONY: start
 start: build-dir
-	if ! lsof -itcp:$(SERVER_PORT); then make server <&- >/dev/null 2>&1 & sleep 1; fi; chromium --new-window http://127.0.0.1:$(SERVER_PORT)/src/index.html
+	if ! lsof -itcp:$(SERVER_PORT); then make server <&- >/dev/null 2>&1 & sleep 1; fi; make client

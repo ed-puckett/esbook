@@ -21,13 +21,7 @@ class FsInterface {
      *          where stats is as returned by get_fs_stats_for_file()
      */
     async save_json(file_handle, obj) {
-        await this.verify_permission(file_handle, true);
-        const writable = await file_handle.createWritable();
-        const contents = JSON.stringify(obj, null, 4);
-        await writable.write(contents);
-        await writable.close();
-        const stats = await this.get_fs_stats_for_file_handle(file_handle);
-        return stats;
+        return this.save_text(file_handle, JSON.stringify(obj, null, 4));
     }
 
     async save_text(file_handle, text) {
