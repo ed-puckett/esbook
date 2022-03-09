@@ -23,6 +23,9 @@ change menuitems to use <a> or <button> (for accessibility concerns)
 can't scroll to last ie when focused to the next-to-last ie
 text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
 provide legacy file handling when FileSystemFileHandle and associated API is not available (e.g., on Firefox, Safari)
+reopen does not work as expected
+provide direct access to last recent
+provide indicator for "formatting"
 
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
 documentation: document: only the last formatting() call in an ie has effect

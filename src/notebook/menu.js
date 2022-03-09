@@ -28,6 +28,10 @@ const {
 
 const default_menubar_spec = [
     { label: 'File', collection: [
+        { label: 'Recent notebooks', id: 'recents', collection: [
+            // ...
+        ] },
+        '---',
         { label: 'Clear',         item: { command: 'clear_notebook',       } },
         '---',
         { label: 'Open...',       item: { command: 'open_notebook',        } },
@@ -37,10 +41,6 @@ const default_menubar_spec = [
         { label: 'Save',          item: { command: 'save_notebook',        }, id: 'save' },
         { label: 'Save as...',    item: { command: 'save_as_notebook',     } },
         { label: 'Export...',     item: { command: 'export_notebook',      } },
-        '---',
-        { label: 'Recent notebooks', id: 'recents', collection: [
-            // ...
-        ] },
         '---',
         { label: 'Settings...',   item: { command: 'settings',             } },
     ] },
