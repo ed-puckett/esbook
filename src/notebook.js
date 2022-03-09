@@ -209,8 +209,12 @@ class Notebook {
 
     // async setup/initialization (to be called immediately after construction)
     async setup() {
-        // notebook source information
-        this.notebook_file_handle  = undefined;
+        // Notebook source information.
+        // When FileSystemFileHandle and APIs not available (indicated by
+        // !fs_interface.fsaapi_available), then this.notebook_file_handle
+        // will always be undefined.  However, this.notebook_file_stats might
+        // be set to hold things like name (in the case of legacy fallback).
+        this.notebook_file_handle  = undefined;  // if set, a FileSystemFileHandle
         this.notebook_file_stats   = undefined;  // stats from when last loaded/saved, or undefined
 
         // notebook persistent state
@@ -419,8 +423,8 @@ class Notebook {
 
     // Set a new notebook source information and update things accordingly.
     async set_notebook_source(file_handle, stats=undefined) {
-        this.notebook_file_handle = file_handle;
-        this.notebook_file_stats  = stats;
+        this.notebook_file_handle = undefined;
+        this.notebook_file_stats  = undefined;
 
         if (file_handle) {
             if (!stats) {
@@ -429,6 +433,9 @@ class Notebook {
             await add_to_recents({ file_handle, stats });
             await this.menubar.rebuild_recents();
         }
+
+        this.notebook_file_handle = file_handle;
+        this.notebook_file_stats  = stats;
 
         let title = DEFAULT_TITLE;
         if (stats?.name) {
@@ -821,29 +828,59 @@ class Notebook {
         this.update_global_view_properties();
     }
 
-    async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
-        try {
-            if (!force && this.notebook_modified()) {
-                if (! await ConfirmDialog.run('Warning: changes not saved, load new document anyway?')) {
-                    return;
-                }
+    async _confirm_load() {
+        if (this.notebook_modified()) {
+            if (! await ConfirmDialog.run('Warning: changes not saved, load new document anyway?')) {
+                return false;
             }
+        }
+        return true;
+    }
+
+    async open_notebook_from_file_handle(file_handle, do_import=false, force=false) {
+        if (!force && !(await this._confirm_load())) {
+            return;
+        }
+
+        try {
+            const { text, stats } = await fs_interface.open({ file_handle });
+            const force_for_finish = true;  // already checked above
+            await this.open_notebook_from_text(text, stats, do_import, force_for_finish);
             if (do_import) {
-                const { text, stats } = await fs_interface.open_text(file_handle);
-                await this.import_nb_state(text);
-                await this.set_notebook_source(undefined);
+                await this.set_notebook_source(undefined, stats);
             } else {
-                const { contents, stats } = await fs_interface.open_json(file_handle);
-                const new_nb_state = this.contents_to_nb_state(contents);
-                await this.load_nb_state(new_nb_state);
                 await this.set_notebook_source(file_handle, stats);
             }
+
+        } catch (error) {
+            console.error('open failed', error.stack);
+            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+            await this.clear_notebook(true);  // initialize empty notebook
+        }
+    }
+
+    async open_notebook_from_text(text, stats, do_import=false, force=false) {
+        if (!force && !(await this._confirm_load())) {
+            return;
+        }
+
+        try {
+            if (do_import) {
+                await this.import_nb_state(text);
+            } else {
+                const contents = JSON.parse(text);  // may throw an error
+                const new_nb_state = this.contents_to_nb_state(contents);
+                await this.load_nb_state(new_nb_state);
+            }
+
             Change.update_for_open(this, do_import);
+
             if (!do_import) {
                 this.set_notebook_unmodified();
                 // check if this notebook is "autoeval"
                 await this._handle_autoeval();
             }
+
             this.update_global_view_properties();
 
         } catch (error) {
@@ -860,6 +897,7 @@ class Notebook {
                     return;
                 }
             }
+
             const open_dialog_types = do_import
                   ? [{
                       description: 'JavaScript files (import)',
@@ -873,9 +911,19 @@ class Notebook {
                           'application/x-esbook': ['.esbook', '.esb'],
                       },
                   }];
-            const { canceled, file_handle } = await fs_interface.prompt_for_open({ types: open_dialog_types })
+
+            const { canceled, file_handle, text, stats } = await fs_interface.open({
+                prompt_options: {
+                    types: open_dialog_types,
+                },
+            });
             if (!canceled) {
-                await this.open_notebook_from_file_handle(file_handle, do_import, true);
+                await this.open_notebook_from_text(text, stats, do_import, true);
+                if (do_import) {
+                    await this.set_notebook_source(undefined, stats);
+                } else {
+                    await this.set_notebook_source(file_handle, stats);
+                }
             }
 
         } catch (error) {
@@ -887,51 +935,57 @@ class Notebook {
 
     async save_notebook(interactive=false) {
         let timestamp_mismatch;
+        let mismatch_indeterminate;
         try {
             const last_fs_timestamp = this.notebook_file_stats?.last_modified;
             if (!this.notebook_file_handle || typeof last_fs_timestamp !== 'number') {
-                timestamp_mismatch = false;
+                timestamp_mismatch = false;  // the file might have been modified, but we cannot determine if so
+                mismatch_indeterminate = true;
             } else {
                 const stats = await fs_interface.get_fs_stats_for_file_handle(this.notebook_file_handle);
                 const current_fs_timestamp = stats.last_modified;
                 timestamp_mismatch = (current_fs_timestamp !== last_fs_timestamp);
+                mismatch_indeterminate = false;
             }
         } catch (_) {
             timestamp_mismatch = false;
         }
+
         try {
             if (timestamp_mismatch) {
-                if (! await ConfirmDialog.run('Warning: notebook file modified by another process, save anyway?')) {
+                const message = `Warning: notebook file ${mismatch_indeterminate ? 'may have been ' : ''}modified by another process, save anyway?`;
+                if (! await ConfirmDialog.run(message)) {
                     return;
                 }
             }
             if (this.current_ie) {
                 this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
             }
-            const contents = this.nb_state_to_contents(this.nb_state);
-            if (!interactive && this.notebook_file_handle) {
-                const file_handle = this.notebook_file_handle;
-                const stats = await fs_interface.save_json(file_handle, contents);
+            const get_text = () => {
+                const contents = this.nb_state_to_contents(this.nb_state);
+                return JSON.stringify(contents, null, 4);
+            };
+            const { canceled, file_handle, stats } = await fs_interface.save(get_text, {
+                file_handle: (interactive || !this.notebook_file_handle) ? undefined : this.notebook_file_handle,
+                prompt_options: {
+                    types: [{
+                        description: 'esbook files',
+                        accept: {
+                            'application/x-esbook': ['.esbook', '.esb'],
+                        },
+                    }],
+                },
+            });
+            if (!canceled) {
                 await this.set_notebook_source(file_handle, stats);
-            } else {
-                const save_dialog_types = [{
-                    description: 'esbook files',
-                    accept: {
-                        'application/x-esbook': ['.esbook', '.esb'],
-                    },
-                }];
-                const { canceled, file_handle } = await fs_interface.prompt_for_save({ types: save_dialog_types });
-                if (canceled) {
-                    // return with nothing changed
-                    return;
-                }
-                const stats = await fs_interface.save_json(file_handle, contents);  // may throw an error
-                await this.set_notebook_source(file_handle, stats);
+
+                this.focus_to_current_ie();
+
+                Change.update_for_save(this);
+                this.set_notebook_unmodified();
+
+                this.update_global_view_properties();
             }
-            this.focus_to_current_ie();
-            Change.update_for_save(this);
-            this.set_notebook_unmodified();
-            this.update_global_view_properties();
 
         } catch (error) {
 //!!! necessary?            await this.set_notebook_source(undefined);  // reset potentially problematic source info
@@ -945,22 +999,14 @@ class Notebook {
             if (this.current_ie) {
                 this.update_nb_state(this.current_ie);  // make sure recent edits are present in this.nb_state
             }
-            const contents = this.nb_state_to_contents(this.nb_state);
-            const save_dialog_options = {
-                description: 'esbook files',
-                accept: {
-                    'text/html': ['.esbook.html'],
-                },
-            };
-            const { canceled, file_handle } = await fs_interface.prompt_for_save(save_dialog_options);
-            if (canceled) {
-                // return with nothing changed
-                return;
-            }
-            const default_server_endpoint = new URL('..', current_script_url).toString();
-            const contents_json = JSON.stringify(contents);
-            const contents_base64 = btoa(contents_json);
-            const page_contents = `<!DOCTYPE html>
+
+            const get_text = () => {
+                const contents = this.nb_state_to_contents(this.nb_state);
+
+                const default_server_endpoint = new URL('..', current_script_url).toString();
+                const contents_json = JSON.stringify(contents);
+                const contents_base64 = btoa(contents_json);
+                return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -987,8 +1033,18 @@ ${contents_base64}
 </body>
 </html>
 `;
-            await fs_interface.save_text(file_handle, page_contents);  // may throw an error
-            this.update_global_view_properties();
+            };
+
+            await fs_interface.save(get_text, {
+                prompt_options: {
+                    types: [{
+                        description: 'html files (export)',
+                        accept: {
+                            'text/html': ['.esbook.html'],
+                        },
+                    }],
+                },
+            });
 
         } catch (error) {
             console.error('export failed', error.stack);

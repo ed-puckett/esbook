@@ -236,11 +236,11 @@
         },
         {
             "id": "id-25068dbe-9e78-4035-bd24-10fa9b42588e",
-            "input": "\n### Example for n=4, i=3, $ff_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$",
+            "input": "\n### Example for n=4, i=3, $f_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$",
             "output": [
                 {
                     "type": "text",
-                    "text": "\n### Example for n=4, i=3, $ff_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$"
+                    "text": "\n### Example for n=4, i=3, $f_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$"
                 }
             ],
             "formatting_options": {
@@ -307,7 +307,11 @@
         {
             "id": "id-83cefd2c-e34e-4772-9dd0-1cce4a0d1b99",
             "input": "",
-            "output": []
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
         }
     ]
 }
