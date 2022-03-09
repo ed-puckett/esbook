@@ -278,17 +278,36 @@
         },
         {
             "id": "id-44c32d51-7c7f-454d-9628-79d6fed2e071",
-            "input": "Finally, for $l=0$ there are three subexpressions with $k \\in \\{0, 1, 2, 3\\}$.\n$$\n\\begin{align}\nC_f(0) &= (-1)^{0-0}{0 \\choose 0}{x \\choose 0} + (-1)^{1-0}{1 \\choose 0}{x \\choose 1} + (-1)^{2-0}{2 \\choose 0}{x \\choose 2} + (-1)^{3-0}{3 \\choose 0}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{0}}}{0!} + \\frac{-1 x^{\\underline{1}}}{1!} + \\frac{x^{\\underline{2}}}{2!} + \\frac{-1 x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{1}{1} + \\frac{-1 (x)}{1} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1) \\cdot -2}{2} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1)(x-2) \\cdot 3}{6} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{-1 (x-1)(x-2)(x-3)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$",
+            "input": "Finally, for $l=0$ there are four subexpressions with $k \\in \\{0, 1, 2, 3\\}$.\n$$\n\\begin{align}\nC_f(0) &= (-1)^{0-0}{0 \\choose 0}{x \\choose 0} + (-1)^{1-0}{1 \\choose 0}{x \\choose 1} + (-1)^{2-0}{2 \\choose 0}{x \\choose 2} + (-1)^{3-0}{3 \\choose 0}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{0}}}{0!} + \\frac{-1 x^{\\underline{1}}}{1!} + \\frac{x^{\\underline{2}}}{2!} + \\frac{-1 x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{1}{1} + \\frac{-1 (x)}{1} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1) \\cdot -2}{2} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1)(x-2) \\cdot 3}{6} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{-1 (x-1)(x-2)(x-3)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$",
             "output": [
                 {
                     "type": "text",
-                    "text": "Finally, for $l=0$ there are three subexpressions with $k \\in \\{0, 1, 2, 3\\}$.\n$$\n\\begin{align}\nC_f(0) &= (-1)^{0-0}{0 \\choose 0}{x \\choose 0} + (-1)^{1-0}{1 \\choose 0}{x \\choose 1} + (-1)^{2-0}{2 \\choose 0}{x \\choose 2} + (-1)^{3-0}{3 \\choose 0}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{0}}}{0!} + \\frac{-1 x^{\\underline{1}}}{1!} + \\frac{x^{\\underline{2}}}{2!} + \\frac{-1 x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{1}{1} + \\frac{-1 (x)}{1} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1) \\cdot -2}{2} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1)(x-2) \\cdot 3}{6} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{-1 (x-1)(x-2)(x-3)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$"
+                    "text": "Finally, for $l=0$ there are four subexpressions with $k \\in \\{0, 1, 2, 3\\}$.\n$$\n\\begin{align}\nC_f(0) &= (-1)^{0-0}{0 \\choose 0}{x \\choose 0} + (-1)^{1-0}{1 \\choose 0}{x \\choose 1} + (-1)^{2-0}{2 \\choose 0}{x \\choose 2} + (-1)^{3-0}{3 \\choose 0}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{0}}}{0!} + \\frac{-1 x^{\\underline{1}}}{1!} + \\frac{x^{\\underline{2}}}{2!} + \\frac{-1 x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{1}{1} + \\frac{-1 (x)}{1} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1) \\cdot -2}{2} + \\frac{(x)(x-1)}{2} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{(x-1)(x-2) \\cdot 3}{6} + \\frac{-1 (x)(x-1)(x-2)}{6} \\\\\n       &= \\frac{-1 (x-1)(x-2)(x-3)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$"
                 }
             ],
             "formatting_options": {
                 "align": "left",
                 "indent": "0em"
             }
+        },
+        {
+            "id": "id-74e69a8b-7cc2-4dbb-84f7-11d62ce63133",
+            "input": "The preceding example indicates how to prove the general result.\n$ $\nEach $C_f(l)$ has $n-l$ subexpressions, and the lowest order of these with $k=l$,\nwhen combined with the next higher, converts the $(x-l)$ in the expansion of $x^{\\underline{l}}$\nin the term.  This continues up to the highest $k=n-1$ term.  During this, the\nbinomial coefficients from the direct calculation of each $\\D^i_0$ interact with\nthe factorials along the $C_f(\\cdot)$ chain to provide exactly the right cancellations\nto make everything balance out.",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "The preceding example indicates how to prove the general result.\n$ $\nEach $C_f(l)$ has $n-l$ subexpressions, and the lowest order of these with $k=l$,\nwhen combined with the next higher, converts the $(x-l)$ in the expansion of $x^{\\underline{l}}$\nin the term.  This continues up to the highest $k=n-1$ term.  During this, the\nbinomial coefficients from the direct calculation of each $\\D^i_0$ interact with\nthe factorials along the $C_f(\\cdot)$ chain to provide exactly the right cancellations\nto make everything balance out."
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-83cefd2c-e34e-4772-9dd0-1cce4a0d1b99",
+            "input": "",
+            "output": []
         }
     ]
 }
