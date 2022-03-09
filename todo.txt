@@ -21,11 +21,10 @@ dialogs: don't let keyboard focus "fall off the edge" down to the underlying not
 review setting of focus overall (many places use setTimeout() to defer setting of focus, which is kludgey)
 change menuitems to use <a> or <button> (for accessibility concerns)
 can't scroll to last ie when focused to the next-to-last ie
-text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
-provide legacy file handling when FileSystemFileHandle and associated API is not available (e.g., on Firefox, Safari)
 reopen does not work as expected
 provide direct access to last recent
-provide indicator for "formatting"
+text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
+provide legacy file handling when FileSystemFileHandle and associated API is not available (e.g., on Firefox, Safari)
 
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
 documentation: document: only the last formatting() call in an ie has effect
@@ -45,7 +44,7 @@ documentation: document output context
 documentation: document output handlers
 documentation: graphics are stored as images in saved notebooks
 documentation: interaction with SVG elements (SHIFT-scroll to zoom, etc)
-documentation: indicators (modified, running)
+documentation: indicators (modified, running, formatting)
 documentation: various actions (menu and key-bindings)
 documentation: key bindings; menu glyphs for modifiers
 documentation: settings
@@ -99,6 +98,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* provide indicator for "formatting"
 * invalid/incomplete sprintf arguments cause Uncaught TypeError that is not displayed
 * theme-settings / settings are sort of mixed together
 * need better validation in settings dialog (e.g., displayIndent)

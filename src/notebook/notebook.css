@@ -21,6 +21,7 @@ body {
     --color-fg-ie-error:               var(--color-c0-page-alert2);
 
     --control-indicator-diameter:      0.5rem;
+
     --selected-indicator-width:        0.16rem;
 }
 
@@ -63,7 +64,8 @@ body {
 }
 
 #controls #modified_indicator,
-#controls #running_indicator {
+#controls #running_indicator,
+#controls #formatting_indicator {
     align-self: center;
     display: inline-block;
     margin: 0.25rem 0.625rem 0.25rem 0;
@@ -81,6 +83,10 @@ body {
 #controls #running_indicator.active {
     border: 1px solid black;
     background-color: aqua;
+}
+#controls #formatting_indicator.active {
+    border: 1px solid black;
+    background-color: #fbde2d;
 }
 
 #controls #help_link {

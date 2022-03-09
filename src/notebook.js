@@ -279,6 +279,7 @@ class Notebook {
         //             <div id="indicators">
         //                 <div id="modified_indicator"></div>
         //                 <div id="running_indicator"></div>
+        //                 <div id="formatting_indicator"></div>
         //             </div>
         //         </div>
         //         <div id="interaction_area">
@@ -294,6 +295,7 @@ class Notebook {
         const indicators_el = create_child_element(this.controls, 'div', { id: 'indicators' });
         this.modified_indicator = create_child_element(indicators_el, 'div', { id: 'modified_indicator', title: 'Modified' });
         this.running_indicator  = create_child_element(indicators_el, 'div', { id: 'running_indicator',  title: 'Running' });
+        this.formatting_indicator  = create_child_element(indicators_el, 'div', { id: 'formatting_indicator',  title: 'Formatting' });
 
         // add notebook stylesheet:
         const stylesheet_url = new URL('notebook/notebook.css', import.meta.url);
@@ -395,7 +397,6 @@ class Notebook {
             this.modified_indicator.title = 'Not modified';
         }
     }
-
     set_running_status(state) {
         if (state) {
             this.running_indicator.classList.add('active');
@@ -403,6 +404,15 @@ class Notebook {
         } else {
             this.running_indicator.classList.remove('active');
             this.running_indicator.title = 'Not running';
+        }
+    }
+    set_formatting_status(state) {
+        if (state) {
+            this.formatting_indicator.classList.add('active');
+            this.formatting_indicator.title = 'Formatting';
+        } else {
+            this.formatting_indicator.classList.remove('active');
+            this.formatting_indicator.title = 'Formatting complete';
         }
     }
 
@@ -1445,32 +1455,37 @@ ${contents_base64}
     }
 
     async typeset_notebook(single_ie=undefined) {
-        const ie_update_list = single_ie ? [single_ie] : this.nb_state.order.map(id => document.getElementById(id));
-        if (is_MathJax_v2) {
-            for (const ie of ie_update_list) {
-                const formatting_options = this.get_formatting_options_for_ie_id(ie.id);
-                MathJax.Hub.config.displayAlign  = formatting_options.align;   // ok if undefined, will use MathJax default
-                MathJax.Hub.config.displayIndent = formatting_options.indent;  // ok if undefined, will use MathJax default
+        try {
+            this.set_formatting_status(true);
+            const ie_update_list = single_ie ? [single_ie] : this.nb_state.order.map(id => document.getElementById(id));
+            if (is_MathJax_v2) {
+                for (const ie of ie_update_list) {
+                    const formatting_options = this.get_formatting_options_for_ie_id(ie.id);
+                    MathJax.Hub.config.displayAlign  = formatting_options.align;   // ok if undefined, will use MathJax default
+                    MathJax.Hub.config.displayIndent = formatting_options.indent;  // ok if undefined, will use MathJax default
 
-                const tasks = [];
-                tasks.push(['Typeset', MathJax.Hub, ie]);
-                tasks.push([this.process_markdown.bind(this), ie]);
+                    const tasks = [];
+                    tasks.push(['Typeset', MathJax.Hub, ie]);
+                    tasks.push([this.process_markdown.bind(this), ie]);
 
-                let set_completed;
-                const done_promise = new Promise(resolve => { set_completed = resolve; });
-                tasks.push(set_completed);
+                    let set_completed;
+                    const done_promise = new Promise(resolve => { set_completed = resolve; });
+                    tasks.push(set_completed);
 
-                MathJax.Hub.Queue(...tasks);
-                await done_promise;
+                    MathJax.Hub.Queue(...tasks);
+                    await done_promise;
+                }
+            } else {  // MathJax version 3
+                //!!! this needs to be revamped to support ie-by-ie formatting, update displayAlign/displayIndent, etc
+                throw new Error('THIS NEEDS TO BE UPDATED FOR MATHJAX V3!!!');
+                await MathJax.typesetPromise();
+                // process markdown *after* MathJax processing...
+                for (const ie of ie_update_list) {
+                    this.process_markdown(ie);
+                }
             }
-        } else {  // MathJax version 3
-            //!!! this needs to be revamped to support ie-by-ie formatting, update displayAlign/displayIndent, etc
-            throw new Error('THIS NEEDS TO BE UPDATED FOR MATHJAX V3!!!');
-            await MathJax.typesetPromise();
-            // process markdown *after* MathJax processing...
-            for (const ie of ie_update_list) {
-                this.process_markdown(ie);
-            }
+        } finally {
+            this.set_formatting_status(false);
         }
     }
 
