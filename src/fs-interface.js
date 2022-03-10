@@ -1,3 +1,7 @@
+const {
+    OpenPromise,
+} = await import('./open-promise.js');
+
 class FsInterface {
     // Determine if the File System Access API is available
     static fsaapi_available = ( globalThis.FileSystemHandle &&
@@ -7,6 +11,12 @@ class FsInterface {
                                 typeof globalThis.showSaveFilePicker  === 'function' &&
                                 typeof globalThis.showDirectoryPicker === 'function'    );
 
+    static ensure_fsaapi_available() {
+        if (!this.fsaapi_available) {
+            throw new Error('unexpected: File System API is not available');
+        }
+    }
+
     get fsaapi_available (){ return this.constructor.fsaapi_available; }
 
     /** Verify permission to access the given FileSystemHandle, prompting the user if necessary
@@ -15,9 +25,10 @@ class FsInterface {
      *  @return {Promise} resolves if permission granted, rejects if permission not granted
      */
     async verify_permission(file_handle, for_writing=false) {
+        this.constructor.ensure_fsaapi_available();
         const options = {};
         if (for_writing) {
-            options.writable = true;  // legacy
+            options.writable = true;  // File System API legacy
             options.mode = 'readwrite';
         }
         return ( await file_handle.queryPermission(options)   === 'granted' ||
@@ -35,6 +46,10 @@ class FsInterface {
      *          where stats is as returned by get_fs_stats_for_file()
      */
     async save(get_text, options) {
+        if (!this.fsaapi_available) {
+            return this.legacy_save(get_text, options);
+        }
+
         options = options ?? {};
 
         let file_handle = options.file_handle;
@@ -66,6 +81,10 @@ class FsInterface {
      *          where stats is as returned by get_fs_stats_for_file()
      */
     async open(options) {
+        if (!this.fsaapi_available) {
+            return this.legacy_open(options);
+        }
+
         options = options ?? {};
 
         let file_handle = options.file_handle;
@@ -90,6 +109,7 @@ class FsInterface {
      *  @return {Promise} resolves to stats as returned by get_fs_stats_for_file()
      */
     async get_fs_stats_for_file_handle(file_handle) {
+        this.constructor.ensure_fsaapi_available();
         await this.verify_permission(file_handle);
         const file = await file_handle.getFile();
         return this.get_fs_stats_for_file(file);
@@ -128,6 +148,7 @@ class FsInterface {
      *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle }
      */
     async prompt_for_save(options=undefined) {
+        this.constructor.ensure_fsaapi_available();
         const result = await this._prompt(globalThis.showSaveFilePicker, options);
         return result
             ? { file_handle: result }
@@ -139,6 +160,7 @@ class FsInterface {
      *  @return {Promise} resolves to { canceled: true }|{ file_handle: FileSystemFileHandle }
      */
     async prompt_for_open(options=undefined) {
+        this.constructor.ensure_fsaapi_available();
         options = options ?? {};
         const result = await this._prompt(globalThis.showOpenFilePicker, { ...options, multiple: false });
         return result
@@ -156,6 +178,80 @@ class FsInterface {
             // a DOMException, so just count any exception as "canceled"
             return undefined;  // indicate: canceled
         }
+    }
+
+    // === LEGACY ===
+
+    /** Save text to a file chosen by the user with the legacy File API.
+     *  @param {function} get_text nullary function to obtain text to be saved
+     *  @param {Object} options {
+     *             prompt_options?: Object,  // if given, then options for showSaveFilePicker() dialog (will be converted)
+     *         }
+     *  @return {Promise} resolves to { canceled: true }|{ stats: Object }
+     *          where stats is as returned by get_fs_stats_for_file()
+     */
+    async legacy_save(get_text, options) {
+        return new Promise((resolve, reject) => {
+            const text = get_text();
+            const a_el = document.createElement('a');
+            a_el.download = options?.name ?? 'new-notebook.esbook';
+            a_el.href = URL.createObjectURL(new Blob([text], { type: 'text/plain'}));
+            // document.body.addEventListener('focus', ...) does not get activated, even if capture is set
+            document.body.onfocus = (event) => {
+                document.body.onfocus = null;
+                URL.revokeObjectURL(a_el.href);
+                a_el.href = null;
+                resolve({});//!!! no stats
+            };
+            a_el.click();
+        });
+    }
+
+    /** Load text from the file associated with a FileSystemFileHandle,
+     *  with the FileSystemFileHandle possibly gotten from prompting user.
+     *  @param {Object} options {
+     *             prompt_options?: Object,  // if given, then options for showOpenFilePicker() dialog (will be converted)
+     *         }
+     *  @return {Promise} resolves to { canceled: true }|{ text: string, stats: Object }
+     *          where stats is as returned by get_fs_stats_for_file()
+     */
+    async legacy_open(options) {
+        const accept = this._convert_options_for_legacy(options);
+
+        const op = new OpenPromise();
+
+        const i_el = document.createElement('input');
+        i_el.type = 'file';
+        if (accept) {
+            i_el.accept = accept;
+        }
+
+        // document.body.addEventListener('focus', ...) does not get activated, even if capture is set
+        document.body.onfocus = async (event) => {
+            document.body.onfocus = null;
+            if (i_el.files.length <= 0) {
+                op.resolve({ canceled: true });
+            } else {
+                const file = i_el.files[0];
+                const text  = await file.text();
+                const stats = this.get_fs_stats_for_file(file);
+                op.resolve({
+                    text,
+                    stats,
+                });
+            }
+        };
+
+        i_el.click();
+
+        return op.promise;
+    }
+
+    _convert_options_for_legacy(options) {
+        options = options ?? {};
+        const options_accept = options?.prompt_options?.types?.[0]?.accept;
+        const accept = !options_accept ? undefined : Object.keys(options_accept);
+        return accept;
     }
 }
 

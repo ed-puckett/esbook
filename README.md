@@ -16,11 +16,36 @@ you will be excuting JavaScript code from that source.  Beware.
 
 # Stucture of the Notebook
 
-The notebook is constructed from a series of Interaction Elements.
-Each Interaction Element (ie) is divided into an _input_ and, below,
-an _output_.
+The notebook comprises a single _interaction\_element_ which in turn
+comprises zero or more _interaction\_element_ elements.  An _interaction\_element_
+is abbreviated as _ie_.
 
 # Interaction Elements
+
+Each ie comprises an input area and an (initially empty) output area.
+
+Text entered into the input area, when evaluated, gives rise to output
+in the output area.
+
+The mode of the input area can be either _markup_ or _JavaScript_.
+
+## Markup Mode
+
+The input area is normally in markup mode, and is interpreted as MarkDown
+with interspersed LaTeX mathematical expressions delimited by $...$ (inline)
+or $$...$$ (display).
+
+Evaluation of an ie whose input area is in markup mode will cause its output area
+to be filled with the formatted result.
+
+## JavaScript Mode
+
+If the first non-whitespace characters of the first line of an input area
+is "//", then the input area is in JavaScript (i.e., EcmaScript) mode.
+
+Evaluation of an ie whose input area is in JavaScript mode is the result
+of evaluated its text as if the text was the body of an async function
+which has been applied to arguments.
 
 ...
 
@@ -63,6 +88,9 @@ manipulation of the output of the interaction element), various
 mathematics interfaces, and various graphics functions and other
 functions to manipluate the output.  Also included are:
 
+    println:        prints its argument followed by newline
+    printf:         implementation of std C printf()
+    sprintf:        implementation of std C sprintf()
     settings:       current settings
     theme_settings: current theme_settings
     formatting:     set formatting { displayAlign, displayIndent }

@@ -17,10 +17,26 @@ you will be excuting JavaScript code from that source.  Beware.</p>
 </ul>
 <hr>
 <h1 id="stucture-of-the-notebook">Stucture of the Notebook</h1>
-<p>The notebook is constructed from a series of Interaction Elements.
-Each Interaction Element (ie) is divided into an <em>input</em> and, below,
-an <em>output</em>.</p>
+<p>The notebook comprises a single <em>interaction_element</em> which in turn
+comprises zero or more <em>interaction_element</em> elements.  An <em>interaction_element</em>
+is abbreviated as <em>ie</em>.</p>
 <h1 id="interaction-elements">Interaction Elements</h1>
+<p>Each ie comprises an input area and an (initially empty) output area.</p>
+<p>Text entered into the input area, when evaluated, gives rise to output
+in the output area.</p>
+<p>The mode of the input area can be either <em>markup</em> or <em>JavaScript</em>.</p>
+<h2 id="markup-mode">Markup Mode</h2>
+<p>The input area is normally in markup mode, and is interpreted as MarkDown
+with interspersed LaTeX mathematical expressions delimited by $...$ (inline)
+or $$...$$ (display).</p>
+<p>Evaluation of an ie whose input area is in markup mode will cause its output area
+to be filled with the formatted result.</p>
+<h2 id="javascript-mode">JavaScript Mode</h2>
+<p>If the first non-whitespace characters of the first line of an input area
+is &quot;//&quot;, then the input area is in JavaScript (i.e., EcmaScript) mode.</p>
+<p>Evaluation of an ie whose input area is in JavaScript mode is the result
+of evaluated its text as if the text was the body of an async function
+which has been applied to arguments.</p>
 <p>...</p>
 <h2 id="expression-evaluation">Expression Evaluation</h2>
 <p>Within an expression, the &quot;this&quot; object references the eval_state
@@ -53,7 +69,10 @@ These values include output_context (which provides utilities for
 manipulation of the output of the interaction element), various
 mathematics interfaces, and various graphics functions and other
 functions to manipluate the output.  Also included are:</p>
-<pre><code>settings:       current settings
+<pre><code>println:        prints its argument followed by newline
+printf:         implementation of std C printf()
+sprintf:        implementation of std C sprintf()
+settings:       current settings
 theme_settings: current theme_settings
 formatting:     set formatting { displayAlign, displayIndent }
 import_lib:     import other libraries from the lib/ directory

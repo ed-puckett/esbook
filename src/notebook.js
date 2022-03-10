@@ -173,6 +173,8 @@ class Notebook {
 
     static default_save_path = DEFAULT_SAVE_PATH;
 
+    static default_default_title = DEFAULT_TITLE;
+
     static cm_dark_mode_theme  = CM_DARK_MODE_THEME;
     static cm_light_mode_theme = CM_LIGHT_MODE_THEME;
 
@@ -437,7 +439,7 @@ class Notebook {
         this.notebook_file_handle = file_handle;
         this.notebook_file_stats  = stats;
 
-        let title = DEFAULT_TITLE;
+        let title = this.constructor.default_title;
         if (stats?.name) {
             title = stats.name;
         }
@@ -966,6 +968,7 @@ class Notebook {
                 return JSON.stringify(contents, null, 4);
             };
             const { canceled, file_handle, stats } = await fs_interface.save(get_text, {
+                name: this.notebook_file_stats?.name ?? this.constructor.default_save_path,
                 file_handle: (interactive || !this.notebook_file_handle) ? undefined : this.notebook_file_handle,
                 prompt_options: {
                     types: [{
@@ -1036,6 +1039,7 @@ ${contents_base64}
             };
 
             await fs_interface.save(get_text, {
+                name: this.notebook_file_stats?.name ?? this.constructor.default_save_path,
                 prompt_options: {
                     types: [{
                         description: 'html files (export)',

@@ -37,6 +37,9 @@
 // mathematics interfaces, and various graphics functions and other
 // functions to manipluate the output.  Also included are:
 //
+//     println:        prints its argument followed by newline
+//     printf:         implementation of std C printf()
+//     sprintf:        implementation of std C sprintf()
 //     settings:       current settings
 //     theme_settings: current theme_settings
 //     formatting:     set formatting { align, indent }
