@@ -22,11 +22,11 @@ review setting of focus overall (many places use setTimeout() to defer setting o
 change menuitems to use <a> or <button> (for accessibility concerns)
 can't scroll to last ie when focused to the next-to-last ie
 reopen does not work as expected
-new document, add space, delete, save, cancel: document shows unmodified even though there are undos past the last save...
+new notebook, add space, delete, save, cancel: notebook shows unmodified even though there are undos past the last save...
 provide direct access to last recent
 text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
 legacy_open() sometimes gets blocked until keypress or mouse click (seen in Firefox)
-legacy_save(): no stats are returned and therefore the new filename and document name are not set
+legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
 
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
 documentation: document: only the last formatting() call in an ie has effect
@@ -94,12 +94,15 @@ provide on_stopped event to allow cleanup of background "processes" (e.g., setIn
 
 
 === UNREPEATED BUGS ====
+formatting indicator is not shown after a notebook is loaded from embedded content in an html page (exported notebook)
 investigate: seems like files are being reloaded a lot as elements are evaluated
 pythagorean-triples.esbook: first cell lines are concatenated (saw once, but not again...)
 have witnessed stray text in buffers after copying/pasting/evaluating (accidental scroll wheel paste?)
 
 
 === DONE ===
+* preserve notebook title in exported format
+* exported notebooks: title is "undefined" when loaded
 * provide legacy file handling when FileSystemFileHandle and associated API is not available (e.g., on Firefox, Safari)
 * provide indicator for "formatting"
 * invalid/incomplete sprintf arguments cause Uncaught TypeError that is not displayed

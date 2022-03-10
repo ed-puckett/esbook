@@ -173,7 +173,7 @@ class Notebook {
 
     static default_save_path = DEFAULT_SAVE_PATH;
 
-    static default_default_title = DEFAULT_TITLE;
+    static default_title = DEFAULT_TITLE;
 
     static cm_dark_mode_theme  = CM_DARK_MODE_THEME;
     static cm_light_mode_theme = CM_LIGHT_MODE_THEME;
@@ -439,7 +439,7 @@ class Notebook {
         this.notebook_file_handle = file_handle;
         this.notebook_file_stats  = stats;
 
-        let title = this.constructor.default_title;
+        let title = document.title || this.constructor.default_title;
         if (stats?.name) {
             title = stats.name;
         }
