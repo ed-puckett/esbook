@@ -6,8 +6,8 @@ emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
 call cleanup on change objects that are deleted by being trimmed by new edits
 provide "toast" messages + dialog to display past messages
 update theme-colors (for dark/light modes, etc)
-system dark/light mode switch is not detected (chromium bug on gnome/linux)
-support dark mode in dagre css (also: Plotly)
+system dark/light mode switch is not detected (chromium bug on gnome/linux) (perhaps only snap-installed chromium)
+support dark mode in dagre css (also: Plotly and other graphics outputs)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse into output area?) (focus issues?)
 set width on graphics output DIVs
 provide settings to only enable autoeval with prompt (default false)
@@ -20,7 +20,7 @@ settings dialog and validation, while working, is a little rough around the edge
 dialogs: don't let keyboard focus "fall off the edge" down to the underlying notebook
 review setting of focus overall (many places use setTimeout() to defer setting of focus, which is kludgey)
 change menuitems to use <a> or <button> (for accessibility concerns)
-can't scroll to last ie when focused to the next-to-last ie
+can't scroll to last ie when focused to the next-to-last ie (if the last ie is autohide and currently has no output)
 reopen does not work as expected
 new notebook, add space, delete, save, cancel: notebook shows unmodified even though there are undos past the last save...
 provide direct access to last recent
