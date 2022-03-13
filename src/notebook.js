@@ -827,6 +827,7 @@ class Notebook {
         this.set_notebook_unmodified();
 
         this.set_running_status(false);
+        this.set_formatting_status(false);
         this.update_global_view_properties();
     }
 

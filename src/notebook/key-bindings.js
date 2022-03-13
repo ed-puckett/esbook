@@ -128,7 +128,7 @@ function bind_key_handler(element) {
 
     const blur_handler = reset;
 
-    const keydown_handler = (event) => {
+    const key_handler = (event) => {
         switch (event.key) {
         case 'Alt':
         case 'AltGraph':
@@ -175,8 +175,8 @@ function bind_key_handler(element) {
     remove_current_key_handler(element);
 
     const listener_specs = [
-        [ 'blur',    blur_handler,    { capture: true } ],
-        [ 'keydown', keydown_handler, { capture: true } ],
+        [ 'blur',    blur_handler, { capture: true } ],
+        [ 'keydown', key_handler,  { capture: true } ],
     ];
 
     for (const [ type, listener, options ] of listener_specs) {

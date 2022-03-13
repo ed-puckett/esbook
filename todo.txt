@@ -62,6 +62,7 @@ documentation: local server
 
 
 === THINK ABOUT ===
+undo is maybe too fne-grained
 review possiblility of injection vulnerabilities for javascript and mdmj; mdmj example: `+alert('hi')&&`gotcha!
 mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
 mathjax: latex equation numbers, labels, etc need to be reset (if used)
