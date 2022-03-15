@@ -5,7 +5,11 @@
         {
             "id": "id-1876a252-56b2-43c0-913b-1e144f8d87fc",
             "input": "",
-            "output": []
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
         },
         {
             "id": "id-e8b2d2cc-4e3f-4f68-913f-18b410da3687",
@@ -227,11 +231,11 @@
         },
         {
             "id": "id-c76940cc-486c-4c82-80f2-4090d6631fa4",
-            "input": "### Surprise!\n\nIt appears that:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\frac{f(k)}{i!} \\prod_{l=0 \\\\ l \\ne k}^i (-1)^{i-l} \\small{l \\choose i} (x - l)\n\\end{align}\n$$\nWe need to show that the above equation can be derived from the definition:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\Bigg( \\sum_{l=0}^{k}{(-1)^{k-l}{k \\choose l}f(l)} \\Bigg) {x \\choose k} \\\\\n\\end{align}\n$$",
+            "input": "### Surprise!\n\nIt appears that:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\frac{f(k)}{i!} \\prod_{l=0 \\\\ l \\ne k}^i (-1)^{i-l} \\small{l \\choose i} (x - l)\n\\end{align}\n$$\n(Note that this can be easily shown to be equivalent to Lagrange Interpolation with the $x_i$ observation points spaced evenly 1 unit apart.)\n$ $\nWe need to show that the above equation can be derived from the definition:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\Bigg( \\sum_{l=0}^{k}{(-1)^{k-l}{k \\choose l}f(l)} \\Bigg) {x \\choose k} \\\\\n\\end{align}\n$$\n",
             "output": [
                 {
                     "type": "text",
-                    "text": "### Surprise!\n\nIt appears that:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\frac{f(k)}{i!} \\prod_{l=0 \\\\ l \\ne k}^i (-1)^{i-l} \\small{l \\choose i} (x - l)\n\\end{align}\n$$\nWe need to show that the above equation can be derived from the definition:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\Bigg( \\sum_{l=0}^{k}{(-1)^{k-l}{k \\choose l}f(l)} \\Bigg) {x \\choose k} \\\\\n\\end{align}\n$$"
+                    "text": "### Surprise!\n\nIt appears that:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\frac{f(k)}{i!} \\prod_{l=0 \\\\ l \\ne k}^i (-1)^{i-l} \\small{l \\choose i} (x - l)\n\\end{align}\n$$\n(Note that this can be easily shown to be equivalent to Lagrange Interpolation with the $x_i$ observation points spaced evenly 1 unit apart.)\n$ $\nWe need to show that the above equation can be derived from the definition:\n$$\n\\begin{align}\nf_{(i)}(x) &= \\sum_{k=0}^i \\Bigg( \\sum_{l=0}^{k}{(-1)^{k-l}{k \\choose l}f(l)} \\Bigg) {x \\choose k} \\\\\n\\end{align}\n$$\n"
                 }
             ],
             "formatting_options": {
@@ -241,11 +245,11 @@
         },
         {
             "id": "id-25068dbe-9e78-4035-bd24-10fa9b42588e",
-            "input": "\n### Example for n=4, i=3, $f_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$",
+            "input": "---\n### Example for n=4, i=3, $f_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$",
             "output": [
                 {
                     "type": "text",
-                    "text": "\n### Example for n=4, i=3, $f_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$"
+                    "text": "---\n### Example for n=4, i=3, $f_{(3)}(x)$\n$$\n\\begin{array}{ccccccc}\nf(0) &        & f(1)    &        & f(2)       &            & f(3) \\\\\n     & \\D^1_0 &         & \\D^1_1 &            & \\D^1_2     &      \\\\\n     &        & \\D^2_0  &        & \\D^2_1     &            &      \\\\\n     &        &         & \\D^3_0 &            &            &      \\\\\n\\end{array}\n$$\nWe need to collect the coefficients of each $f(l)$.  Call these $C_f(l)$.\n$ $\nWe will start with $l=3$ which has only one subexpression when $k=3$.\n$$\n\\begin{align}\nC_f(3) &= (-1)^{3-3}{3 \\choose 3}{x \\choose 3} \\\\\n       &= \\frac{x^{\\underline{3}}}{3!} \\\\\n       &= \\frac{(x)(x-1)(x-2)}{6} \\\\\n       &\\textit{(correct)} \\\\\n\\end{align}\n$$"
                 }
             ],
             "formatting_options": {
