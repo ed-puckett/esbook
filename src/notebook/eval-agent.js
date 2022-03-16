@@ -110,7 +110,7 @@ function transform_text_result(result) {
     return { type: 'text', text, is_tex, inline_tex };
 }
 
-export class EvalWorker {
+export class EvalAgent {
     /** Call this function instead of constructing an instance with new.
      *  @param {Object} eval_state will be present as "this" during evaluation
      *  @param {Function} formatting set a new formatting options object
@@ -124,7 +124,7 @@ export class EvalWorker {
      *                    mean that the instance is "done".
      */
     static async eval(eval_state, formatting, output_context, expression) {
-        return new EvalWorker(eval_state, formatting, output_context, expression)._run();
+        return new EvalAgent(eval_state, formatting, output_context, expression)._run();
     }
 
     constructor(eval_state, formatting, output_context, expression) {
@@ -224,7 +224,7 @@ export class EvalWorker {
 
         async function process_action(action) {
             if (self._stopped) {
-                throw new Error('error received after EvalWorker already stopped');
+                throw new Error('error received after EvalAgent already stopped');
             } else {
                 try {
                     return await self.output_context.output_handler_update_notebook(action.type, action);
@@ -240,7 +240,7 @@ export class EvalWorker {
 
         async function process_error(error) {
             if (self._stopped) {
-                throw new Error('error received after EvalWorker already stopped');
+                throw new Error('error received after EvalAgent already stopped');
             } else {
                 return self.output_context.output_handler_update_notebook('error', error);
             }

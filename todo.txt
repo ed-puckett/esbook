@@ -1,5 +1,5 @@
 nerdamer: nested functions using sum or product are not alpha-renamed properly and they fail strangely
-"Typesetting math: 100%" is shown on printout (e.g., examples/solve-logistic-equation-fixed-points.esbook)
+"Typesetting math: 100%" is shown on printout (e.g., examples/solve-logistic-equation-fixed-points.esbook) (#MathJax_Message)
 #dialog_event_blocker is not deflecting focus
 review Content-Security-Policy
 emacs key bindings shadow other important standard key bindings (e.g., Ctrl-X)
@@ -27,6 +27,7 @@ provide direct access to last recent
 text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
 legacy_open() sometimes gets blocked until keypress or mouse click (seen in Firefox)
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
+add support for web workers
 
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
 documentation: document: only the last formatting() call in an ie has effect
@@ -69,7 +70,6 @@ mathjax: latex equation numbers, labels, etc need to be reset (if used)
 options for printing (e.g., show autohide elements)
 installer
 "unevaluated" status for an ie (with an associated indicator)
-add support for web workers
 support configurable key bindings
 provide print_markup() (or something) in eval
 save fails silently when there is a permissions error (showSaveFilePicker returns undefined for permissions error and also for user cancel)
@@ -90,7 +90,7 @@ use "contenteditable" element instead of CodeMirror stuff?
 figure out what to do with nb_state
 figure out how to reload / re-initialize eval state
 figure out codemirror + emacs clipboard support
-deleting element with an eval worker running something like setInterval(): old eval worker keeps running even though "stopped" (maybe on_stopped event could help)
+deleting element with an eval agent running something like setInterval(): old eval agent keeps running even though "stopped" (maybe on_stopped event could help)
 provide on_stopped event to allow cleanup of background "processes" (e.g., setInterval)
 
 
@@ -193,7 +193,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 * implement message_controller.confirm_sync (eliminated the need for _sync variant...)
 * update output-handlers.js
 * update class OutputContext in notebook.js
-* update eval-worker.js
+* update eval-agent.js
 * save failed: get_fs_stats_for_file_handle is not defined
 * eval: graphics element is not sized correctly (see examples/dagre-demo.esbook)
 * streamline operation of output handlers

@@ -98,8 +98,8 @@ const {
 
 const {
     TextuallyLocatedError,
-    EvalWorker,
-} = await import('./notebook/eval-worker.js');
+    EvalAgent,
+} = await import('./notebook/eval-agent.js');
 
 const {
     get_recents,
@@ -492,21 +492,21 @@ class Notebook {
 
     // Remove the internal state object for ie with id ie_id.
     remove_internal_state_for_ie_id(ie_id) {
-        this.remove_eval_worker_for_ie_id(ie_id);
+        this.remove_eval_agent_for_ie_id(ie_id);
         delete this.internal_nb_state[ie_id];
     }
 
-    remove_eval_worker_for_ie_id(ie_id) {
+    remove_eval_agent_for_ie_id(ie_id) {
         const internal_state = this.get_internal_state_for_ie_id(ie_id);
         if (internal_state) {
-            internal_state.eval_worker?.stop();  // stop old eval_worker, if any
-            internal_state.eval_worker = undefined;
+            internal_state.eval_agent?.stop();  // stop old eval_agent, if any
+            internal_state.eval_agent = undefined;
         }
     }
-    set_eval_worker_for_ie_id(ie_id, eval_worker) {
-        this.remove_eval_worker_for_ie_id(ie_id);
+    set_eval_agent_for_ie_id(ie_id, eval_agent) {
+        this.remove_eval_agent_for_ie_id(ie_id);
         const internal_state = this.establish_internal_state_for_ie_id(ie_id);
-        internal_state.eval_worker = eval_worker;
+        internal_state.eval_agent = eval_agent;
     }
 
     // Remove ie with id ie_id from this.nb_state and this.internal_nb_state
@@ -1433,9 +1433,9 @@ ${contents_base64}
             try {
 
                 const input_text = this.get_input_text_for_ie_id(ie.id);
-                const eval_worker = await this.evaluate_input_text(ie.id, output_context, input_text);
-                if (eval_worker) {
-                    this.set_eval_worker_for_ie_id(ie.id, eval_worker);
+                const eval_agent = await this.evaluate_input_text(ie.id, output_context, input_text);
+                if (eval_agent) {
+                    this.set_eval_agent_for_ie_id(ie.id, eval_agent);
                 }
 
             } catch (err) {
@@ -1473,7 +1473,7 @@ ${contents_base64}
 
     // may throw an error
     // Note: due to the conversion of mdmj to an expression,
-    // an EvalWorker instance is always returned.
+    // an EvalAgent instance is always returned.
     async evaluate_input_text(ie_id, output_context, input_text) {
         let text = input_text;
         const detected_modes = this.constructor.detect_ie_modes(input_text);
@@ -1511,7 +1511,7 @@ ${contents_base64}
             formatting(settings.formatting_options);
 
             // evaluate
-            return EvalWorker.eval(this.get_eval_state(), formatting, output_context, text);
+            return EvalAgent.eval(this.get_eval_state(), formatting, output_context, text);
         }
     }
 
