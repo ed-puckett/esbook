@@ -35,8 +35,69 @@ export class EvalWorker {
         }
     }
 
+    async eval(expression, ...objects) {
+        if (this.terminated) {
+            throw new Error(`eval worker ${this.id}: worker has been terminated`);
+        }
+        if (this._current_expression) {
+            throw new Error(`eval worker ${this.id}: an expression evaluation is already in process`);
+        }
+
+        const result_promise = new OpenPromise();
+        let result_promise_fulfilled = false;
+
+        const reset = () => {
+            this._current_expression = undefined;
+            this._reset_event_handlers();
+            if (!result_promise_fulfilled) {
+                result_promise.reject(new Error(`eval worker ${this.id} / expression ${expression_id}: evaluation terminated`));
+            }
+        };
+
+        const expression_id = generate_object_id();
+
+        const worker_message = {
+            request: 'eval',
+            id: expression_id,
+            expression,
+            objects,
+        };
+
+        this._current_expression = {
+            ...worker_message,
+            terminate() {
+                reset();
+            },
+        };
+
+        this._worker.onmessage = (event) => {
+            const result = event.data;
+            if ('value' in result) {
+                result_promise.resolve(result.value);
+            } else {
+                result_promise.reject(result.error);
+            }
+            result_promise_fulfilled = true;
+            reset();
+        };
+        this._worker.onerror = (event) => {
+            result_promise.reject(new Error(`eval worker ${this.id} / expression ${expression_id}: error in worker`));
+            result_promise_fulfilled = true;
+            reset();
+        };
+        this._worker.onmessageerror = (event) => {
+            result_promise.reject(new Error(`eval worker ${this.id} / expression ${expression_id}: serialization error in worker`));
+            result_promise_fulfilled = true;
+            reset();
+        };
+
+        this._worker.postMessage(worker_message);
+
+        return result_promise.promise;
+    }
+
     // returns an async interator, i.e., this function is an async generator
-    eval(expression, ...objects) {
+    stream_eval(expression, ...objects) {
         if (this.terminated) {
             throw new Error(`eval worker ${this.id}: worker has been terminated`);
         }
@@ -63,7 +124,7 @@ export class EvalWorker {
                 console.warn(`eval worker ${this.id} / expression ${expression_id}: result received after done`, result);
             } else {
                 if (pending_promises.length > 0) {
-                    if (result.value) {
+                    if ('value' in result) {
                         pending_promises.shift().resolve({ value: result.value });
                     } else {
                         pending_promises.shift().reject(result.error);
@@ -82,6 +143,7 @@ export class EvalWorker {
         const expression_id = generate_object_id();
 
         const worker_message = {
+            request: 'stream_eval',
             id: expression_id,
             expression,
             objects,
@@ -107,7 +169,7 @@ export class EvalWorker {
             handle_done();
         };
         this._worker.onmessageerror = (event) => {
-            handle_result({ error: new Error(`eval worker ${this.id} / expression ${expression_id}: deserialization error in worker`) });
+            handle_result({ error: new Error(`eval worker ${this.id} / expression ${expression_id}: serialization error in worker`) });
             handle_done();
         };
 
@@ -120,7 +182,7 @@ export class EvalWorker {
                     next() {
                         if (pending_results.length > 0) {
                             const result = pending_results.shift()
-                            if (result.value) {
+                            if ('value' in result) {
                                 return Promise.resolve({ value: result.value });
                             } else {
                                 return Promise.reject(result.error);

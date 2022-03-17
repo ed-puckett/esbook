@@ -1,3 +1,4 @@
+sometimes underlying markup is displayed, e.g., html('br') has been seen to cause this
 nerdamer: nested functions using sum or product are not alpha-renamed properly and they fail strangely
 "Typesetting math: 100%" is shown on printout (e.g., examples/solve-logistic-equation-fixed-points.esbook) (#MathJax_Message)
 #dialog_event_blocker is not deflecting focus
@@ -28,6 +29,7 @@ text coalescing does not work when multiple printf() calls happen too quickly; s
 legacy_open() sometimes gets blocked until keypress or mouse click (seen in Firefox)
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
 
+documentation: create_worker(); async generator model, "objects" argument for extra arguments to EvalWorker.eval()
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
 documentation: document: only the last formatting() call in an ie has effect
 documentation: recommend: avoid latex equation numbers, labels, etc (use \tag{...} instead)
