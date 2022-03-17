@@ -47,6 +47,7 @@
 //     vars:           export new "global" properties
 //     is_stopped:     determine if the evaluation has been stopped
 //     delay_ms:       return a Promise that resolves after a specified delay
+//     create_worker:  create a new EvalWorker instance
 //
 // These all continue to be available even after the evaluation has
 // returned if there are any async actions still active.
@@ -113,6 +114,7 @@ function transform_text_result(result) {
 export class EvalAgent {
     /** Call this function instead of constructing an instance with new.
      *  @param {Object} eval_state will be present as "this" during evaluation
+     *  @param {Function} create_worker function to create new EvalWorker instance
      *  @param {Function} formatting set a new formatting options object
      *                    { align: string, indent: string }.
      *  @param {OutputContext} output_context object containing output
@@ -123,11 +125,11 @@ export class EvalAgent {
      *                    return of the _run method does not necessarily
      *                    mean that the instance is "done".
      */
-    static async eval(eval_state, formatting, output_context, expression) {
-        return new EvalAgent(eval_state, formatting, output_context, expression)._run();
+    static async eval(eval_state, create_worker, formatting, output_context, expression) {
+        return new EvalAgent(eval_state, create_worker, formatting, output_context, expression)._run();
     }
 
-    constructor(eval_state, formatting, output_context, expression) {
+    constructor(eval_state, create_worker, formatting, output_context, expression) {
         Object.defineProperties(this, {
             id: {
                 value: generate_uuid(),
@@ -135,6 +137,10 @@ export class EvalAgent {
             },
             eval_state: {
                 value: eval_state,
+                enumerable: true,
+            },
+            create_worker: {
+                value: create_worker,
                 enumerable: true,
             },
             formatting: {
@@ -315,6 +321,7 @@ export class EvalAgent {
             settings:       get_settings(),
             theme_settings: get_theme_settings(),
             formatting:     this.formatting,
+            create_worker:  this.create_worker,
             import_lib,
             vars,
             is_stopped,

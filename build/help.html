@@ -79,6 +79,7 @@ import_lib:     import other libraries from the lib/ directory
 vars:           export new &quot;global&quot; properties
 is_stopped:     determine if the evaluation has been stopped
 delay_ms:       return a Promise that resolves after a specified delay
+create_worker:  create a new EvalWorker instance
 </code></pre>
 <p>These all continue to be available even after the evaluation has
 returned if there are any async actions still active.

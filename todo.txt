@@ -27,7 +27,6 @@ provide direct access to last recent
 text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
 legacy_open() sometimes gets blocked until keypress or mouse click (seen in Firefox)
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
-add support for web workers
 
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
 documentation: document: only the last formatting() call in an ie has effect
@@ -102,6 +101,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* add support for web workers
 * preserve notebook title in exported format
 * exported notebooks: title is "undefined" when loaded
 * provide legacy file handling when FileSystemFileHandle and associated API is not available (e.g., on Firefox, Safari)

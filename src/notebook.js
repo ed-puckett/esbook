@@ -97,14 +97,18 @@ const {
 } = await import('./notebook/change.js');
 
 const {
+    get_recents,
+    add_to_recents,
+} = await import('./notebook/recents.js');
+
+const {
     TextuallyLocatedError,
     EvalAgent,
 } = await import('./notebook/eval-agent.js');
 
 const {
-    get_recents,
-    add_to_recents,
-} = await import('./notebook/recents.js');
+    EvalWorker,
+} = await import('./notebook/eval-worker.js');
 
 
 // === NOTEBOOK INSTANCE ===
@@ -178,7 +182,8 @@ class Notebook {
     static cm_dark_mode_theme  = CM_DARK_MODE_THEME;
     static cm_light_mode_theme = CM_LIGHT_MODE_THEME;
 
-    static sym_eval_state = Symbol.for('eval_state');
+    static sym_eval_state   = Symbol.for('eval_state');
+    static sym_eval_workers = Symbol.for('eval_workers');
 
     // CSS class for ie when in mdmj mode
     static _ie_autohide_css_class = 'autohide';
@@ -446,8 +451,8 @@ class Notebook {
         document.title = title;
     }
 
-    // Set a new empty state for the notebook.
-    set_new_notebook_state() {
+    // Set a new empty state for the notebook (also calls reset_eval_state())
+    reset_notebook_state() {
         this.nb_state = {
             nb_type:    this.constructor.nb_type,
             nb_version: this.constructor.nb_version,
@@ -455,10 +460,9 @@ class Notebook {
             elements: {},  // the actual interaction_element data, indexed by interaction_element id
         };
         // internal_nb_state is internal state for each ie indexed by ie.id
-        // plus one more slot at Symbol.from(
-        this.internal_nb_state = {
-            [this.constructor.sym_eval_state]: {},  // eval_state for notebook
-        };
+        // plus two more slots (at sym_eval_state and sym_eval_workers)
+        this.internal_nb_state = {};
+        this.reset_eval_state();
     }
 
     set_formatting_options_for_ie_id(ie_id, formatting_options) {
@@ -473,7 +477,16 @@ class Notebook {
     }
 
     reset_eval_state() {
-        this.internal_nb_state[this.constructor.sym_eval_state] = {};
+        for (const eval_worker of this.internal_nb_state[this.constructor.sym_eval_workers] ?? []) {
+            try {
+                eval_worker.terminate();
+            } catch (_) {
+                // nothing...
+            }
+        }
+
+        this.internal_nb_state[this.constructor.sym_eval_state]   = {};  // eval_state for notebook
+        this.internal_nb_state[this.constructor.sym_eval_workers] = [];  // EvalWorker instances for notebook
     }
     get_eval_state() {
         return this.internal_nb_state[this.constructor.sym_eval_state];
@@ -817,7 +830,7 @@ class Notebook {
         }
 
         // reset state
-        this.set_new_notebook_state();
+        this.reset_notebook_state();
         await this.set_notebook_source(undefined);
         this.current_ie = undefined;
         const ie = this.add_new_ie();  // add a single new interaction_element
@@ -1117,7 +1130,7 @@ ${contents_base64}
         // validation passed; clear the current state and then load the new state
         const prior_state = { current_ie: this.current_ie, nb_state: this.nb_state };  // save in order to restore if there is an error
         this.current_ie = undefined;
-        this.set_new_notebook_state();
+        this.reset_notebook_state();
         // we accepted the notebook format in the validation above, so set current type and version:
         this.nb_state.nb_type    = this.constructor.nb_type;
         this.nb_state.nb_version = this.constructor.nb_version;
@@ -1510,8 +1523,14 @@ ${contents_base64}
             // establish initial formatting_options in case it is not set by the evaluation
             formatting(settings.formatting_options);
 
+            const create_worker = () => {
+                const eval_worker = new EvalWorker();
+                this.internal_nb_state[this.constructor.sym_eval_workers].push(eval_worker);
+                return eval_worker;
+            };
+
             // evaluate
-            return EvalAgent.eval(this.get_eval_state(), formatting, output_context, text);
+            return EvalAgent.eval(this.get_eval_state(), create_worker, formatting, output_context, text);
         }
     }
 
