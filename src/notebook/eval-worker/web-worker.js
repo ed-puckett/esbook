@@ -4,7 +4,7 @@ const AsyncFunction          = Object.getPrototypeOf(async function () {}).const
 const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () {}).constructor;
 
 self.onmessage = async function (message) {
-    const { request, id, expression, objects } = message.data;
+    const { request, worker_id, id, expression, objects } = message.data;
 
     switch (request) {
     case 'eval': {

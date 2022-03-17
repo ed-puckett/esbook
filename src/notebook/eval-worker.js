@@ -59,6 +59,7 @@ export class EvalWorker {
         const worker_message = {
             request: 'eval',
             id: expression_id,
+            worker_id: this.id,
             expression,
             objects,
         };
@@ -145,6 +146,7 @@ export class EvalWorker {
         const worker_message = {
             request: 'stream_eval',
             id: expression_id,
+            worker_id: this.id,
             expression,
             objects,
         };
