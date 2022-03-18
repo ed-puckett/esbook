@@ -87,7 +87,7 @@ export class MenuCommandEvent extends define_subscribable('menu-command') {
 
 export class MenuBar {
 
-    static menu_element_tag_name     = 'ul';
+    static menu_element_tag_name     = 'menu';
     static menuitem_element_tag_name = 'li';
 
     static open_recent_command_prefix = 'open_recent_';  // + index (0-based)
@@ -241,7 +241,7 @@ export class MenuBar {
                             collection.style.top  = `${mi_br.y + mi_br.height}px`;
                             collection.style.left = `${mi_br.x}px`;
                         } else {
-                            collection.style.top  = `${mi_br.y - mi_br.height - 7}px`;  // kludge: subtract extra to account for menu padding
+                            collection.style.top  = `${mi_br.y - mi_br.height}px`;
                             collection.style.left = `${mi_br.x + mi_br.width}px`;
                         }
                     }

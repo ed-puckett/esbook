@@ -42,6 +42,13 @@
     border-radius: 0.25rem;
     border: 1px solid grey;
     box-shadow: 3px 3px 16px lightgrey;
+
+    /* eliminate default styling for menu elements */
+    margin-block-start:   0;
+    margin-block-end:     0;
+    margin-inline-start:  0;
+    margin-inline-end:    0;
+    padding-inline-start: 0;
 }
 
 #content .menuitem.disabled {

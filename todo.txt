@@ -103,6 +103,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* change <ul> elements to <menu> elements in menu and fix positioning logic
 * add support for web workers
 * preserve notebook title in exported format
 * exported notebooks: title is "undefined" when loaded
