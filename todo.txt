@@ -28,7 +28,6 @@ text coalescing does not work when multiple printf() calls happen too quickly; s
 legacy_open() sometimes gets blocked until keypress or mouse click (seen in Firefox)
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
 update license
-test autoeval (and also from embedded content in exported html files)
 build demos from examples when building
 
 documentation: create_worker(); async generator model, "objects" argument for extra arguments to EvalWorker.eval(); eval/stream_eval
@@ -105,6 +104,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* test autoeval (and also from embedded content in exported html files)
 * make autoeval evaulate entire notebook
 * change <ul> elements to <menu> elements in menu and fix positioning logic
 * add support for web workers
