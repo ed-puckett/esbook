@@ -13,11 +13,11 @@
         },
         {
             "id": "id-65afe6c9-67ab-4646-a5ae-a30abfeba7a4",
-            "input": "Evaluate this entire notebook to get started (from the menu: Element->Eval notebook)\nThen, click the Go button to start.\nEquations and parameters may be modified in code in the last element.",
+            "input": "This notebook will be automatically evaluated when loaded.\nOnce evaluation completes, click the Go button to start.\n$ $\nEquations and parameters may be modified in code in the last element.\nTo see the effect of modifications, evaluate the last element, or\nsimply re-evaluate the entire notebook (from the menu: Element->Eval notebook)\n",
             "output": [
                 {
                     "type": "text",
-                    "text": "Evaluate this entire notebook to get started (from the menu: Element->Eval notebook)\nThen, click the Go button to start.\nEquations and parameters may be modified in code in the last element."
+                    "text": "This notebook will be automatically evaluated when loaded.\nOnce evaluation completes, click the Go button to start.\n$ $\nEquations and parameters may be modified in code in the last element.\nTo see the effect of modifications, evaluate the last element, or\nsimply re-evaluate the entire notebook (from the menu: Element->Eval notebook)\n"
                 }
             ],
             "formatting_options": {
