@@ -12,7 +12,6 @@ support dark mode in dagre css (also: Plotly and other graphics outputs)
 sometimes input cell does not respond to keyboard shortcuts after focus is reset (with mouse into output area?) (focus issues?)
 set width on graphics output DIVs
 provide settings to only enable autoeval with prompt (default false)
-test autoeval
 nerdamer matrices are rendered with simple vertical bars (TeX vmatrix seems to be hard-coded instead of bmatrix)
 provide "clear" action for current output or all outputs
 cannot use keyboard navigation in menu when screen reader is on (focus does not move)
@@ -28,6 +27,9 @@ provide direct access to last recent
 text coalescing does not work when multiple printf() calls happen too quickly; see: output-context.js: create_text_output_data(): output_data_collection remains empty
 legacy_open() sometimes gets blocked until keypress or mouse click (seen in Firefox)
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
+update license
+test autoeval (and also from embedded content in exported html files)
+build demos from examples when building
 
 documentation: create_worker(); async generator model, "objects" argument for extra arguments to EvalWorker.eval(); eval/stream_eval
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
@@ -103,6 +105,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* make autoeval evaulate entire notebook
 * change <ul> elements to <menu> elements in menu and fix positioning logic
 * add support for web workers
 * preserve notebook title in exported format

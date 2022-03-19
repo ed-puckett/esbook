@@ -274,6 +274,8 @@ class Notebook {
             await this.load_nb_state(initializing_nb_state);
             Change.update_for_open(this);  // do this before this.set_notebook_unmodified()
             this.set_notebook_unmodified();
+            // check if this notebook is "autoeval"
+            await this._handle_autoeval();
         }
     }
 
@@ -645,7 +647,7 @@ class Notebook {
             if (!this.current_ie) {
                 beep();
             } else {
-                this.ie_ops_eval_notebook(this.current_ie, false);
+                this.ie_ops_eval_notebook();
             }
             break;
         }
@@ -756,7 +758,7 @@ class Notebook {
         this.notebook_modified();
     }
 
-    async ie_ops_eval_notebook(ie, only_before_current_element=false) {
+    async ie_ops_eval_notebook(ie=undefined, only_before_current_element=false) {
         this.reset_eval_state();
         for (const ie_id of this.nb_state.order) {
             if (only_before_current_element && ie_id === ie.id) {
@@ -1210,9 +1212,7 @@ ${contents_base64}
             const first_line = cm.getLine(0);
             const detected_modes = this.constructor.detect_ie_modes(first_line);
             if (detected_modes.autoeval) {
-                const first_ie = document.getElementById(first_ie_id);
-                const stay = true;
-                await this.ie_ops_eval_element(first_ie, stay);
+                await this.ie_ops_eval_notebook();
             }
         }
     }
