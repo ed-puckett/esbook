@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>ode-plotter.esbook</title>
     <script defer type="module">
-        const default_server_endpoint = 'http://127.0.0.1:4300/';
+        const default_server_endpoint = 'https://blackguard.github.io/esbook/build/';
         const server_endpoint = new URL(location).searchParams.get('s') ?? default_server_endpoint;
         const loading_indicator_el = document.createElement('h1');
         loading_indicator_el.innerText = 'Loading...';
