@@ -39,6 +39,12 @@ build-dir: ./node_modules README.md
 	node -e 'require("fs/promises").readFile("README.md").then(t => console.log(`<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n$${require("marked").marked(t.toString())}\n</body>\n</html>`))' > "$(BUILDDIR)/help.html"
 	cp src/favicon.ico "$(BUILDDIR)/"
 
+.PHONY: demos-dir
+demos-dir:
+	rm -fr demos && \
+	( cd ./examples/ && find . -type d -exec mkdir -p ../demos/{} \; ) && \
+	( cd ./examples/ && find . -iname '*.esbook' -exec node ../src/build/make-demo.mjs {} \; )
+
 .PHONY: lint
 lint: ./node_modules
 	./node_modules/.bin/eslint src
@@ -46,7 +52,7 @@ lint: ./node_modules
 # kill the server by performing a GET on /QUIT
 # uses Linux commands: lsof, grep, cut
 .PHONY: server
-server: build-dir
+server: build-dir demos-dir
 	( cd "$(BUILDDIR)" && npx http-server -d -n -c-1 -a 127.0.0.1 --port $(SERVER_PORT) | tee >(grep -q -m1 '"GET /QUIT"'; echo QUITTING; kill $$(lsof -itcp:$(SERVER_PORT) -Fp | grep ^p | cut -c2-)) )
 
 .PHONY: kill-server
@@ -62,5 +68,5 @@ client:
 	chromium --new-window http://127.0.0.1:$(SERVER_PORT)/src/index.html
 
 .PHONY: start
-start: build-dir
+start: build-dir demos-dir
 	if ! lsof -itcp:$(SERVER_PORT); then make server <&- >/dev/null 2>&1 & sleep 1; fi; make client

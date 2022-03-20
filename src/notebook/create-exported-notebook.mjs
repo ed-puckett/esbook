@@ -19,6 +19,9 @@ if (typeof btoa !== 'function') {
     btoa = (b) => Buffer.from(b).toString('base64');
 }
 
+
+export const initializing_data_element_id = 'initializing-data-f55c8878-87c8-11ec-b7c3-273bd5f809b1';
+
 export function create_exported_notebook(contents_json, document_title, default_server_endpoint) {
     if (typeof contents_json !== 'string') {
         throw new Error('contents_json must be a string');
@@ -52,7 +55,7 @@ export function create_exported_notebook(contents_json, document_title, default_
     </script>
 </head>
 <body>
-<div id="initializing-data-f55c8878-87c8-11ec-b7c3-273bd5f809b1" style="display:none">
+<div id="${initializing_data_element_id}" style="display:none">
 ${contents_base64}
 </div>
 </body>

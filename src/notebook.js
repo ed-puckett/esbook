@@ -11,8 +11,6 @@ const DEFAULT_TITLE = 'Untitled';
 const CM_DARK_MODE_THEME  = 'blackboard';
 const CM_LIGHT_MODE_THEME = 'default';
 
-const initializing_data_element_id = 'initializing-data-f55c8878-87c8-11ec-b7c3-273bd5f809b1';
-
 
 // === EXTERNAL MODULES ===
 
@@ -110,6 +108,7 @@ const {
 } = await import('./notebook/eval-worker.js');
 
 const {
+    initializing_data_element_id,
     create_exported_notebook,
 } = await import('./notebook/create-exported-notebook.mjs');
 
