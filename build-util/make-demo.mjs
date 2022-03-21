@@ -8,7 +8,7 @@ const dest_extension   = '.html';
 
 const {
     create_exported_notebook,
-} = await import('../notebook/create-exported-notebook.mjs');
+} = await import('../src/notebook/create-exported-notebook.mjs');
 
 import { readFile, writeFile } from 'fs/promises';
 
@@ -36,8 +36,8 @@ if (!source_file.endsWith(source_extension)) {
     usage_error();
 }
 
-const examples_dir = new URL('../../examples/', import.meta.url);
-const demos_dir    = new URL('../../demos/', import.meta.url);
+const examples_dir = new URL('../examples/', import.meta.url);
+const demos_dir    = new URL('../demos/', import.meta.url);
 const source       = new URL(source_file, examples_dir);
 const dest_file    = source_file.substring(0, source_file.length-source_extension.length) + dest_extension;
 const dest         = new URL(dest_file, demos_dir);

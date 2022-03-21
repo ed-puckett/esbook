@@ -43,8 +43,8 @@ build-dir: ./node_modules README.md
 demos-dir:
 	rm -fr ./demos && \
 	( cd ./examples/ && find . -type d -exec mkdir -p ../demos/{} \; ) && \
-	( cd ./examples/ && find . -iname '*.esbook' -exec /usr/bin/env node ../src/build/make-demo.mjs {} \; ) && \
-	( cd ./demos/ && find . -iname '*.html' | /usr/bin/env node ../src/build/make-demos-index.mjs \; )
+	( cd ./examples/ && find . -iname '*.esbook' -exec /usr/bin/env node ../build-util/make-demo.mjs {} \; ) && \
+	( cd ./demos/ && find . -iname '*.html' | /usr/bin/env node ../build-util/make-demos-index.mjs \; )
 
 .PHONY: lint
 lint: ./node_modules

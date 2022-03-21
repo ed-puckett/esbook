@@ -8,7 +8,7 @@ const html_files = readFileSync(0).toString().split(/\r?\n/)
     .map(s => s.trim().replace(/^[.][/]/, ''))
     .filter(s => s !== '');
 
-const demos_dir = new URL('../../demos/', import.meta.url);
+const demos_dir = new URL('../demos/', import.meta.url);
 const dest      = new URL('index.html', demos_dir);
 
 const contents_html = `<!DOCTYPE html>

@@ -28,9 +28,8 @@ text coalescing does not work when multiple printf() calls happen too quickly; s
 legacy_open() sometimes gets blocked until keypress or mouse click (seen in Firefox)
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
 sometimes web workers are not removed (seen in dev tools, two sets of workers)
-replace current dialog implementation with new dialog element
+replace current dialog implementation with new html dialog element
 indent does not work correctly (at least in "default" editor mode)
-update license
 
 documentation: create_worker(); async generator model, "objects" argument for extra arguments to EvalWorker.eval(); eval/stream_eval
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
@@ -67,6 +66,7 @@ documentation: local server
 
 
 === THINK ABOUT ===
+update license
 undo is maybe too fne-grained
 review possiblility of injection vulnerabilities for javascript and mdmj; mdmj example: `+alert('hi')&&`gotcha!
 mathjax menu event handlers get lost (probably with markdown processing/innerHTML)
@@ -106,6 +106,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* evaluate: does exposing the src/build directory represent a risk (because its contained scripts write files)? (moved to ./build-util/)
 * build demos from examples when building
 * test autoeval (and also from embedded content in exported html files)
 * make autoeval evaulate entire notebook
