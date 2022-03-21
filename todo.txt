@@ -29,6 +29,7 @@ legacy_open() sometimes gets blocked until keypress or mouse click (seen in Fire
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
 sometimes web workers are not removed (seen in dev tools, two sets of workers)
 replace current dialog implementation with new dialog element
+indent does not work correctly (at least in "default" editor mode)
 update license
 
 documentation: create_worker(); async generator model, "objects" argument for extra arguments to EvalWorker.eval(); eval/stream_eval

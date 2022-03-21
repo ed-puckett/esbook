@@ -36,14 +36,15 @@ build-dir: ./node_modules README.md
 	rm -fr "$(BUILDDIR)/node_modules" && \
 	mkdir -p "$(BUILDDIR)/node_modules" && \
 	for d in chart.js codemirror d3 dagre-d3 dompurify js-sha256 marked mathjax nerdamer plotly.js-dist sprintf-js uuid; do cp -a "./node_modules/$${d}" "$(BUILDDIR)/node_modules/"; done && \
-	node -e 'require("fs/promises").readFile("README.md").then(t => console.log(`<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n$${require("marked").marked(t.toString())}\n</body>\n</html>`))' > "$(BUILDDIR)/help.html"
+	/usr/bin/env node -e 'require("fs/promises").readFile("README.md").then(t => console.log(`<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n$${require("marked").marked(t.toString())}\n</body>\n</html>`))' > "$(BUILDDIR)/help.html"
 	cp src/favicon.ico "$(BUILDDIR)/"
 
 .PHONY: demos-dir
 demos-dir:
 	rm -fr ./demos && \
 	( cd ./examples/ && find . -type d -exec mkdir -p ../demos/{} \; ) && \
-	( cd ./examples/ && find . -iname '*.esbook' -exec node ../src/build/make-demo.mjs {} \; )
+	( cd ./examples/ && find . -iname '*.esbook' -exec /usr/bin/env node ../src/build/make-demo.mjs {} \; ) && \
+	( cd ./demos/ && find . -iname '*.html' | /usr/bin/env node ../src/build/make-demos-index.mjs \; )
 
 .PHONY: lint
 lint: ./node_modules
