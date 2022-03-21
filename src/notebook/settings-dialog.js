@@ -41,12 +41,14 @@ const sections = [{
             type: 'text',
             settings_path: [ 'editor_options', 'indentUnit' ],
             analyze: (value) => analyze_editor_options_indentUnit(value, 'Indent'),
+            convert_to_number: true,
         }, {
             id: 'editor_options_tabSize',
             label: 'Tab size',
             type: 'text',
             settings_path: [ 'editor_options', 'tabSize' ],
             analyze: (value) => analyze_editor_options_tabSize(value, 'Tab size'),
+            convert_to_number: true,
         }, {
             id: 'editor_options_indentWithTabs',
             label: 'Indent with tabs',
@@ -133,7 +135,7 @@ export class SettingsDialog extends Dialog {
             const error_div = create_child_element(section_div, 'div', { class: `error-message` });
 
             for (const setting of settings) {
-                const { id, label, type, settings_path, options, analyze } = setting;
+                const { id, label, type, settings_path, options, analyze, convert_to_number } = setting;
                 const setting_div = create_child_element(named_section_div, 'div', { 'data-setting': undefined });
                 let control;
                 if (type === 'select') {
@@ -180,7 +182,7 @@ export class SettingsDialog extends Dialog {
                             return;
                         }
                     }
-                    set_obj_path(current_settings, settings_path, value);
+                    set_obj_path(current_settings, settings_path, (convert_to_number ? +value : value));
 
                     try {
                         await update_settings(current_settings)
