@@ -41,7 +41,7 @@ build-dir: ./node_modules README.md
 
 .PHONY: demos-dir
 demos-dir:
-	rm -fr demos && \
+	rm -fr ./demos && \
 	( cd ./examples/ && find . -type d -exec mkdir -p ../demos/{} \; ) && \
 	( cd ./examples/ && find . -iname '*.esbook' -exec node ../src/build/make-demo.mjs {} \; )
 

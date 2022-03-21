@@ -270,7 +270,7 @@ class Notebook {
                 const initializing_contents = JSON.parse(initializing_contents_json);
                 initializing_nb_state = this.contents_to_nb_state(initializing_contents);
             } catch (err) {
-                throw new Error(`corrupt initializing data contained in document; element id: ${initializing_data_element_id}`);
+                throw new Error(`corrupt initializing data contained in notebook; element id: ${initializing_data_element_id}`);
             }
             initializing_data_el.remove();  // remove the initializing element
             await this.load_nb_state(initializing_nb_state);
@@ -283,7 +283,7 @@ class Notebook {
 
     async _initialize_document() {
         if (document.getElementById('content')) {
-            throw new Error('initial document must not contain an element with id "content"');
+            throw new Error('initial notebook must not contain an element with id "content"');
         }
 
         // add initial notebook structure to document body:
@@ -823,7 +823,7 @@ class Notebook {
     // create a new empty notebook with a single interaction_element element
     async clear_notebook(force=false) {
         if (!force && this.notebook_modified()) {
-            if (! await ConfirmDialog.run('Warning: changes not saved, clear document anyway?')) {
+            if (! await ConfirmDialog.run('Warning: changes not saved, clear notebook anyway?')) {
                 return;
             }
         }
@@ -850,7 +850,7 @@ class Notebook {
 
     async _confirm_load() {
         if (this.notebook_modified()) {
-            if (! await ConfirmDialog.run('Warning: changes not saved, load new document anyway?')) {
+            if (! await ConfirmDialog.run('Warning: changes not saved, load new notebook anyway?')) {
                 return false;
             }
         }
@@ -874,7 +874,7 @@ class Notebook {
 
         } catch (error) {
             console.error('open failed', error.stack);
-            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty notebook)`);
             await this.clear_notebook(true);  // initialize empty notebook
         }
     }
@@ -905,7 +905,7 @@ class Notebook {
 
         } catch (error) {
             console.error('open failed', error.stack);
-            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty notebook)`);
             await this.clear_notebook(true);  // initialize empty notebook
         }
     }
@@ -913,7 +913,7 @@ class Notebook {
     async open_notebook(do_import=false) {
         try {
             if (this.notebook_modified()) {
-                if (! await ConfirmDialog.run('Warning: changes not saved, load new document anyway?')) {
+                if (! await ConfirmDialog.run('Warning: changes not saved, load new notebook anyway?')) {
                     return;
                 }
             }
@@ -948,7 +948,7 @@ class Notebook {
 
         } catch (error) {
             console.error('open failed', error.stack);
-            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty document)`);
+            await AlertDialog.run(`open failed: ${error.message}\n(initializing empty notebook)`);
             await this.clear_notebook(true);  // initialize empty notebook
         }
     }
