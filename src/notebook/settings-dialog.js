@@ -8,9 +8,12 @@ const {
     AlertDialog,
     create_control_element,
     create_select_element,
+} = await import('../dialog.js');
+
+const {
     get_obj_path,
     set_obj_path,
-} = await import('../dialog.js');
+} = await import('../obj-path.js');
 
 const {
     SettingsUpdatedEvent,

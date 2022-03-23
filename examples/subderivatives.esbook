@@ -1,0 +1,25 @@
+{
+    "nb_type": "esbook",
+    "nb_version": "2.0.0",
+    "elements": [
+        {
+            "id": "id-12490541-3367-44ba-8de3-4306c1f9c88c",
+            "input": "",
+            "output": []
+        },
+        {
+            "id": "id-b776463a-0626-49f0-8e9c-7265acd4b427",
+            "input": "# Subderivatives\n\n---\n\nSee: https://www.youtube.com/watch?v=tHaUP84hfZw\n$ $\n\"Subderivatives and Lagrange's Approach to Taylor Expansions | Algebraic Calculus Two | Wild Egg\"\n\n$ $\n\n---\n\nGiven a derivative operator $D$ and, for $n \\in \\mathbb{Z}$, $n \\ge 0$, define:\n$ $\n$\\quad D^0 :=$ $identity$\n$\\quad D^1 :=$ $D$\n$\\quad D^n :=$ the $n^{th}$ composition of $D$ with itself\n$ $\nThen, define the _subderivative operator_ $D_n$ as follows:\n$ $\n$\\quad D_n := \\frac{1}{n!}D^n$\n$ $\nFor a function $f$ for which $D^n f$ is defined, $D^n f$ is called the $n^{th}$ _subderivative of_ $f$.\n\n$ $\n#### Example\n\np: 2 1 -3 0 1    (i.e., p(x) = 2 + x - 3x^2 + x^4)\n\nHarriot Matrix:\n 1           0\n 1  1\n 1  2  1\n 1  3  3  1\n 1  4  6  4  1\n\nMultiplied by coefficients gives the subderivatives in the columns:\n2          0     1           0       2           0\n  1              1  1                1  1\n    -3        *  1  2  1         =  -3 -6 -3\n        0        1  3  3  1          0  0  0  0\n0          1     1  4  6  4  1       1  4  6  4  1\n\nNote: left-multiplying by a diagonal matrix is just multiplying each individual row by the corresponding diagonal element\n\nThe coeffients of a polynomial in (x-a) are given by the subderivatives:\np(x) =   [2 + a - 3a^2 + a^4]\n       +      [1 - 6a + 4a^3](x-a)\n       +          [-3 + 6a^2](x-a)^2\n       +                 [4a](x-a)^3\n       +                  [1](x-a)^4\n\nNote: just the expansions of (B + (A-B))^n via p(B + (A-B))....\n\nUsage:\nThe slope of the tangent at x=a is given by [1 - 6a + 4a^3].\nFor example: for a= 0, slope is 1\n             for a= 1, slope is 1-6+4 = -1\n             for a=-1, slope is 1+6-4 =  3",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "# Subderivatives\n\n---\n\nSee: https://www.youtube.com/watch?v=tHaUP84hfZw\n$ $\n\"Subderivatives and Lagrange's Approach to Taylor Expansions | Algebraic Calculus Two | Wild Egg\"\n\n$ $\n\n---\n\nGiven a derivative operator $D$ and, for $n \\in \\mathbb{Z}$, $n \\ge 0$, define:\n$ $\n$\\quad D^0 :=$ $identity$\n$\\quad D^1 :=$ $D$\n$\\quad D^n :=$ the $n^{th}$ composition of $D$ with itself\n$ $\nThen, define the _subderivative operator_ $D_n$ as follows:\n$ $\n$\\quad D_n := \\frac{1}{n!}D^n$\n$ $\nFor a function $f$ for which $D^n f$ is defined, $D^n f$ is called the $n^{th}$ _subderivative of_ $f$.\n\n$ $\n#### Example\n\np: 2 1 -3 0 1    (i.e., p(x) = 2 + x - 3x^2 + x^4)\n\nHarriot Matrix:\n 1           0\n 1  1\n 1  2  1\n 1  3  3  1\n 1  4  6  4  1\n\nMultiplied by coefficients gives the subderivatives in the columns:\n2          0     1           0       2           0\n  1              1  1                1  1\n    -3        *  1  2  1         =  -3 -6 -3\n        0        1  3  3  1          0  0  0  0\n0          1     1  4  6  4  1       1  4  6  4  1\n\nNote: left-multiplying by a diagonal matrix is just multiplying each individual row by the corresponding diagonal element\n\nThe coeffients of a polynomial in (x-a) are given by the subderivatives:\np(x) =   [2 + a - 3a^2 + a^4]\n       +      [1 - 6a + 4a^3](x-a)\n       +          [-3 + 6a^2](x-a)^2\n       +                 [4a](x-a)^3\n       +                  [1](x-a)^4\n\nNote: just the expansions of (B + (A-B))^n via p(B + (A-B))....\n\nUsage:\nThe slope of the tangent at x=a is given by [1 - 6a + 4a^3].\nFor example: for a= 0, slope is 1\n             for a= 1, slope is 1-6+4 = -1\n             for a=-1, slope is 1+6-4 =  3"
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        }
+    ]
+}

@@ -29,6 +29,8 @@ legacy_open() sometimes gets blocked until keypress or mouse click (seen in Fire
 legacy_save(): no stats are returned and therefore the new filename and notebook name are not set
 sometimes web workers are not removed (seen in dev tools, two sets of workers)
 replace current dialog implementation with new html dialog element
+Save should not change focus
+undo/redo should position cursor at the affected text
 
 documentation: create_worker(); async generator model, "objects" argument for extra arguments to EvalWorker.eval(); eval/stream_eval
 documentation: legacy file handling issues: no quick-save, no modified check before save, no recents, ...
@@ -65,6 +67,7 @@ documentation: local server
 
 
 === THINK ABOUT ===
+need an improved CAS
 update license
 undo is maybe too fne-grained
 review possiblility of injection vulnerabilities for javascript and mdmj; mdmj example: `+alert('hi')&&`gotcha!
