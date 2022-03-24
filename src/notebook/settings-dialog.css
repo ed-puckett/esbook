@@ -13,6 +13,11 @@ body {
     --color-fg-settings-dialog-error:   var(--color-c1-page-alert2);
 }
 
+.settings-dialog .dialog_text {
+    font-size: x-large;
+    font-style: italic;
+}
+
 .settings-dialog .section {
     display: flex;
 }

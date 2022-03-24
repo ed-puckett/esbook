@@ -131,6 +131,8 @@ export class SettingsDialog extends Dialog {
         // can find it if it already exists.
         this._dialog_element.classList.add(this.constructor.settings_dialog_css_class);
 
+        this._dialog_text_container.innerText = 'Settings';
+
         for (const { section } of sections) {
             const { name, settings } = section;
             const section_div = create_child_element(this._dialog_form, 'div', { class: 'section' });
