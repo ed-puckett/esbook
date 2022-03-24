@@ -35,6 +35,14 @@ const {
     beep,
 } = await import('../beep.js');
 
+
+// add the stylesheet
+const stylesheet_url = new URL('./settings-dialog.css', import.meta.url);
+create_stylesheet_link(document.head, stylesheet_url);
+
+
+// dialog definitiion
+
 const sections = [{
     section: {
         name: 'Editor',
@@ -99,29 +107,9 @@ const sections = [{
     },
 }];
 
+
 export class SettingsDialog extends Dialog {
     static settings_dialog_css_class = 'settings-dialog';
-
-    /** focus a pre-existing instance of the settings dialog or run
-     *  a new instance of the dialog if one does not currently exist.
-     *  @return {Promise}
-     */
-    static run(message, options) {
-        const pre_existing_element = document.querySelector(`#content #ui .${this.settings_dialog_css_class}`);
-        if (pre_existing_element) {
-            // set focus if necessary
-            if (document.activeElement.closest(`.${this.settings_dialog_css_class}`) !== pre_existing_element) {
-                setTimeout(() => pre_existing_element.querySelector('.dialog_accept').focus());
-            }
-            const pre_existing_instance = Dialog.instance_from_element(pre_existing_element);
-            if (!pre_existing_instance) {
-                throw new Error(`unexpected: Dialog.instance_from_element() returned null for element with class ${this.settings_dialog_css_class}`);
-            }
-            return pre_existing_instance.promise;
-        } else {
-            return new this().run();
-        }
-    }
 
     _populate_dialog_element() {
         const current_settings = get_settings();
@@ -132,7 +120,7 @@ export class SettingsDialog extends Dialog {
 
         for (const { section } of sections) {
             const { name, settings } = section;
-            const section_div = create_child_element(this._dialog_element, 'div', { class: 'section' });
+            const section_div = create_child_element(this._dialog_form, 'div', { class: 'section' });
 
             const named_section_div = create_child_element(section_div, 'div', { 'data-section': name });
             const error_div = create_child_element(section_div, 'div', { class: `error-message` });
@@ -200,38 +188,12 @@ export class SettingsDialog extends Dialog {
             }
         }
 
-        const button_container = create_child_element(this._dialog_element, 'span');
-        const accept_button = create_child_element(button_container, 'button', {
-            class: 'dialog_accept',
+        const accept_button = create_child_element(this._dialog_form, 'input', {
+            type: 'submit',
+            value: 'Done',
         });
-        accept_button.innerText = 'Done';
-        accept_button.onclick = (event) => this._complete();
-        button_container.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                event.stopPropagation();
-                event.preventDefault();
-                this._complete();
-            }
-        }, {
-            capture: true,
-        });
-
-        this._dialog_element.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                event.stopPropagation();
-                event.preventDefault();
-                this._complete();
-            }
-        }, {
-            capture: true,
-        });
-
-        setTimeout(() => accept_button.focus());
+        this._dialog_element.onclose = (event) => this._complete();
 
         //!!! need to disable default key bindings?
-
-        // add the stylesheet
-        const stylesheet_url = new URL('settings-dialog.css', import.meta.url);
-        create_stylesheet_link(document.head, stylesheet_url);
     }
 }
