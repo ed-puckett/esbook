@@ -111,6 +111,19 @@ const sections = [{
 export class SettingsDialog extends Dialog {
     static settings_dialog_css_class = 'settings-dialog';
 
+    static run(message, options) {
+        const pre_existing_element = document.querySelector(`#content #ui .${this.settings_dialog_css_class}`);
+        if (pre_existing_element) {
+            const pre_existing_instance = Dialog.instance_from_element(pre_existing_element);
+            if (!pre_existing_instance) {
+                throw new Error(`unexpected: Dialog.instance_from_element() returned null for element with class ${this.settings_dialog_css_class}`);
+            }
+            return pre_existing_instance.promise;
+        } else {
+            return new this().run();
+        }
+    }
+
     _populate_dialog_element() {
         const current_settings = get_settings();
 
