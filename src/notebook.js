@@ -36,7 +36,7 @@ const { fs_interface } = await import('./fs-interface.js');
 
 const { beep } = await import('./beep.js');
 
-const { AlertDialog, ConfirmDialog } = await import('./dialog.js');
+const { Dialog, AlertDialog, ConfirmDialog } = await import('./dialog.js');
 
 const { SettingsDialog } = await import('./notebook/settings-dialog.js');
 
@@ -580,6 +580,10 @@ class Notebook {
     }
 
     async handle_command(command) {
+        if (Dialog.is_modal_active()) {
+            return;  // ignore commands while modal dialog is active
+        }
+
         this.menubar.deactivate();  // just in case
 
         switch (command) {

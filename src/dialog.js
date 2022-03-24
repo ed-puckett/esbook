@@ -34,6 +34,10 @@ export class Dialog {
      */
     static run(message, options) { return new this().run(message, options); }
 
+    static is_modal_active() {
+        return [ ...document.querySelectorAll(`dialog.${this._modal_dialog_css_class}`) ].some(d => d.open);
+    }
+
     /** Return the dialog instance associated with an element, if any.
      *  @param {Element} element an HTML element in the DOM
      *  @return {Element|null} null if element is not a dialog or a child
@@ -42,6 +46,8 @@ export class Dialog {
     static instance_from_element(element) {
         return _dialog_element_to_instance_map[element.closest('dialog')];
     }
+
+    static _modal_dialog_css_class = 'modal_dialog';
 
     constructor() {
         this._completed = false;
@@ -114,6 +120,7 @@ export class Dialog {
         }
         const dialog_element = create_child_element(ui_element, 'dialog', {
             id: this._dialog_element_id,
+            class: this.constructor._modal_dialog_css_class,
         });
         this._dialog_text_container = create_child_element(dialog_element, 'div', {
             class: 'dialog_text',

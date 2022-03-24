@@ -203,12 +203,14 @@ export class SettingsDialog extends Dialog {
             }
         }
 
+        // Done button should not cause Enter to automatically submit the form
+        // unless directly clicked.
         const accept_button = create_child_element(this._dialog_form, 'input', {
-            type: 'submit',
+            type: 'button',
             value: 'Done',
         });
-        this._dialog_element.onclose = (event) => this._complete();
+        accept_button.onclick = (event) => this._dialog_element.close();
 
-        //!!! need to disable default key bindings?
+        this._dialog_element.onclose = (event) => this._complete();
     }
 }
