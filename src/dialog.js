@@ -13,41 +13,20 @@ const {
 } = await import('./open-promise.js');
 
 
-// === STYLESHEET ===
+// === STYLESHEET AND POLYFILL ===
 
-create_stylesheet_link(document.head, new URL('dialog/dialog.css', import.meta.url));
+create_stylesheet_link(document.head, new URL('./dialog/dialog.css', import.meta.url));
+create_stylesheet_link(document.head, new URL('../node_modules/dialog-polyfill/dist/dialog-polyfill.css', import.meta.url));
+
+await import(new URL('../node_modules/dialog-polyfill/dist/dialog-polyfill.js', import.meta.url));
+export const dialogPolyfill = globalThis.dialogPolyfill;
 
 
 // === DIALOG BASE CLASS ===
 
-/* GENERAL DIALOG LAYOUT
- *
- * <div id="content">
- *     <div id="ui">
- *         <div id="unique-id-1" class="dialog">
- *             <!-- dialog child elements... -->
- *         </div>
- *
- *         <div id="unique-id-1" class="dialog">
- *             .
- *             .
- *             .
- *         </div>
- *         .
- *         .
- *         .
- *
- *         <div id="dialog_event_blocker"></div>
- *     </div>
- * </div>
- */
-
 const _dialog_element_to_instance_map = new WeakMap();
 
 export class Dialog {
-    static blocker_element_id = 'dialog_event_blocker';
-    static dialog_css_class   = 'dialog';
-
     /** run a new instance of this dialog class
      *  @param {string} message to be passed to instance run() method
      *  @param {Object|undefined|null} options to be passed to instance run() method
@@ -61,7 +40,7 @@ export class Dialog {
      *          of a dialog, otherwise the associated Dialog instance.
      */
     static instance_from_element(element) {
-        return _dialog_element_to_instance_map[element.closest(`.${this.dialog_css_class}`)];
+        return _dialog_element_to_instance_map[element.closest('dialog')];
     }
 
     constructor() {
@@ -70,7 +49,6 @@ export class Dialog {
         this._promise.promise.finally(() => {
             try {
                 this._destroy_dialog_element();
-                this._adjust_event_blocker();
             } catch (error) {
                 console.warn('ignoring error when finalizing dialog promise', error);
             }
@@ -87,15 +65,9 @@ export class Dialog {
     get promise (){ return this._promise.promise; }
 
     run(...args) {
-        try {
-            this._populate_dialog_element(...args);
-            // call this._adjust_event_blocker() on the next tick
-            // because otherwise the size calculation is wrong
-            // the first time....
-            setTimeout(() => this._adjust_event_blocker());
-        } catch (error) {
-            this._cancel(error);
-        }
+        this._populate_dialog_element(...args);
+        dialogPolyfill.registerDialog(this._dialog_element);
+        this._dialog_element.showModal();
         return this.promise;
     }
 
@@ -137,21 +109,18 @@ export class Dialog {
         if (ui_element.tagName !== 'DIV' || ui_element.parentElement !== content_element) {
             throw new Error('pre-existing #ui element is not a <div> that is a direct child of the #content element');
         }
-        const pre_existing_blocker_element = document.getElementById(this.constructor.blocker_element_id);
-        const blocker_element = pre_existing_blocker_element ??
-              create_child_element(ui_element, 'div', { id: this.constructor.blocker_element_id });
-        if (blocker_element.tagName !== 'DIV' || blocker_element.parentElement !== ui_element) {
-            throw new Error(`pre-existing #${this.constructor.blocker_element_id} element is not a <div> that is a direct child of the #ui element`);
-        }
         if (document.getElementById(this._dialog_element_id)) {
             throw new Error(`unexpected: dialog with id ${this._dialog_element_id} already exists`);
         }
-        const dialog_element = create_element('div', {
-            id:    this._dialog_element_id,
-            class: this.constructor.dialog_css_class,
+        const dialog_element = create_child_element(ui_element, 'dialog', {
+            id: this._dialog_element_id,
         });
-        // dialog elements must occur before blocker_element
-        ui_element.insertBefore(dialog_element, blocker_element);
+        this._dialog_text_container = create_child_element(dialog_element, 'div', {
+            class: 'dialog_text',
+        });
+        this._dialog_form = create_child_element(dialog_element, 'form', {
+            method: 'dialog',
+        });
         this._dialog_element = dialog_element;
     }
 
@@ -160,19 +129,9 @@ export class Dialog {
             _dialog_element_to_instance_map.delete(this._dialog_element);
             this._dialog_element.remove();
         }
+        this._dialog_element.oncancel = null;
+        this._dialog_element.onclose = null;
         this._dialog_element = undefined;
-    }
-
-    _adjust_event_blocker() {
-return;//!!! now handled with z-order...
-        const blocker_element = document.getElementById(this.constructor.blocker_element_id);
-        const dialog_elements = document.querySelectorAll('#content #ui .dialog');
-        const last_dialog_element = dialog_elements[dialog_elements.length-1];  // undefined if dialog_elements is empty
-        if (last_dialog_element) {
-            const last_dialog_rect = last_dialog_element.getBoundingClientRect();
-            const top = last_dialog_rect.top + last_dialog_rect.height;
-            blocker_element.style.top = `${top}px`;
-        }
     }
 }
 
@@ -181,29 +140,12 @@ export class AlertDialog extends Dialog {
         const {
             accept_button_label = 'Ok',
         } = (options ?? {});
-        create_child_element(this._dialog_element, 'div', {
-            class: 'dialog_text',
-        }).innerText = message;
-        const button_container = create_child_element(this._dialog_element, 'span');
-        const accept_button = create_child_element(button_container, 'button', {
-            class: 'dialog_accept',
+        this._dialog_text_container.innerText = message;
+        const accept_button = create_child_element(this._dialog_form, 'input', {
+            type: 'submit',
+            value: accept_button_label,
         });
-        accept_button.innerText = accept_button_label;
-        accept_button.onclick = (event) => this._complete();
-        this._dialog_element.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                event.stopPropagation();
-                event.preventDefault();
-                this._complete();
-            } else if (event.key === 'Enter') {
-                event.stopPropagation();
-                event.preventDefault();
-                this._complete();
-            }
-        }, {
-            capture: true,
-        });
-        setTimeout(() => accept_button.focus());
+        this._dialog_element.onclose = (event) => this._complete();
     }
 }
 
@@ -213,34 +155,19 @@ export class ConfirmDialog extends Dialog {
             decline_button_label = 'No',
             accept_button_label  = 'Yes',
         } = (options ?? {});
-        create_child_element(this._dialog_element, 'div', {
-            class: 'dialog_text',
-        }).innerText = message;
-        const button_container = create_child_element(this._dialog_element, 'span');
-        const decline_button = create_child_element(button_container, 'button', {
-            class: 'dialog_decline',
+        this._dialog_text_container.innerText = message;
+        const decline_button = create_child_element(this._dialog_form, 'input', {
+            type: 'button',
+            value: decline_button_label,
         });
         decline_button.innerText = decline_button_label;
         decline_button.onclick = (event) => this._complete(false);
-        const accept_button = create_child_element(button_container, 'button', {
-            class: 'dialog_accept',
+        const accept_button = create_child_element(this._dialog_form, 'input', {
+            type: 'submit',
+            value: accept_button_label,
         });
-        accept_button.innerText = accept_button_label;
-        accept_button.onclick = (event) => this._complete(true);
-        this._dialog_element.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                event.stopPropagation();
-                event.preventDefault();
-                this._complete(false);
-            } else if (event.key === 'Enter') {
-                event.stopPropagation();
-                event.preventDefault();
-                this._complete(true);
-            }
-        }, {
-            capture: true,
-        });
-        setTimeout(() => accept_button.focus());
+        this._dialog_element.oncancel = (event) => this._complete(false);
+        this._dialog_element.onclose = (event) => this._complete(this._dialog_element.returnValue === accept_button_label);
     }
 }
 
