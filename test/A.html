@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>TEST A</title>
+    <script type="module">
+        function add_text_el(innerText) {
+            const loaded_el = document.createElement('h1');
+            loaded_el.innerText = innerText;
+            document.body.appendChild(loaded_el);
+        }
+        add_text_el('SCRIPT LOADED');
+        try {
+            const import_url = new URL('./imp.js', location);
+            const { message } = await import(import_url);
+            add_text_el(`IMPORTED MESSAGE: ${message}`);
+            add_text_el('SUCCESS');
+        } catch (error) {
+            add_text_el('FAILED TO IMPORT MESSAGE');
+            add_text_el(error);
+            console.error(error);
+        }
+    </script>
+</head>
+<body>
+<h1>TEST A</h1>
+<h1>BODY LOADED</h1>
+</body>
+</html>
