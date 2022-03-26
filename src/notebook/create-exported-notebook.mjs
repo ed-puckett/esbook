@@ -40,18 +40,19 @@ export function create_exported_notebook(contents_json, document_title, default_
     <meta charset="utf-8">
     <title>${document_title}</title>
     <script type="module">
-        const default_server_endpoint = ${make_string_literal(default_server_endpoint)};
-        const server_endpoint = new URL(location).searchParams.get('s') ?? default_server_endpoint;
         const loading_indicator_el = document.createElement('h1');
         loading_indicator_el.innerText = 'Loading...';
         document.body.insertBefore(loading_indicator_el, document.body.firstChild);
-        try {
-            await import(new URL('./src/init.js', server_endpoint));
-        } catch (error) {
-            document.body.innerHTML = '<h1>Failed to Load</h1><h2>Server endpoint: '+server_endpoint+'</h2><pre>'+error.stack+'</pre>';
-        } finally {
-            loading_indicator_el.remove();
-        }
+        const default_server_endpoint = ${make_string_literal(default_server_endpoint)};
+        const server_endpoint = new URL(location).searchParams.get('s') ?? default_server_endpoint;
+        const init_url = new URL('./src/init.js', server_endpoint);
+        import(init_url)
+            .catch(error => {
+                document.body.innerHTML = '<h1>Failed to Load</h1><h2>Server endpoint: '+server_endpoint+'</h2><pre>'+error.stack+'</pre>';
+            })
+            .finally(() => {
+                loading_indicator_el.remove()
+            });
     </script>
 </head>
 <body>
