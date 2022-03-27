@@ -3,9 +3,9 @@
 // basic_modifier_desc_map is the definition from which
 // modifier_desc_map and modifier_code_desc_map are derived.
 const basic_modifier_desc_map = {
+    meta:  { code: 'm', event_prop: 'metaKey',  glyph: '\u2318', display_order: 3, alternates: ['cmd', 'command' ] },
     ctrl:  { code: 'c', event_prop: 'ctrlKey',  glyph: '\u2303', display_order: 1, alternates: [ 'control' ] },
     shift: { code: 's', event_prop: 'shiftKey', glyph: '\u21E7', display_order: 2, alternates: [] },
-    meta:  { code: 'm', event_prop: 'metaKey',  glyph: '\u2318', display_order: 3, alternates: ['cmd', 'command' ] },
     alt:   { code: 'a', event_prop: 'altKey',   glyph: '\u2325', display_order: 4, alternates: [] },
 };
 

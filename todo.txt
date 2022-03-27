@@ -106,6 +106,7 @@ have witnessed stray text in buffers after copying/pasting/evaluating (accidenta
 
 
 === DONE ===
+* swap cmd and shift in menu accelerator glyph order
 * replace current dialog implementation with new html dialog element
 * dialogs: don't let keyboard focus "fall off the edge" down to the underlying notebook
 * #dialog_event_blocker is not deflecting focus (no longer used)
