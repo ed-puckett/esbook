@@ -56,6 +56,7 @@ lint: ./node_modules
 server: build-dir demos-dir
 	( cd "$(BUILDDIR)" && npx http-server -d -n -c-1 -a 127.0.0.1 --port $(SERVER_PORT) | tee >(grep -q -m1 '"GET /QUIT"'; echo QUITTING; kill $$(lsof -itcp:$(SERVER_PORT) -Fp | grep ^p | cut -c2-)) )
 
+# uses curl
 .PHONY: kill-server
 kill-server:
 	@if lsof -itcp:$(SERVER_PORT); then curl http://127.0.0.1:$(SERVER_PORT)/QUIT; fi
