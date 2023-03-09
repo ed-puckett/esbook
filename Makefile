@@ -9,6 +9,7 @@ MAKEFLAGS += --no-print-directory
 
 BUILDDIR = ./build
 
+SERVER_HOST = 127.0.0.2
 SERVER_PORT = 4300
 
 
@@ -35,7 +36,7 @@ build-dir: ./node_modules README.md
 	if [[ ! -e "$(BUILDDIR)/lib" ]]; then ( cd "$(BUILDDIR)" && ln -s ../lib . ); fi && \
 	rm -fr "$(BUILDDIR)/node_modules" && \
 	mkdir -p "$(BUILDDIR)/node_modules" && \
-	for d in chart.js codemirror d3 dialog-polyfill dompurify js-sha256 marked mathjax nerdamer plotly.js-dist sprintf-js uuid; do cp -a "./node_modules/$${d}" "$(BUILDDIR)/node_modules/"; done && \
+	for d in chart.js codemirror d3 @hpcc-js d3-graphviz dialog-polyfill dompurify js-sha256 marked mathjax nerdamer plotly.js-dist sprintf-js uuid; do cp -a "./node_modules/$${d}" "$(BUILDDIR)/node_modules/"; done && \
 	/usr/bin/env node -e 'require("fs/promises").readFile("README.md").then(t => console.log(`<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n</head>\n<body>\n$${require("marked").marked(t.toString())}\n</body>\n</html>`))' > "$(BUILDDIR)/help.html"
 	cp src/favicon.ico "$(BUILDDIR)/"
 
@@ -54,12 +55,12 @@ lint: ./node_modules
 # uses Linux commands: lsof, grep, cut
 .PHONY: server
 server: build-dir demos-dir
-	( cd "$(BUILDDIR)" && npx http-server -d -n -c-1 -a 127.0.0.1 --port $(SERVER_PORT) | tee >(grep -q -m1 '"GET /QUIT"'; echo QUITTING; kill $$(lsof -itcp:$(SERVER_PORT) -Fp | grep ^p | cut -c2-)) )
+	( cd "$(BUILDDIR)" && npx http-server -d -n -c-1 -a $(SERVER_HOST) --port $(SERVER_PORT) | tee >(grep -q -m1 '"GET /QUIT"'; echo QUITTING; kill $$(lsof -itcp:$(SERVER_PORT) -Fp | grep ^p | cut -c2-)) )
 
 # uses curl
 .PHONY: kill-server
 kill-server:
-	@if lsof -itcp:$(SERVER_PORT); then curl http://127.0.0.1:$(SERVER_PORT)/QUIT; fi
+	@if lsof -itcp:$(SERVER_PORT); then curl http://$(SERVER_HOST):$(SERVER_PORT)/QUIT; fi
 
 .PHONY: dev-server
 dev-server:
@@ -67,7 +68,7 @@ dev-server:
 
 .PHONY: client
 client:
-	chromium --new-window http://127.0.0.1:$(SERVER_PORT)/src/index.html
+	chromium --new-window http://$(SERVER_HOST):$(SERVER_PORT)/src/index.html
 
 .PHONY: start
 start: build-dir demos-dir

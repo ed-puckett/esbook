@@ -285,145 +285,52 @@ class ChartOutputHandler extends _GraphicsOutputHandlerBase {
     }
 }
 
-class DagreOutputHandler extends _GraphicsOutputHandlerBase {
+class GraphvizOutputHandler extends _GraphicsOutputHandlerBase {
     constructor() {
-        super('dagre');
-        this._default_initial_scale = 1;
-        this._default_left_margin   = 30;
-        this._default_height_margin = 40;
+        super('graphviz');
     }
 
-    get default_initial_scale (){ return this._default_initial_scale; }
-    get default_left_margin   (){ return this._default_left_margin;   }
-    get default_height_margin (){ return this._default_height_margin; }
-
     // Format of config object: {
-    //     nodes[]?: [ string/*name*/, { style?:string, svg_attr?: [ attr:string, value:any ][] }?, ... ][],
-    //     edges[]?: [ string/*from*/, string/*to*/, { label?: string, style?: string, ... }? ][],
-    //     node_options?: {
-    //         style?: string,
-    //         ...
-    //     },
-    //     node_svg_attr[]?: [ attr:string, value:any ],  // may also be an object instead of array of key/value pairs
-    //     edge_options?: {
-    //         style?: string,
-    //         ...
-    //     },
-    //     render_options?: {
-    //         initial_scale?: number,  // default: 1
-    //         left_margin?:   number,  // default: 30
-    //         height_margin?: number,  // default: 40
-    //     },
+    //     node_config?: string,
+    //     nodes[]?: (string | [ string/*name*/, string/*options*/ ])[],
+    //     edges[]?: [ string/*from*/, string/*to*/, { label?: string, ... }? ][],
     // }
 
     // may throw an error
-    // output_data: { type: 'dagre', image_format: string, image_format_quality: number, image_uri: string }
+    // output_data: { type: 'graphviz', image_format: string, image_format_quality: number, image_uri: string }
     async update_notebook(output_context, value) {
-        const { d3, dagreD3, dagre_stylesheet_text  } = await import('./output-handlers/dagre-d3.js');
-        const [ size_config, dagre_config ] = output_context.parse_graphics_args(value.args, 'usage: dagre([size_config], config)');
-        // svg elements must be created with a special namespace
-        // (otherwise, will get error when rendering: xxx.getBBox is not a function)
-        const svg_namespace = 'http://www.w3.org/2000/svg';
-        const svg = output_context.create_output_element({
+        const { render } = await import('./output-handlers/graphviz.js');
+        const [ size_config, graphviz_config ] = output_context.parse_graphics_args(value.args, 'usage: graphviz([size_config], config)');
+
+        const element = output_context.create_output_element({
             size_config,
-            child_tag: 'svg',
-            child_element_namespace: svg_namespace,
-            child_attrs: {
-                class: 'dagre',
-            },
         });
-        svg.appendChild(document.createElementNS(svg_namespace, 'g'));  // required by dagreD3
-        svg.addEventListener('wheel', function (event) {
-            if (!event.shiftKey) {
-                // stop normal scroll wheel event from zooming the svg
-                event.stopImmediatePropagation();
-            }
-        }, true);
-        const graph = new dagreD3.graphlib.Graph().setGraph({});
-        const {
-            node_options:  all_node_options,   // for all nodes
-            node_svg_attr: all_node_svg_attr,  // for all nodes
-            edge_options:  all_edge_options,   // for all edges
-            render_options,
-        } = dagre_config;
-        const { style: all_node_style } = (all_node_options ?? {});  // separate style from other node options
-        const extra_all_node_options = all_node_options ? { ...all_node_options, style: undefined } : {};
-        const extra_all_edge_options = all_edge_options ? { ...all_edge_options } : {};
-        function combine_styles(global, local) {
-            return (global && local)
-                ? `${global}; ${local}`
-                : global ? global : local;
+        const element_selector = `#${element.id}`;
+
+        const dot_stmts = [];
+        if (graphviz_config.node_config) {
+            dot_stmts.push(`node ${node_config}`);
         }
-        for (const node_config of (dagre_config.nodes ?? [])) {
-            let name, options, style, svg_attr;
-            let node_options;
-            if (typeof node_config === 'string') {
-                name = node_config;
-                options = {};
-                node_options = { ...extra_all_node_options, label: name };
+        for (const node_spec of (graphviz_config.nodes ?? [])) {
+            if (typeof node_spec === 'string') {
+                const name = node_spec;
+                dot_stmts.push(name);
             } else {
-                [ name, options ] = node_config;
-                style    = options?.style;
-                svg_attr = options?.svg_attr;
-                const node_extra_options = { ...extra_all_node_options, ...(options ?? {}), style: undefined, svg_attr: undefined };
-                node_options = {
-                    label: name,
-                    ...node_extra_options,
-                };
-            }
-            graph.setNode(name, node_options);
-            const node = graph.node(name);
-            const combined_style = combine_styles(all_node_style, style);
-            if (combined_style) {
-                node.style = combined_style;
-            }
-            if (svg_attr) {
-                const key_value_pairs = (typeof svg_attr === 'object')
-                      ? Object.entries(svg_attr)
-                      : svg_attr;  // assumed to already be an array of key/value pairs
-                for (const [ attr_name, attr_value ] of key_value_pairs) {
-                    node[attr_name] = attr_value;
-                }
+                const [ name, options ] = node_spec;
+                dot_stmts.push(`${name} [${options}]`);
             }
         }
-        if (all_node_svg_attr) {
-            const key_value_pairs = (typeof all_node_svg_attr === 'object')
-                  ? Object.entries(all_node_svg_attr)
-                  : all_node_svg_attr;  // assumed to already be an array of key/value pairs
-            for (const node_id of graph.nodes()) {
-                const node = graph.node(node_id);
-                for (const [ attr_name, attr_value ] of key_value_pairs) {
-                    node[attr_name] = attr_value;
-                }
-            }
+        for (const [ from, to, options ] of (graphviz_config.edges ?? [])) {
+            dot_stmts.push(`${from}->${to}${options ? `[${options}]` : ''}`);
         }
-        for (const [ from, to, edge_options ] of (dagre_config.edges ?? [])) {
-            const edge_extra_options = { ...extra_all_edge_options, ...(edge_options ?? {}) };
-            graph.setEdge(from, to, {
-                curve: d3.curveBasis,
-                ...edge_extra_options,
-            });
-        }
-        // realize the graph
-        const svg_d3 = d3.select(`#${svg.id}`);
-        const inner = svg_d3.select("g");
-        // set up zoom support
-        const zoom = d3.zoom().on("zoom", function (event) {
-            inner.attr("transform", event.transform);
-        });
-        svg_d3.call(zoom);
+        const dot = `digraph { ${dot_stmts.join(';')} }`;
+
         // create and run the renderer
-        const render = new dagreD3.render();
-        render(inner, graph);
-        // adjust the graph size and position
-        const initial_scale = render_options?.initial_scale ?? this.default_initial_scale;
-        const left_margin   = render_options?.left_margin   ?? this.default_left_margin;
-        const height_margin = render_options?.height_margin ?? this.default_height_margin;
-        const { width: g_width, height: g_height } = graph.graph();
-        svg_d3.call(zoom.transform, d3.zoomIdentity.translate(left_margin, height_margin/2).scale(initial_scale));
-        svg_d3.attr('height', (g_height*initial_scale + height_margin));
+        await render(element_selector, dot, {});
+
         // finally, render the data uri
-        return output_context.create_svg_output_data(this.type, svg, false, dagre_stylesheet_text);
+        const svg = element.querySelector('svg');
+        return output_context.create_svg_output_data(this.type, svg, false);
     }
 }
 
@@ -501,7 +408,7 @@ export const output_handler_id_to_handler =  // handler_id->handler
             HTMLOutputHandler,
             GenericImageOutputHandler,
             ChartOutputHandler,
-            DagreOutputHandler,
+            GraphvizOutputHandler,
             ImageDataOutputHandler,
             PlotlyOutputHandler,
 

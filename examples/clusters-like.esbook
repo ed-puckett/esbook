@@ -1,0 +1,65 @@
+{
+    "nb_type": "esbook",
+    "nb_version": "2.0.0",
+    "elements": [
+        {
+            "id": "id-bb5229ec-1f75-468e-b649-b2fbc986e158",
+            "input": "// autoeval",
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-65afe6c9-67ab-4646-a5ae-a30abfeba7a4",
+            "input": "This notebook will be automatically evaluated when loaded.\nOnce evaluation completes, click the Go button to start.\n$ $\nEquations and parameters may be modified in code in the last element.\nTo see the effect of modifications, evaluate the last element, or\nsimply re-evaluate the entire notebook (from the menu: Element->Eval notebook)\n",
+            "output": [
+                {
+                    "type": "text",
+                    "text": "This notebook will be automatically evaluated when loaded.\nOnce evaluation completes, click the Go button to start.\n$ $\nEquations and parameters may be modified in code in the last element.\nTo see the effect of modifications, evaluate the last element, or\nsimply re-evaluate the entire notebook (from the menu: Element->Eval notebook)\n"
+                }
+            ],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-62586896-26db-456f-a932-010b74369e72",
+            "input": "// xautohide\n\nclass WorkerPool {\n    constructor(worker_count=navigator.hardwareConcurrency) {\n        Object.defineProperties(this, {\n            worker_count: {\n                value: worker_count,\n                enumerable: true,\n            },\n        });\n        this._workers = [];\n        this._update_pool();\n    }\n\n    get workers (){\n        if (this._workers.some(w => w.terminated)) {\n            this._update_pool();\n        }\n        return this._workers;\n    }\n\n    _update_pool() {\n        this._workers = this._workers.filter(w => !w.terminated);\n        for (let i = this._workers.length; i < this.worker_count; i++) {\n            this._workers.push(create_worker());\n        }\n    }\n};\n\nvars({ worker_pool: this.eval_context.worker_pool ?? new WorkerPool() });",
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-221137d4-4cc0-401e-9d12-80f78781140d",
+            "input": "// xautohide\n\nconst {\n    setup,\n} = await import('/clusters-like-runner.js');\n\nvars({ setup });",
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-43590d42-c11b-4c60-b631-2ac66bf04d0d",
+            "input": "//\nconst go = setup.bind(this, worker_pool, output_context);\n\nconst particles_per_flavor = 500;\n\nconst flavor_init = {\n    red:    { color: 'rgba(255, 0,   0,   1.0)', affinity: { red:  3, green:  3, blue:  4, yellow:  3 } },\n    green:  { color: 'rgba(0,   255, 0,   1.0)', affinity: { red: -2, green:  3, blue:  3, yellow:  1 } },\n    blue:   { color: 'rgba(0,   0,   255, 1.0)', affinity: { red: -3, green:  3, blue:  3, yellow: -1 } },\n    yellow: { color: 'rgba(255, 255, 0,   1.0)', affinity: { red:  1, green:  1, blue:  1, yellow:  1 } },\n};\n\nconst flavors = Object.keys(flavor_init);\n\nconst particle_init = new Array(flavors.length*particles_per_flavor);\nfor (let i = 0; i < flavors.length; i++) {\n    particle_init.fill({ flavor: flavors[i] }, i*particles_per_flavor, (i+1)*particles_per_flavor);\n}\n\ngo({\n    flavor_init,\n    particle_init,\n    packing_force_min: -2e-1,\n    particle_mass:     1000,\n    particle_size:     10,\n});\n",
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        },
+        {
+            "id": "id-b3fb8d75-1ee6-47b9-aa1e-9e82957ab6a0",
+            "input": "",
+            "output": [],
+            "formatting_options": {
+                "align": "left",
+                "indent": "0em"
+            }
+        }
+    ]
+}

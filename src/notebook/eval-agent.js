@@ -300,8 +300,8 @@ export class EvalAgent {
             return graphics('chart', args);
         }
 
-        async function dagre(...args) {
-            return graphics('dagre', args);
+        async function graphviz(...args) {
+            return graphics('graphviz', args);
         }
 
         async function draw_image_data(...args) {
@@ -335,7 +335,7 @@ export class EvalAgent {
             html,
             graphics,
             chart,
-            dagre,
+            graphviz,
             draw_image_data,
             plotly,
         };
