@@ -2,6 +2,10 @@ const {
     OpenPromise,
 } = await import('./open-promise.js');
 
+const {
+    generate_object_id,
+} = await import('./uuid.js');
+
 class FsInterface {
     // Determine if the File System Access API is available
     static fsaapi_available = ( globalThis.FileSystemHandle &&
@@ -218,17 +222,34 @@ class FsInterface {
     async legacy_open(options) {
         const accept = this._convert_options_for_legacy(options);
 
-        const op = new OpenPromise();
+        // For browsers that do not support the File System Access API (e.g., Firefox)
+        // opening files is implemented by a file-type input element.  There is a
+        // problem with that, though: if the user activates the file open panel and
+        // then cancels, no event is emitted that we can use to subsequently remove
+        // the input element.
+        // Another issue is that the input element will not activate in Firefox (at
+        // the time of writing) unless the input element is part of the DOM.
+        // Fortunately, the input element need not be displayed in order for it to
+        // work.
+        // Therefore, once we create the input element, we just leave it in the DOM,
+        // hidden, and reuse it whenever necessary.
 
-        const i_el = document.createElement('input');
-        i_el.type = 'file';
-        if (accept) {
-            i_el.accept = accept;
+        let i_el = document.getElementById(this.constructor.legacy_file_input_element_id);
+        if (!i_el) {
+            i_el = document.createElement('input');
+            i_el.id = this.constructor.legacy_file_input_element_id;
+            i_el.classList.add('hidden-fs-interface-element');  // css class definition in notebook/notebook.css
+            i_el.type = 'file';
+            if (accept) {
+                i_el.accept = accept;
+            }
+            document.body.insertBefore(i_el, document.body.firstChild);  // put at beginning of document body
         }
 
-        // document.body.addEventListener('focus', ...) does not get activated, even if capture is set
-        document.body.onfocus = async (event) => {
-            document.body.onfocus = null;
+        const op = new OpenPromise();
+
+        i_el.onchange = async (event) => {
+console.log('COMPLETE');//!!!
             if (i_el.files.length <= 0) {
                 op.resolve({ canceled: true });
             } else {
@@ -240,12 +261,15 @@ class FsInterface {
                     stats,
                 });
             }
-        };
+        }
 
+        // activate the file open panel
         i_el.click();
 
         return op.promise;
     }
+
+    static legacy_file_input_element_id = 'legacy_file_input_element_id';
 
     _convert_options_for_legacy(options) {
         options = options ?? {};

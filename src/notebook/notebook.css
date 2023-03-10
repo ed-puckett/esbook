@@ -1,3 +1,19 @@
+/* For browsers that do not support the File System Access API (e.g., Firefox)
+ * opening files is implemented by a file-type input element.  There is a
+ * problem with that, though: if the user activates the file open panel and
+ * then cancels, no event is emitted that we can use to subsequently remove
+ * the input element.
+ * Another issue is that the input element will not activate in Firefox (at
+ * the time of writing) unless the input element is part of the DOM.
+ * Fortunately, the input element need not be displayed in order for it to
+ * work.
+ * Therefore, once we create the input element, we just leave it in the DOM,
+ * hidden, and reuse it whenever necessary.
+ */
+.hidden-fs-interface-element {
+    display: none;
+}
+
 /* See theme-colors.css for the general colors that are set according
  * to the prefers-color-scheme media query.
  */
