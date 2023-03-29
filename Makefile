@@ -34,6 +34,7 @@ build-dir: ./node_modules README.md
 	mkdir -p "$(BUILDDIR)" && \
 	if [[ ! -e "$(BUILDDIR)/src" ]]; then ( cd "$(BUILDDIR)" && ln -s ../src . ); fi && \
 	if [[ ! -e "$(BUILDDIR)/lib" ]]; then ( cd "$(BUILDDIR)" && ln -s ../lib . ); fi && \
+	if [[ ! -e "$(BUILDDIR)/demos" ]]; then ( cd "$(BUILDDIR)" && ln -s ../demos . ); fi && \
 	rm -fr "$(BUILDDIR)/node_modules" && \
 	mkdir -p "$(BUILDDIR)/node_modules" && \
 	for d in chart.js codemirror d3 @hpcc-js d3-graphviz dialog-polyfill dompurify js-sha256 marked mathjax nerdamer plotly.js-dist sprintf-js uuid; do cp -a "./node_modules/$${d}" "$(BUILDDIR)/node_modules/"; done && \

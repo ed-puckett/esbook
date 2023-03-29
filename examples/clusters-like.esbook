@@ -36,7 +36,7 @@
         },
         {
             "id": "id-221137d4-4cc0-401e-9d12-80f78781140d",
-            "input": "// xautohide\n\nconst {\n    setup,\n} = await import('/clusters-like-runner.js');\n\nvars({ setup });",
+            "input": "// xautohide\n\nconst {\n    setup,\n} = await import_lib('clusters-like-runner.js');\n\nvars({ setup });",
             "output": [],
             "formatting_options": {
                 "align": "left",

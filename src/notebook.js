@@ -8,6 +8,8 @@ const DEFAULT_SAVE_PATH = 'new-notebook.esbook';
 
 const DEFAULT_TITLE = 'Untitled';
 
+const OPEN_RECENT_URL_PARAM = 'open-recent';
+
 const CM_DARK_MODE_THEME  = 'blackboard';
 const CM_LIGHT_MODE_THEME = 'default';
 
@@ -255,6 +257,8 @@ class Notebook {
             // with id = initializing_data_element_id, if any
             await this.initialize_from_embedded_data();
 
+            await this.handle_search_params();
+
         } catch (error) {
             show_initialization_failed(error);
             throw error;
@@ -278,6 +282,23 @@ class Notebook {
             this.set_notebook_unmodified();
             // check if this notebook is "autoeval"
             await this._handle_autoeval();
+        }
+    }
+
+    async handle_search_params() {
+        const params = new URL(document.location).searchParams;
+        if (params.has(OPEN_RECENT_URL_PARAM)) {
+            const recent_index_string = params.get(OPEN_RECENT_URL_PARAM) || '1';
+            const recent_index = +recent_index_string;
+            if (isNaN(recent_index) || !Number.isInteger(recent_index) || recent_index <= 0) {
+                throw new Error(`search parameter "${OPEN_RECENT_URL_PARAM}" must specify no value or a positive integer`);
+            }
+            const recents = await get_recents();
+            if (recent_index >= recents.length) {
+                throw new Error(`search parameter "${OPEN_RECENT_URL_PARAM}" too large`);
+            }
+            //!!! does not work because of sandbox
+            this.handle_command(`${MenuBar.open_recent_command_prefix}${recent_index}`);
         }
     }
 
