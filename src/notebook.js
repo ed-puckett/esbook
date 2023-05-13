@@ -1549,7 +1549,7 @@ class Notebook {
 
                     let set_completed;
                     const done_promise = new Promise(resolve => { set_completed = resolve; });
-                    tasks.push(set_completed);
+                    tasks.push(set_completed);  //!!! isn't set_completed always undefined here???
 
                     MathJax.Hub.Queue(...tasks);
                     await done_promise;

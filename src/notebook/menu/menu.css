@@ -12,7 +12,7 @@
 }
 
 #content .menubar>li {
-    display: inline;  /* horizonal orientation for top-level items of menubar */
+    display: inline;  /* horizontal orientation for top-level items of menubar */
     padding: 0 0.5rem 0 0.5rem;
 }
 
