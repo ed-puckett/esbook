@@ -7,7 +7,7 @@
         const loading_indicator_el = document.createElement('h1');
         loading_indicator_el.innerText = 'Loading...';
         document.body.insertBefore(loading_indicator_el, document.body.firstChild);
-        const default_server_endpoint = 'https://blackguard.github.io/esbook/build/';
+        const default_server_endpoint = 'https://ed-puckett.github.io/esbook/build/';
         const server_endpoint = new URL(location).searchParams.get('s') ?? default_server_endpoint;
         const init_url = new URL('./src/init.js', server_endpoint);
         import(init_url)

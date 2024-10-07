@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const default_server_endpoint = 'https://blackguard.github.io/esbook/build/';
+const default_server_endpoint = 'https://ed-puckett.github.io/esbook/build/';
 
 const source_extension = '.esbook';
 const dest_extension   = '.html';
